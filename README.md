@@ -1,5 +1,7 @@
 # NYC Driver Dashboard — Driver Intelligence
 
+**v2.0 (2026-10-30)** — yorug' (light) redesign: oq kartalar, katta soat paneli, 2×2 asosiy kartalar (Best Location / Airports / Earnings / Road Alerts) va Main navigation panjara — foydalanuvchi yuborgan konsept skrinshoti asosida. Barcha 16 funksiya saqlangan.
+
 NYC Uber/TLC haydovchilari uchun yagona Driver Intelligence Dashboard.
 Jonli sayt: https://hayotus.github.io/uber/
 

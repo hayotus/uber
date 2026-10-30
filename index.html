@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>NYC Driver Dashboard — Driver Intelligence</title>
 <meta name="description" content="NYC Uber/TLC haydovchilari uchun Driver Intelligence Dashboard: talab xaritasi, aeroportlar, daromad, jurnal va aqlli tavsiyalar.">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#f4f4f1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,66 +15,70 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--bg:#0b1220;--card:#141f33;--card2:#1a2740;--line:#26334d;--txt:#e9eff8;--mut:#93a4bb;--amb:#f5b301;--grn:#22c55e;--red:#ef4444;--blu:#38bdf8;--pur:#a78bfa}
+:root{--bg:#f4f4f1;--card:#ffffff;--card2:#f0f0ec;--line:#e3e3dd;--txt:#111214;--mut:#6f7278;--amb:#d97706;--grn:#16a34a;--red:#dc2626;--blu:#2563eb;--pur:#7c3aed}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-header.top{position:sticky;top:0;z-index:900;background:rgba(11,18,32,.92);backdrop-filter:blur(10px);border-bottom:2px solid var(--amb);padding:10px 14px 8px}
-header.top .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
-h1{font-size:17px;margin:0;letter-spacing:.4px}
-h1 b{color:var(--amb)}
-.sub{font-size:12px;color:var(--mut)}
-.live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--grn);border:1px solid var(--grn);border-radius:20px;padding:3px 9px}
-.live i{width:8px;height:8px;border-radius:50%;background:var(--grn);display:inline-block;animation:pl 1.6s infinite}
-@keyframes pl{0%,100%{opacity:1}50%{opacity:.25}}
 main{padding:12px 12px 4px;max-width:760px;margin:0 auto}
 .view{display:none}
 .view.act{display:block}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(16,16,16,.04)}
 .card h3{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:700}
 .big{font-size:24px;font-weight:800;line-height:1.15}
 .mid{font-size:17px;font-weight:700}
-.small{font-size:12px;color:var(--mut)}
+.small{font-size:12.5px;color:var(--mut)}
 .badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.6px;border-radius:6px;padding:2px 6px;vertical-align:middle}
-.b-live{background:rgba(34,197,94,.15);color:var(--grn);border:1px solid var(--grn)}
-.b-est{background:rgba(245,179,1,.13);color:var(--amb);border:1px solid var(--amb)}
-.b-hist{background:rgba(147,164,187,.13);color:var(--mut);border:1px solid var(--mut)}
+.b-live{background:rgba(22,163,74,.10);color:var(--grn);border:1px solid var(--grn)}
+.b-est{background:rgba(217,119,6,.10);color:var(--amb);border:1px solid var(--amb)}
+.b-hist{background:rgba(111,114,120,.10);color:var(--mut);border:1px solid #c9c9c2}
 .hi{color:var(--red);font-weight:800}.med{color:var(--amb);font-weight:800}.low{color:var(--grn);font-weight:800}
-button,.btn{background:var(--amb);color:#111;border:0;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer}
+button,.btn{background:#111214;color:#fff;border:0;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer}
 button.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
 button:active{opacity:.75}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(16,16,16,.04)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--grn);background:rgba(22,163,74,.10);border:1px solid rgba(22,163,74,.35);border-radius:20px;padding:4px 10px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--grn);display:inline-block;animation:pl 1.6s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.25}}
+.clock{font-size:52px;font-weight:800;letter-spacing:-1.5px;line-height:1.05}
+.wxtile{background:var(--card2);border-radius:16px;padding:12px 10px;text-align:center;min-width:116px;max-width:140px}
+.wxtile .ic{font-size:30px;line-height:1.2}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;text-align:left;color:var(--txt);box-shadow:0 1px 2px rgba(16,16,16,.04);width:100%}
+.tile .t{display:flex;gap:7px;align-items:center;font-weight:700;font-size:15px}
+.tile .v{font-size:22px;font-weight:800;margin-top:9px;line-height:1.15}
+.tile .s{color:var(--mut);font-size:12.5px;margin-top:3px;font-weight:400}
 .qa{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-.qa button{background:var(--card);border:1px solid var(--line);color:var(--txt);padding:10px 2px 8px;font-size:11px;border-radius:12px}
-.qa button span{display:block;font-size:21px;margin-bottom:3px}
-#map{height:52vh;min-height:320px;border-radius:14px;border:1px solid var(--line);z-index:1}
+.qa button{background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:11px 2px 9px;font-size:12px;font-weight:600;border-radius:14px}
+.qa button span{display:block;font-size:20px;margin-bottom:3px}
+#map{height:52vh;min-height:320px;border-radius:18px;border:1px solid var(--line);z-index:1}
 #mapHome{height:230px;border-radius:14px;border:1px solid var(--line);z-index:1}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.chip{background:var(--card2);border:1px solid var(--line);color:var(--mut);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
-.chip.on{color:#111;background:var(--amb);border-color:var(--amb)}
-nav.bot{position:fixed;left:0;right:0;bottom:0;z-index:950;background:rgba(13,20,36,.97);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
-nav.bot button{flex:1;background:none;color:var(--mut);border-radius:0;padding:8px 0 7px;font-size:11px;font-weight:700;position:relative}
+.chip{background:#fff;border:1px solid var(--line);color:var(--mut);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.chip.on{color:#fff;background:#111214;border-color:#111214}
+nav.bot{position:fixed;left:0;right:0;bottom:0;z-index:950;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.bot button{flex:1;background:none;color:var(--mut);border-radius:0;padding:8px 0 7px;font-size:11px;font-weight:600;position:relative}
 nav.bot button span{display:block;font-size:20px;margin-bottom:2px}
-nav.bot button.on{color:var(--txt)}
-nav.bot button.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;background:var(--amb);border-radius:0 0 4px 4px}
+nav.bot button.on{color:#111214;font-weight:800}
+nav.bot button.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;background:var(--grn);border-radius:0 0 4px 4px}
 .list{list-style:none;margin:0;padding:0}
-.list li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.list li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
 .list li .r{display:flex;justify-content:space-between;align-items:center;gap:8px}
-details.mod{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+details.mod{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 2px rgba(16,16,16,.04)}
 details.mod summary{padding:13px 14px;font-weight:800;font-size:15px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
 details.mod summary::-webkit-details-marker{display:none}
 details.mod .in{padding:0 14px 14px}
 label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px;font-weight:600}
-input,select,textarea{width:100%;background:var(--bg2,#0e1626);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;font-size:15px}
+input,select,textarea{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;font-size:15px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.bar{height:8px;background:var(--card2);border-radius:6px;overflow:hidden;margin:4px 0 8px}
-.bar i{display:block;height:100%;background:var(--amb)}
+.bar{height:8px;background:#ececea;border-radius:6px;overflow:hidden;margin:4px 0 8px}
+.bar i{display:block;height:100%;background:#111214}
 table{width:100%;border-collapse:collapse;font-size:13px}
 td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
 th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom));background:#1d2a44;color:var(--txt);border:1px solid var(--amb);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:990;display:none;max-width:88vw;text-align:center}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom));background:#111214;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:990;display:none;max-width:88vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .mono{font-variant-numeric:tabular-nums}
-.leaflet-container{background:#dfe5ea;font-family:inherit}
+.leaflet-container{background:#e8ebee;font-family:inherit}
 .src{font-size:11px;color:var(--mut);margin-top:6px}
 .go{width:100%;margin-top:8px}
 canvas.wx{width:100%;height:70px;display:block}
@@ -82,26 +86,36 @@ canvas.wx{width:100%;height:70px;display:block}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="row">
-    <div>
-      <h1>NYC DRIVER <b>INTELLIGENCE</b></h1>
-      <div class="sub" id="hdrSub">Driver Dashboard · v1.0</div>
-    </div>
-    <div style="text-align:right">
-      <span class="live"><i></i>LIVE</span>
-      <div class="sub mono" id="hdrClock">--:--</div>
-    </div>
-  </div>
-</header>
 <main>
 <!-- ============ HOME ============ -->
 <section id="view-home" class="view act">
-  <div class="grid">
-    <div class="card"><h3>Hozirgi hudud</h3><div class="mid" id="curZone">Aniqlanmoqda…</div><div class="small" id="curZoneSub">GPS orqali aniqlanadi</div></div>
-    <div class="card"><h3>Talab darajasi</h3><div class="big" id="curDemand">—</div><div class="small"><span class="badge b-hist">HISTORICAL</span> TLC tarixi asosida baho</div></div>
-    <div class="card"><h3>Bugungi daromad</h3><div class="big mono" id="todayEarn">$0</div><div class="small">Jurnaldagi yozuvlar boʻyicha (sof)</div></div>
-    <div class="card"><h3>Ob-havo</h3><div class="mid" id="wxShort">—</div><div class="small" id="wxSub"><span class="badge b-live">LIVE</span> Open-Meteo</div></div>
+  <div class="hero">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:800;font-size:17px;letter-spacing:.3px">NYC DRIVER</div>
+      <span class="live"><i></i>LIVE</span>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:16px;justify-content:space-between;align-items:flex-start">
+      <div style="min-width:0">
+        <div class="clock" id="heroClock">--:--</div>
+        <div class="small" id="heroDate" style="font-size:13.5px">New York City · Live overview</div>
+        <div class="small" style="margin-top:12px;font-size:13.5px">📍 <b id="curZone" style="color:var(--txt)">Aniqlanmoqda…</b></div>
+        <div class="small" id="curZoneSub">GPS orqali aniqlanadi</div>
+        <div class="small" style="margin-top:6px;font-size:13.5px">Talab darajasi: <span id="curDemand">—</span> <span class="badge b-hist">HISTORICAL</span></div>
+      </div>
+      <div class="wxtile">
+        <div class="ic" id="wxIcon">🌤️</div>
+        <div style="font-weight:800;font-size:16px;margin-top:4px" id="wxShort">—</div>
+        <div class="small" style="font-weight:700;color:var(--txt)">Weather</div>
+        <div class="small" id="wxSub">Current conditions</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <button class="tile" id="tileBestBtn"><div class="t"><span style="color:var(--grn)">◎</span>Best Location</div><div class="v" id="tileBest">—</div><div class="s">Estimated opportunity</div></button>
+    <button class="tile" data-go="airports"><div class="t"><span style="color:var(--blu)">✈️</span>Airports</div><div class="v">JFK · LGA · EWR</div><div class="s">Flights and queue estimates</div></button>
+    <button class="tile" data-go="journal"><div class="t"><span style="color:var(--grn)">💳</span>Earnings</div><div class="v mono" id="todayEarn">$0</div><div class="s">Today's net earnings</div></button>
+    <button class="tile" data-go="tools" data-mod="modClose"><div class="t"><span style="color:var(--amb)">⚠️</span>Road Alerts</div><div class="v" id="alertVal">Live</div><div class="s">Closures and incidents</div></button>
   </div>
 
   <div class="card" id="bestCard">
@@ -119,18 +133,20 @@ canvas.wx{width:100%;height:70px;display:block}
     <div class="src">Ranglar: TLC tarixiy safarlari zichligi. Qizil — yuqori talab hududi.</div>
   </div>
 
-  <h3 style="color:var(--mut);font-size:12px;letter-spacing:.8px;margin:14px 0 8px">QUICK ACTIONS</h3>
+  <h3 style="color:var(--txt);font-size:16px;margin:16px 0 8px;font-weight:800">Main navigation</h3>
   <div class="qa">
-    <button data-go="airports"><span>✈️</span>Airport</button>
+    <button data-go="home"><span>▦</span>Home</button>
+    <button data-go="map"><span>🗺️</span>Map</button>
+    <button data-go="airports"><span>✈️</span>Airports</button>
     <button data-go="map"><span>🔥</span>Demand</button>
-    <button data-go="tools" data-mod="modEarn"><span>💵</span>Earnings</button>
-    <button data-go="tools" data-mod="modVoice"><span>🎙️</span>Voice</button>
-    <button data-go="tools" data-mod="modWx"><span>🌦️</span>Weather</button>
-    <button data-go="tools" data-mod="modPark"><span>🅿️</span>Parking</button>
+    <button data-go="tools" data-mod="modEvents"><span>📅</span>Events</button>
+    <button data-go="tools" data-mod="modEarn"><span>💳</span>Earnings</button>
     <button data-go="tools" data-mod="modEv"><span>⚡</span>Charging</button>
-    <button data-go="tools" data-mod="modRest"><span>🚻</span>Places</button>
+    <button data-go="tools"><span>⚙️</span>More</button>
   </div>
+
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v2.0 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -378,6 +394,8 @@ function renderHome(){
   const cur=sc.find(s=>s.z===nz.z)||sc[0];
   $("curDemand").innerHTML=demandLabel(cur.D)+' <span style="font-size:14px;color:var(--mut)">'+cur.D+"/100</span>";
   bestPick=sc[0];
+  const tb=$("tileBest");if(tb)tb.textContent=bestPick.z.n.replace(" Airport","");
+  const av=$("alertVal");if(av)av.textContent=CLOSURES.length+" ta ogohlantirish";
   $("bestName").textContent=bestPick.z.n;
   $("bestMeta").textContent="Ball "+bestPick.score+"/100 · "+bestPick.dist.toFixed(1)+" mi · ≈"+bestPick.etaMin+" daq yoʻl · taxminiy "+money(bestPick.perHour)+"/soat";
   const rs=[];
@@ -441,11 +459,11 @@ function drawFlights(code){
   const bw=W/m.hours.length;
   m.hours.forEach((x,i)=>{
     const bh=(H-34)*(x.arr/mx);
-    ctx.fillStyle=i===0?"#f5b301":"#38bdf8";
+    ctx.fillStyle=i===0?"#111214":"#2563eb";
     ctx.fillRect(i*bw+10,H-22-bh,bw-20,bh);
-    ctx.fillStyle="#e9eff8";ctx.font="bold 12px sans-serif";ctx.textAlign="center";
+    ctx.fillStyle="#111214";ctx.font="bold 12px sans-serif";ctx.textAlign="center";
     ctx.fillText(x.arr,i*bw+bw/2,H-28-bh);
-    ctx.fillStyle="#93a4bb";ctx.font="11px sans-serif";
+    ctx.fillStyle="#6f7278";ctx.font="11px sans-serif";
     ctx.fillText(String(x.h).padStart(2,"0")+":00",i*bw+bw/2,H-6);
   });
   const peak=m.hours.reduce((a,b)=>b.arr>a.arr?b:a);
@@ -458,6 +476,7 @@ function loadWeather(){
   const u="https://api.open-meteo.com/v1/forecast?latitude="+userLat()+"&longitude="+userLon()+"&current=temperature_2m,precipitation,weather_code,wind_speed_10m&hourly=precipitation_probability,temperature_2m&forecast_days=1&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York";
   fetchT(u,9000).then(r=>r.json()).then(j=>{
     wxData=j;const c=j.current;
+    const wxi=$("wxIcon");if(wxi)wxi.textContent=c.weather_code>=95?"⛈️":c.weather_code>=71?"🌨️":c.weather_code>=61?"🌧️":c.weather_code>=51?"🌦️":c.weather_code>=45?"🌫️":c.weather_code>=3?"☁️":c.weather_code===2?"⛅":c.weather_code===1?"🌤️":"☀️";
     const h=nowNY().getHours();
     const probs=(j.hourly&&j.hourly.precipitation_probability)||[];
     rainProb3h=Math.max(probs[h]||0,probs[h+1]||0,probs[h+2]||0);
@@ -473,9 +492,9 @@ function drawWx(j){
   const probs=j.hourly.precipitation_probability||[];const h=nowNY().getHours();
   ctx.clearRect(0,0,W,H);const n=12,bw=W/n;
   for(let i=0;i<n;i++){const p=probs[h+i]||0;const bh=(H-30)*(p/100);
-    ctx.fillStyle=p>=50?"#f5b301":"#38bdf8";ctx.fillRect(i*bw+6,H-20-bh,bw-12,bh);
-    ctx.fillStyle="#e9eff8";ctx.font="bold 11px sans-serif";ctx.textAlign="center";ctx.fillText(p+"%",i*bw+bw/2,H-26-bh);
-    ctx.fillStyle="#93a4bb";ctx.font="10px sans-serif";ctx.fillText(String((h+i)%24).padStart(2,"0"),i*bw+bw/2,H-6);}
+    ctx.fillStyle=p>=50?"#d97706":"#2563eb";ctx.fillRect(i*bw+6,H-20-bh,bw-12,bh);
+    ctx.fillStyle="#111214";ctx.font="bold 11px sans-serif";ctx.textAlign="center";ctx.fillText(p+"%",i*bw+bw/2,H-26-bh);
+    ctx.fillStyle="#6f7278";ctx.font="10px sans-serif";ctx.fillText(String((h+i)%24).padStart(2,"0"),i*bw+bw/2,H-6);}
 }
 
 /* ================= Maps & Layers (Modul 1, 6, 12, 13, 15) ================= */
@@ -649,10 +668,11 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
 document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 $("bestGo").addEventListener("click",()=>{if(bestPick)gmaps(bestPick.z.lat,bestPick.z.lon)});
+$("tileBestBtn").addEventListener("click",()=>{const b=$("bestCard");if(b)b.scrollIntoView({behavior:"smooth"})});
 $("camMapBtn").addEventListener("click",()=>{go("map");const ch=document.querySelector('[data-layer="cam"]');if(ch&&!ch.classList.contains("on"))ch.click()});
 $("wcRefresh").addEventListener("click",()=>refreshWC(true));
 $("evRefresh").addEventListener("click",()=>refreshEV(true));
-function tickClock(){$("hdrClock").textContent=nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});$("hdrSub").textContent="Driver Dashboard · "+nowNY().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}
+function tickClock(){const t=nowNY();const hc=$("heroClock");if(hc)hc.textContent=t.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});const hd=$("heroDate");if(hd)hd.textContent="New York City · Live overview · "+t.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}
 if(navigator.geolocation){
   navigator.geolocation.watchPosition(p=>{
     pos={lat:p.coords.latitude,lon:p.coords.longitude};
