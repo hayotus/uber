@@ -87,3 +87,20 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - realPerHour qatlamlari: zoneHour scope ishladi (n=4).
 
 **NOT TESTED (v5.0):** brauzerda jurnal formasi (zona/soat selectlari) vizual tekshiruvi — jonli QA da qilinadi; iPhone fizik sinov.
+
+## v6.0 — 3-bosqich (2026-10-31, lokal tekshiruv)
+
+- Fayl bo'linishi: index.html 27,156 B + style.css 7,925 B + app.js 58,441 B; `node --check app.js` PASS; index.html da ichki <style>/<script> qolmadi; inline onclick (gmaps) uchun `window.gmaps` eksport qilindi.
+- Home: 3 blok + <details id="homeMore"> (details ochiq/yopiq muvozanati tekshirildi: 12/12).
+- Drive rejimi CSS (≥48px, kontrast), alerts/maybeNotify/refreshHeat funksiyalari mavjudligi tekshirildi.
+- IDB: idbMirror saqlash nuqtalariga ulandi (saveSettings, saveJournal, GO yozuvi + 60s interval); idbRestore boot da chaqiriladi.
+
+**NOT TESTED (v6.0):** jonli brauzer QA (v5.0 QA yakunlangach o'tkaziladi); IDB dan tiklash yo'li (localStorage tozalangan holat); drive rejimi vizual ko'rinishi; iPhone fizik sinov; kamera Overpass jonli javobi (OSM da NYC kameralar siyrak — zaxira yo'li tez-tez ishlashi mumkin).
+
+## v5.0 — jonli QA natijasi (2026-10-31, brauzer)
+
+- Versiya v5.0 tasdiqlandi (SW yangilanishi 3-reload da keldi — 2 emas; keyingi versiyalarda hisobga olinadi).
+- Jurnal: Hudud + Boshlanish soati selectlari bor; yozuv "📍Harlem · ▶ 10:00" ko'rinishida chiqdi; sof $179.92; Home "Real o'rtacha: $22.49/soat" ga yangilandi ✔.
+- Settings kalibrlash kartasi: "Hudud belgilangan smenalar: 1/30 — yana 29 ta kerak" ✔.
+- Analytics aniqlik kartasi: bo'sh holat halol ("Hali tavsiya yo'q"), NaN/undefined yo'q ✔.
+- **TOPILMA (yorliq muammosi):** tavsiya "📍 Google Maps — yo'l olish" tugmasi bosilganda yoziladi, lekin tugma nomi buni bildirmaydi; QA "GO tugmasi yo'q" deb topdi. v6.0 da tuzatildi: tugma "📍 GO — Google Maps ga yo'l olish" deb qayta nomlandi + alohida "✔️ Faqat tavsiyani yozib qo'yish (navigatsiyasiz)" tugmasi qo'shildi (recordRec). Juftlik statistikasi jonli tekshiruvi v6 QA siga qoldi.
