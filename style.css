@@ -123,3 +123,7 @@ body.drive #voiceCmds{display:block}
 .wcol span{font-size:10px;color:var(--mut)}
 .wbar{height:46px;display:flex;align-items:flex-end;width:100%}
 .wb{width:100%;background:#3b82f6;border-radius:4px 4px 0 0;min-height:3px}
+
+/* TLC Radar havola tugmasi (v8.1) */
+nav.bot a.botlink{flex:1;color:var(--mut);text-decoration:none;text-align:center;padding:8px 0 7px;font-size:10.5px;font-weight:600;white-space:nowrap}
+nav.bot a.botlink span{display:block;font-size:20px;margin-bottom:2px}
