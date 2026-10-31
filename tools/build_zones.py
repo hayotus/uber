@@ -171,6 +171,9 @@ def main():
                           "tlcIds": ids, "wd": wd, "we": we, "daily": daily})
         print(f"{name}: kunlik o'rtacha {daily}, pik soat {max(wd + we)}")
 
+    # peakRef = barcha soatlik qiymatlarning 95-persentili (maksimum outlier kalibrlashni buzadi)
+    _allv = sorted(v for z in zones_out for v in z["wd"] + z["we"])
+    peak = round(_allv[int(len(_allv) * 0.95)], 1)
     out = {
         "meta": {
             "source": "NYC Open Data — 2025 High Volume FHV Trip Data (TLC), dataset nt46-nv3c",

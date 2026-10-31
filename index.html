@@ -601,7 +601,7 @@ function renderAirports(){
       '<div class="small">Pastda (&lt;6000 ft): <b>'+a.low+'</b> · Yangilandi: '+new Date(a.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+'</div>'+
       (a.list.length?'<div class="small">'+a.list.map(x=>esc(x.f||"—")+" · "+(x.alt!=null?Math.round(x.alt)+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"");
     } else {
-      live='<div class="med">Jonli manba mavjud emas</div><div class="small">adsb.lol hali javob bermadi yoki yetib boʻlmadi. Tarixiy naqsh pastda.</div>';
+      live='<div class="med">Jonli manba mavjud emas</div><div class="small">adsb.lol brauzerdan toʻgʻridan-toʻgʻri ochilmaydi (CORS) — jonli ADS-B hozircha ishlamaydi. Tarixiy naqsh pastda.</div>';
     }
     return '<div class="card"><h3>✈️ '+ap.code+" — "+esc(ap.name)+'</h3>'+
     '<div class="small" style="margin-bottom:4px"><span class="badge b-live">LIVE</span> ADS-B (adsb.lol, kalitsiz)</div>'+live+
@@ -660,7 +660,7 @@ function loadAdsb(){
       adsb[ap.code]={ts:Date.now(),total:ac.length,low:low,list:list.slice(0,5)};
       apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
       renderApiStat();renderAirports();
-    }).catch(()=>{apiStat.adsb="XATO — adsb.lol yetib boʻlmadi";renderApiStat()});
+    }).catch(()=>{apiStat.adsb="BLOKLANGAN — brauzer CORS (adsb.lol da ACAO yoʻq)";renderApiStat()});
   });
 }
 

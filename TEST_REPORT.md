@@ -54,3 +54,26 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Takroriy/mavjud bo'lmagan element ID lari — PASS (0 ta muammo)
 - 16 modul mavjudligi (Menu + ekranlar) — PASS
 - Maxfiy kalitlar frontendda — PASS (yo'q; barcha manbalar kalitsiz)
+
+## v4.0 — 1-bosqich sinovi (2026-10-31)
+
+**Ma'lumot tekshiruvi (zones.json) — PASS**
+- Mustaqil Socrata jamlamalari bilan solishtirildi (2025-09-01..28): JFK 308,799 (faylda 308,798), LGA 403,114 (403,110), Times Sq 230,576 (230,577), EWR dropoff 138,495 (138,496) — farq faqat yaxlitlashda.
+- Socrata dow konvensiyasi empirik tasdiqlandi: Monday=1..Sunday=7 (2025-09-06 shanba → dow=6).
+- Haftalik agregatsiya so'rovlari server tomonidan uzilgani kuzatildi — build skript kunlik so'rovlar + checkpoint bilan ishlaydi.
+
+**Jonli QA (brauzer, 2026-10-31 08:28 EDT) — PASS (ADS-B dan tashqari)**
+- Home: Best = Midtown Manhattan; jurnal bo'sh bo'lganda "Real $/soat: ma'lumot yo'q" (uydirma formula yo'q) ✔; "TLC tarixiy yuklangan" ✔.
+- Hotspot TOP 5: har qatorda real "pikap/s" (TLC) ✔.
+- Airports HISTORICAL: shanba 08:00 uchun JFK 174, LGA 100, EWR 116 pikap/soat — zones.json we[8] bilan mos ✔.
+- Settings: "TLC zones.json: OK · TLC HVFHS 2025-09 (20 zona)" ✔.
+- Journal round-trip: $200/8s/120mi/$10 → sof $179.92; Home "Real o'rtacha: $22.49/soat (jurnal, 1 smena)" ✔; yozuv o'chirildi, iz qolmadi ✔.
+- undefined/NaN/bo'sh bloklar: yo'q ✔.
+
+**ADS-B LIVE — ISHLAMAYDI (brauzer CORS)**
+- adsb.lol serverdan ishlaydi (HTTP 200), lekin Access-Control-Allow-Origin sarlavhasi yo'q — brauzer fetch bloklaydi. adsb.fi ham xuddi shunday; adsb.one/airplanes.live 403; allorigins proxy 522.
+- Ilova buni halol ko'rsatadi: "Jonli manba mavjud emas (CORS)". Yechim variantlari: OpenSky hisobi (kalit) — foydalanuvchi qarori kerak; yoki tarixiy rejimda qolish.
+
+**Kalibrlash tuzatishi:** peakRef endi maksimum (2053.2) emas, 95-persentil (1243.8) — ertalabki ballar sun'iy past bo'lmasligi uchun.
+
+**NOT TESTED (v4.0):** iPhone fizik sinov; GPS ruxsati bilan jonli rejim; ADS-B (CORS sabab, yuqorida); offline rejimda zones.json keshdan o'qilishi.
