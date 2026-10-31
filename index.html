@@ -405,7 +405,7 @@ function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";cle
 function fetchT(u,ms,opt){const c=new AbortController();const h=setTimeout(()=>c.abort(),ms||9000);return fetch(u,Object.assign({signal:c.signal},opt||{})).then(r=>{clearTimeout(h);if(!r.ok)throw new Error("HTTP "+r.status);return r}).catch(e=>{clearTimeout(h);throw e})}
 function hav(a,b,c,d){const R=3958.8,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,s=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(s))}
 function inkF(){return document.documentElement.getAttribute("data-theme")==="light"?"#111214":"#f4f6f8"}
-function money(n){return "$"+(Math.round(n*100)/100).toLocaleString("en-US")}
+function money(n){return "$"+(Math.round(n*100)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function nowNY(){return new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}))}
 function seedRand(seed){let x=seed%2147483647;if(x<=0)x+=2147483646;return()=> (x=x*16807%2147483647)/2147483647}
 function gmaps(lat,lon){window.open("https://www.google.com/maps/dir/?api=1&destination="+lat+","+lon,"_blank")}
