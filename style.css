@@ -88,3 +88,29 @@ body.drive .card{border:1px solid #5f728f}
 body.drive #voiceCmds{display:block}
 .alertItem{padding:7px 0;border-bottom:1px solid var(--line)}
 .alertItem:last-child{border-bottom:none}
+
+/* Hotspot Ranking 2.0 (v7.0) */
+.hotctl{margin-bottom:10px}
+.hctlrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.hchip{flex:1;min-height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--txt);font-weight:700;font-size:13px;padding:8px 4px;cursor:pointer}
+.hchip.on{background:var(--grn);color:#06130a;border-color:transparent}
+.hrow{display:flex;gap:6px}
+.hrow select{flex:1;min-height:40px}
+.hcard{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.hcard.top{border-color:var(--grn);box-shadow:0 0 0 1px var(--grn)}
+.hrow1{display:flex;align-items:center;gap:8px}
+.rk{font-size:17px;min-width:26px;text-align:center}
+.hn{flex:1;font-weight:800;font-size:15px}
+.hs{font-size:22px;font-weight:900}
+.htr{font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:var(--card);white-space:nowrap}
+.htr.up{color:#16a34a}.htr.dn{color:#dc2626}.htr.fl{color:var(--mut)}
+.hsub{display:flex;align-items:center;gap:8px;margin:6px 0;color:var(--grn)}
+.spark{width:72px;height:24px;flex:none}
+.hchips{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px}
+.hchips span{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 7px}
+.hcbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:6px}
+.hcb span{font-size:10px;color:var(--mut);display:block;text-align:center}
+.hcb .bar{height:5px;margin:2px 0 0}
+.hbtns{display:flex;gap:6px}
+.hbtns .go{flex:1.4;margin-top:0}
+.hbtns .ghost{flex:1}

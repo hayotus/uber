@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=63">
+<link rel="stylesheet" href="./style.css?v=70">
 </head>
 <body>
 <main>
@@ -118,7 +118,7 @@
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v6.3 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v7.0 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -158,7 +158,13 @@
 <!-- ============ DEMAND ============ -->
 <section id="view-demand" class="view">
   <div class="card"><h3>Demand &amp; Smart Intelligence</h3><div class="small">Talab xaritasi (HISTORICAL), hududlar reytingi va Smart Engine tafsiloti. Talab — TLC HVFHS tarixiy maʼlumotidan (zones.json); ball — ochiq komponentlar modeli. Jonli Uber talabi ochiq emas.</div></div>
-<details class="mod" id="modHot"><summary><span>🏆 NYC Hotspot Ranking</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="hotList"></div><div class="src">Ball: TLC tarixiy talab, jonli ob-havo (zona boʻyicha), faol tadbir/yopilish oynalari va masofa. $/soat faqat jurnalingizdan olinadi.</div></div></details>
+<details class="mod" id="modHot"><summary><span>🏆 NYC Hotspot Ranking</span><span class="badge b-est">ESTIMATED</span></summary><div class="in">
+<div class="hotctl"><div class="hctlrow" id="hotChips"><button class="hchip on" data-hoff="0">Hozir</button><button class="hchip" data-hoff="1">+1 soat</button><button class="hchip" data-hoff="2">+2 soat</button><button class="hchip" data-hoff="3">+3 soat</button></div>
+<div class="hrow"><select id="hotSort"><option value="score">Saralash: Ball</option><option value="rate">Saralash: Real $/soat</option><option value="dist">Saralash: Masofa</option><option value="demand">Saralash: Talab (D)</option></select><select id="hotMax"><option value="0">Masofa: hammasi</option><option value="3">≤3 mi</option><option value="6">≤6 mi</option><option value="10">≤10 mi</option></select></div></div>
+<div id="hotList"></div>
+<button class="ghost" id="hotMore" style="display:none;width:100%">Hammasini koʻrsatish</button>
+<div class="src" id="hotNote">Ball: TLC tarixiy talab, ob-havo, tadbir/yopilish va masofa. $/soat faqat jurnalingizdan olinadi.</div>
+</div></details>
 
   <details class="mod" id="modSmart"><summary><span>🧠 Smart Driver Intelligence</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="smartBox"></div><div class="src">Formula: Score = 0.30·Talab + 0.20·Reyslar + 0.15·Tadbirlar + 0.15·Ob-havo + 0.10·Yoʻl + 0.10·Masofa. Koeffitsiyentlar boshlangʻich — real natijalar bilan sozlanadi.</div></div></details>
 
@@ -177,7 +183,7 @@
     <button class="mtile" data-go="journal"><span class="ic">📓</span><div class="n">7. Driver Journal</div><div class="s">Smena jurnali (LOCAL)</div></button>
     <button class="mtile" data-go="tools" data-mod="modVoice"><span class="ic">🎙️</span><div class="n">8. Voice Assistant</div><div class="s">Ovozli buyruqlar</div></button>
     <button class="mtile" data-go="demand"><span class="ic">🧠</span><div class="n">9. Smart Driver Intelligence</div><div class="s">Ball + confidence tafsiloti</div></button>
-    <button class="mtile" data-go="demand"><span class="ic">🏆</span><div class="n">10. NYC Hotspot Ranking</div><div class="s">Hududlar reytingi</div></button>
+    <button class="mtile" data-go="demand"><span class="ic">🏆</span><div class="n">10. NYC Hotspot Ranking</div><div class="s">Reyting + vaqt prognozi + GO</div></button>
     <button class="mtile" data-go="tools" data-mod="modWx"><span class="ic">🌦️</span><div class="n">11. Weather &amp; Rain Radar</div><div class="s">Open-Meteo (LIVE)</div></button>
     <button class="mtile" data-go="tools" data-mod="modCam"><span class="ic">📷</span><div class="n">12. Speed &amp; Traffic Camera</div><div class="s">Limit va kameralar</div></button>
     <button class="mtile" data-go="tools" data-mod="modRest"><span class="ic">🚻</span><div class="n">13. Restroom &amp; Rest Stop</div><div class="s">OSM jonli + zaxira</div></button>
@@ -338,6 +344,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=63"></script>
+<script type="module" src="./app.js?v=70"></script>
 </body>
 </html>

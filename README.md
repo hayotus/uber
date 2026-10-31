@@ -89,3 +89,13 @@ iPhone Safari → saytni ochish → Share → **Add to Home Screen**. Standalone
 - **adsb.lol** (kalitsiz, ochiq ADS-B jamoat tarmog'i): aeroport atrofidagi jonli samolyotlar, past balandlikdagilar soni, eng yaqin reyslar ro'yxati — LIVE.
 - Tekshirilib ishlamaganlari: **OpenSky** anonim API (yetib bo'lmadi + anonim kirish yopilgan), **FAA status** endpointi (yetib bo'lmadi). Ular ishlatilmaydi.
 - Uber ichki navbat/surge ochiq emas — ilova uni uydirmaydi.
+
+## v7.0 (2026-10-31) — Hotspot Ranking 2.0
+
+- Modul 10 butunlay qayta ishlandi: jadval o'rniga boy kartalar.
+- Vaqt tanlash: Hozir / +1 / +2 / +3 soat — ball tanlangan soat uchun hisoblanadi (zoneScoresAt; TLC naqsh, tadbir/yopilish oynalari, ob-havo prognozi shu soatga moslanadi; kelajakda reyslar ham naqsh).
+- Karta: ball, trend (↗/↘/→), keyingi 6 soat sparkline (TLC naqsh), pikap/soat, hududning real $/soati (zoneRates, jurnal), masofa/ETA, aeroport zonalarida AirLabs LIVE chip, tadbir/yopilish/yomg'ir chiplari, D·F·E·W·T·P mini-barlar.
+- Saralash: Ball / Real $/soat / Masofa / Talab; masofa filtri ≤3/6/10 mi; top-10 + "hammasini ko'rsatish".
+- Har kartada GO va "Yozib qo'yish" — recordRecFor(s) orqali kalibrlash zanjiriga yoziladi.
+- hourIdx: Math.floor (prognoz massivi indeksi soat boshiga mos; DST kechasida ham tekshirildi).
+- Lokal mantiq testlari: 20/20 PASS (vaqt siljishi, yarim tun/DST o'tishlari, zoneRates, sparkSVG, recordRecFor).
