@@ -145,3 +145,9 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Eski (keshi zaharlangan) profilda ham yangi format darhol chiqdi: sarlavha "Eng yaqin reyslar (qo'nish vaqti — taxminiy, masofa/tezlikdan):"; yozuvlar: "AA95 · Madrid (MAD) · ~01:37 PM · — · 0.9 mi" (JFK), "UA1442 · Denver (DEN) · ~01:37 PM · 208 ft · 3.1 mi" (LGA), "UA2823 · Vashington (IAD) · ~01:37 PM · 893 ft · 13.4 mi" (EWR).
 - Manfiy balandlik yo'q (15/15 yozuv); yetishmagan balandlik "—" bo'lib chiqadi (halol).
 - Sonlar: JFK 114/8, LGA 42/5, EWR 89/6. Kesh tuzatishi (?v=63) isbotlandi.
+
+## v7.0 / v7.1 — Hotspot Ranking 2.0 (2026-10-31, brauzer QA) — PASS
+
+- Lokal mantiq testlari 20/20 PASS: zoneScoresAt vaqt siljishi (Sat 21:30 → +3s = Sun 00:30, we[0]), patternSeries yarim tun va DST (2026-11-01 soat qaytishi — 01:00 ikki marta, devor-soat to'g'ri), zoneRates, sparkSVG, recordRecFor, hourIdx (floor).
+- Jonli QA: footer v7.0 (1 yuklashda keldi); chiplar (Hozir/+1/+2/+3) va selectlar bor; kartalar 10 → 20; 1-karta Williamsburg 43 (↗, 669 pikap/soat); +2 soat rejimida 47 ball / 855 pikap/soat ga o'zgardi; aeroport kartalarida AirLabs LIVE chiplar (LGA 44/6, EWR 88/7, JFK 109/13); ✔️ toast ishladi; Masofa saralashi Times Square (0.1 mi) ni birinchi qildi.
+- TOPILGAN XATO (v7.0): medallar "U0001F947" matni bo'lib chiqdi → v7.1 da haqiqiy emoji qo'yildi, qayta QA: 🥇🥈🥉 to'g'ri (Williamsburg 43 / Midtown 41 / Harlem 41), footer v7.1.
