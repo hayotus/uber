@@ -1,7 +1,7 @@
 /* NYC Driver Dashboard — Service Worker
    Asosiy interfeys va jurnal offline ishlashi uchun kesh.
    API javoblari keshlenmaydi (jonli ma'lumot eskirib qolmasligi uchun). */
-const CACHE = "driver-dash-v2";
+const CACHE = "driver-dash-v3";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
