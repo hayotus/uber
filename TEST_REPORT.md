@@ -104,3 +104,14 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Settings kalibrlash kartasi: "Hudud belgilangan smenalar: 1/30 — yana 29 ta kerak" ✔.
 - Analytics aniqlik kartasi: bo'sh holat halol ("Hali tavsiya yo'q"), NaN/undefined yo'q ✔.
 - **TOPILMA (yorliq muammosi):** tavsiya "📍 Google Maps — yo'l olish" tugmasi bosilganda yoziladi, lekin tugma nomi buni bildirmaydi; QA "GO tugmasi yo'q" deb topdi. v6.0 da tuzatildi: tugma "📍 GO — Google Maps ga yo'l olish" deb qayta nomlandi + alohida "✔️ Faqat tavsiyani yozib qo'yish (navigatsiyasiz)" tugmasi qo'shildi (recordRec). Juftlik statistikasi jonli tekshiruvi v6 QA siga qoldi.
+
+## v6.0 — jonli QA natijasi (2026-10-31, brauzer) — 7/7 PASS
+
+- Versiya v6.0 (3-reload da keldi — kutilganidek).
+- Home: 3 blok to'g'ridan-to'g'ri ko'rinadi (Best / Bugun / Ogohlantirishlar — "Faol ogohlantirishlar yo'q ✔"); "Batafsil" ichida Smart, Airport activity, Heatmap, Main navigation, TOP 5 — hammasi bor.
+- Haydash rejimi: tugma holati almashadi, ovozli buyruqlar kartasi chiqadi/yashirinadi ✔.
+- Kalibrlash zanjiri uchtan uch: "✔️ Faqat tavsiyani yozib qo'yish" → toast ✔; jurnal yozuvi (Midtown, ▶ 11:00) ✔; Analytics: "Bog'langan tavsiyalar: 1 · Aniqlik 100% (1/1) · $22.49/soat · Namuna kichik — xulosa chiqarishga erta" ✔ (NaN/undefined yo'q).
+- Eslatma: 1 juftlikda aniqlik 100% chiqishi tabiiy (namuna kichik ogohlantirishi aynan shu uchun); ma'no 10+ juftlikdan keyin boshlanadi.
+- Test yozuvi tozalandi. (QA brauzeri localStorage dagi 1 ta test tavsiya yozuvi o'sha profilning o'zida qoladi — foydalanuvchi telefoniga ta'siri yo'q.)
+
+**NOT TESTED (yakuniy holat):** iPhone fizik sinov, PWA Home Screen o'rnatish, offline qayta ishga tushirish, IDB dan tiklash yo'li (localStorage tozalangan holat), CSV eksport tugmasini bosish — barchasi foydalanuvchi qurilmasida tekshirilishi kerak.
