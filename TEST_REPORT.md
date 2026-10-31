@@ -134,3 +134,8 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 
 - Foydalanuvchi savoli bilan tekshirildi: Radar dagi "vaqt + qayerdan" — qayerdan = AirLabs dep_iata (real), vaqt = Radar ning o'z taxminiy formulasi (masofa/tezlik + 10 daq; kod izohida ham "taxminiy"). Dashboard ga aynan shu usul, "taxminiy" yorlig'i bilan ko'chirildi.
 - Jonli QA: push dan keyin.
+
+## v6.2 QA — kesh diagnostikasi (2026-10-31)
+
+- Dastlabki QA lar ro'yxatni eski formatda ko'rsatdi. Chuqur tekshiruv: (1) jonli app.js lokal bilan baytma-bayt bir xil (md5 mos, Last-Modified 13:17:50); (2) kodda ikkinchi render yo'li yo'q (bitta renderAirports); (3) QA brauzerida `app.js?probe=62` ochilganda yangi kod BORligi ko'rindi — demak tarmoq to'g'ri, aybdor profilning SW keshi (v8 install paytida deployment hali tarqalmagan edi) + stale-while-revalidate.
+- **Tuzatish (v6.3):** asset URL larga versiya (`?v=63`) — yangi URL = hamma keshlarda yangi kalit. QA eski (zaharланган) profilda qayta o'tkaziladi: yangi format darhol chiqsa, tuzatish isbotlanadi.
