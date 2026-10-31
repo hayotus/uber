@@ -182,7 +182,7 @@ canvas.wx{width:100%;height:70px;display:block}
   </div>
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
-  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v4.0 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v5.0 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -316,6 +316,7 @@ canvas.wx{width:100%;height:70px;display:block}
     <div class="src">Elektr xarajati sozlamalardagi sarf/narx bilan hisoblanadi; toll+boshqa — jurnalga kiritilgani.</div>
   </div>
   <div class="card"><h3>Oxirgi 7 kun — net daromad</h3><canvas class="wx" id="anChart" width="680" height="140"></canvas></div>
+  <div class="card"><h3>Tavsiya aniqligi (kalibrlash)</h3><div id="accBox" class="small">Hisoblanmoqda…</div><div class="src">GO tavsiyasi + o'sha kun/huddagi real jurnal smenasi solishtiriladi. $/soat o'rtachingizdan yuqori chiqsa — "aniq" hisoblanadi.</div></div>
   <div class="card"><h3>Tavsiyalar tarixi (Smart Engine)</h3><ul class="list" id="recList"></ul><div class="src">GO bosilganda tavsiya shu yerda yoziladi — kelajakda real natijalar bilan kalibrlash uchun.</div></div>
 </section>
 
@@ -353,6 +354,7 @@ canvas.wx{width:100%;height:70px;display:block}
     <button class="go" id="sSave">Saqlash</button>
     <div class="src">Sozlamalar faqat shu qurilmada (localStorage) saqlanadi. Maxfiy kalitlar saqlanmaydi.</div>
   </div>
+  <div class="card"><h3>Kalibrlash — koeffitsiyentlar</h3><div id="calBox" class="small">Hisoblanmoqda…</div><div class="src">30+ hududli smena yig'ilganda tizim koeffitsiyentlarni taklif qiladi. Avtomatik qo'llanmaydi — faqat siz tasdiqlasangiz.</div></div>
   <div class="card"><h3>API ulanish holati</h3><div id="apiStat" class="small">Tekshirilmagan</div>
     <div class="src">Barcha manbalar kalitsiz va ochiq: Open-Meteo, RainViewer, OpenStreetMap (Overpass), Esri tiles, adsb.lol (ADS-B jonli), NYC Open Data — TLC HVFHS (zones.json). Uber ichki maʼlumoti (navbat/surge) berilmaydi — uydirma raqamlar koʻrsatilmaydi.</div>
   </div>
@@ -374,6 +376,10 @@ canvas.wx{width:100%;height:70px;display:block}
     <div class="frow">
       <div><label>Mil</label><input id="jMiles" type="number" inputmode="decimal" placeholder="0"></div>
       <div><label>Toll + boshqa ($)</label><input id="jExp" type="number" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <div class="frow">
+      <div><label>Hudud (zona)</label><select id="jZone"><option value="">— belgilanmagan —</option></select></div>
+      <div><label>Boshlanish soati</label><select id="jHour"><option value="">—</option></select></div>
     </div>
     <label>Eslatma</label><input id="jNote" type="text" placeholder="Masalan: JFK kechki smena">
     <button class="go" id="jAdd">Saqlash</button>
@@ -479,7 +485,7 @@ const ASP_OFF=["2026-01-01","2026-01-19","2026-02-16","2026-05-25","2026-06-19",
 const DEF_POS={lat:40.7580,lon:-73.9855}; /* Times Square — GPS kelguncha */
 let pos=null, wxData=null, rainProb3h=0;
 let ZD=null, zoneWx={}, adsb={}, lastRPH=null;
-let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,airports:["JFK","LGA","EWR"],zone:""};
+let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,weights:null,airports:["JFK","LGA","EWR"],zone:""};
 try{const s=JSON.parse(localStorage.getItem("drv_settings")||"null");if(s)settings=Object.assign(settings,s)}catch(e){}
 function saveSettings(){localStorage.setItem("drv_settings",JSON.stringify(settings))}
 function applyTheme(){document.documentElement.setAttribute("data-theme",settings.theme==="light"?"light":"dark")}
@@ -504,8 +510,15 @@ function evWin(ev){const now=nowNY();
   return null}
 function evState(ev){const w=evWin(ev);if(!w)return "info";const now=nowNY();if(now>w.e)return "past";if(now>=new Date(w.s.getTime()-2*3600e3))return "active";return "later"}
 function clActive(c){if(!c.start||!c.end)return false;const now=nowNY();return now>=new Date(c.start)&&now<=new Date(c.end)}
-function realPerHour(){const es=journal.filter(e=>e.hours>0);if(!es.length)return null;let tn=0,th=0;es.forEach(e=>{tn+=netOf(e.gross,e.miles,e.exp);th+=e.hours});if(th<=0)return null;return {v:tn/th,n:es.length}}
+function realPerHour(zoneName){const es=journal.filter(e=>e.hours>0);if(!es.length)return null;const rate=e=>netOf(e.gross,e.miles,e.exp)/e.hours;
+  if(zoneName){const h=nowNY().getHours();
+    const zh=es.filter(e=>e.zone===zoneName&&e.startHour!=null&&Math.abs(e.startHour-h)<=2);
+    if(zh.length>=2)return {v:zh.reduce((a,e)=>a+rate(e),0)/zh.length,n:zh.length,scope:"zoneHour"};
+    const zz=es.filter(e=>e.zone===zoneName);
+    if(zz.length>=2)return {v:zz.reduce((a,e)=>a+rate(e),0)/zz.length,n:zz.length,scope:"zone"};}
+  let tn=0,th=0;es.forEach(e=>{tn+=netOf(e.gross,e.miles,e.exp);th+=e.hours});if(th<=0)return null;return {v:tn/th,n:es.length,scope:"all"}}
 const WEIGHTS={D:0.30,F:0.20,E:0.15,W:0.15,T:0.10,P:0.10};
+function effW(){return settings.weights||WEIGHTS}
 const SEVP={"Yuqori":26,"Oʻrtacha":14,"Past":6};
 function zoneScores(){
   const peakRef=ZD?ZD.meta.peakRef:0;
@@ -529,7 +542,7 @@ function zoneScores(){
     let P=Math.max(5,100-dist*7);if(settings.zone&&settings.zone===z.n)P=Math.min(100,P+6);
     let acc=0,wsum=0;
     const comps=[["D",D],["F",F],["E",E],["W",W],["T",T],["P",P]];
-    comps.forEach(function(kv){if(kv[1]==null)return;acc+=WEIGHTS[kv[0]]*kv[1];wsum+=WEIGHTS[kv[0]]});
+    comps.forEach(function(kv){if(kv[1]==null)return;acc+=effW()[kv[0]]*kv[1];wsum+=effW()[kv[0]]});
     const score=wsum?Math.round(acc/wsum):0;
     const etaMin=Math.max(2,Math.round(dist*3.2));
     return {z:z,dist:dist,score:score,D:D==null?null:Math.round(D),F:Math.round(F),E:Math.round(E),W:Math.round(W),T:Math.round(T),P:Math.round(P),raw:raw,etaMin:etaMin};
@@ -549,7 +562,7 @@ function renderHome(){
   const tb=$("tileBest");if(tb)tb.textContent=bestPick.z.n.replace(" Airport","");
   const av=$("alertVal");if(av)av.textContent=CLOSURES.length+" ta ogohlantirish";
   $("bestName").textContent=bestPick.z.n;
-  lastRPH=realPerHour();$("bestMeta").textContent="Ball "+bestPick.score+"/100 · "+distTxt(bestPick.dist)+" · ≈"+bestPick.etaMin+" daq yoʻl · "+(lastRPH?("Real oʻrtacha: "+money(lastRPH.v)+"/soat (jurnal, "+lastRPH.n+" smena)"):"Real $/soat: maʼlumot yoʻq");
+  lastRPH=realPerHour(bestPick.z.n);$("bestMeta").textContent="Ball "+bestPick.score+"/100 · "+distTxt(bestPick.dist)+" · ≈"+bestPick.etaMin+" daq yoʻl · "+(lastRPH?("Real oʻrtacha: "+money(lastRPH.v)+"/soat (jurnal, "+(lastRPH.scope==="zone"?"shu hudud, ":lastRPH.scope==="zoneHour"?"hudud+soat, ":"")+lastRPH.n+" smena)"):"Real $/soat: maʼlumot yoʻq");
   lastCalcAt=nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
   let conf=58;if(pos)conf+=20;if(wxData)conf+=12;if(!ZD)conf-=18;if(!Object.keys(zoneWx).length)conf-=6;if(bestPick.D==null)conf-=10;if(sc.length>1&&(sc[0].score-sc[1].score)<5)conf-=10;if(rainProb3h>0)conf+=3;
   bestPick.conf=Math.max(30,Math.min(95,conf));
@@ -580,7 +593,7 @@ function renderSmart(sc){
   const s=sc[0];
   const row=(n,v)=>"<div class='small' style='display:flex;justify-content:space-between'><span>"+n+"</span><b>"+v+"</b></div><div class='bar'><i style='width:"+Math.min(100,v)+"%'></i></div>";
   $("smartBox").innerHTML="<div class='mid'>Eng kuchli tavsiya: "+esc(s.z.n)+" — "+s.score+"/100</div>"+
-   row("Talab (D) ×0.30",s.D)+row("Reyslar (F) ×0.20",s.F)+row("Tadbirlar (E) ×0.15",s.E)+row("Ob-havo (W) ×0.15",s.W)+row("Yoʻl holati (T) ×0.10",s.T)+row("Masofa mosligi (P) ×0.10",s.P)+
+   row("Talab (D) ×"+effW().D,s.D)+row("Reyslar (F) ×"+effW().F,s.F)+row("Tadbirlar (E) ×"+effW().E,s.E)+row("Ob-havo (W) ×"+effW().W,s.W)+row("Yoʻl holati (T) ×"+effW().T,s.T)+row("Masofa mosligi (P) ×"+effW().P,s.P)+
    "<div class='small'>Real $/soat: "+(lastRPH?money(lastRPH.v)+" (jurnal, "+lastRPH.n+" smena)":"maʼlumot yoʻq")+" · borish ≈"+s.etaMin+" daq ("+distTxt(s.dist)+") · Confidence: "+(bestPick&&bestPick.conf?bestPick.conf+"%":"—")+"</div>";
 }
 
@@ -818,26 +831,26 @@ function renderJournal(){
   const fDays=f==="all"?null:parseInt(f,10);
   const sorted=[].concat(journal).sort((a,b)=>b.date<a.date?-1:1).filter(e=>{if(!fDays)return true;const d=new Date(e.date+"T12:00:00");return (nowNY()-d)<=fDays*864e5});
   $("jList").innerHTML=sorted.map(e=>{const net=netOf(e.gross,e.miles,e.exp);
-    return '<li><div class="r"><div><b>'+esc(e.date)+'</b> · <span class="mono">'+money(e.gross)+'</span><div class="small">'+e.hours+' soat · '+distTxt(e.miles)+' · sof: <b>'+money(net)+'</b>'+(e.note?" · "+esc(e.note):"")+'</div></div><div><button class="del" data-edit="'+e.id+'" title="Tahrirlash" style="color:var(--blu)">✏️</button><button class="del" data-del="'+e.id+'" title="O\u02bbchirish">✕</button></div></div></li>'}).join("")||'<li class="small">Bu filtrda yozuv yo\u02bbq.</li>';
+    return '<li><div class="r"><div><b>'+esc(e.date)+'</b> · <span class="mono">'+money(e.gross)+'</span><div class="small">'+e.hours+' soat · '+distTxt(e.miles)+' · sof: <b>'+money(net)+'</b>'+(e.zone?" · 📍"+esc(e.zone):"")+(e.startHour!=null?" · ▶ "+String(e.startHour).padStart(2,"0")+":00":"")+(e.note?" · "+esc(e.note):"")+'</div></div><div><button class="del" data-edit="'+e.id+'" title="Tahrirlash" style="color:var(--blu)">✏️</button><button class="del" data-del="'+e.id+'" title="O\u02bbchirish">✕</button></div></div></li>'}).join("")||'<li class="small">Bu filtrda yozuv yo\u02bbq.</li>';
   document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{journal=journal.filter(x=>x.id!=b.getAttribute("data-del"));saveJournal();renderJournal();toast("Yozuv oʻchirildi")}));
   document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{
     const e=journal.find(x=>x.id==b.getAttribute("data-edit"));if(!e)return;
-    editingId=e.id;$("jDate").value=e.date;$("jGross").value=e.gross;$("jHours").value=e.hours;$("jMiles").value=e.miles;$("jExp").value=e.exp;$("jNote").value=e.note||"";
+    editingId=e.id;$("jDate").value=e.date;$("jGross").value=e.gross;$("jHours").value=e.hours;$("jMiles").value=e.miles;$("jExp").value=e.exp;$("jZone").value=e.zone||"";$("jHour").value=e.startHour==null?"":String(e.startHour);$("jNote").value=e.note||"";
     $("jAdd").textContent="Yangilash (tahrir saqlansin)";window.scrollTo(0,0);toast("Tahrirlash rejimi — oʻzgartirib Saqlang");
   }));
 }
 $("jAdd").addEventListener("click",()=>{
-  const e={id:editingId||Date.now(),date:$("jDate").value||dayStr(nowNY()),gross:parseFloat($("jGross").value)||0,hours:parseFloat($("jHours").value)||0,miles:parseFloat($("jMiles").value)||0,exp:parseFloat($("jExp").value)||0,note:$("jNote").value.trim()};
+  const e={id:editingId||Date.now(),date:$("jDate").value||dayStr(nowNY()),gross:parseFloat($("jGross").value)||0,hours:parseFloat($("jHours").value)||0,miles:parseFloat($("jMiles").value)||0,exp:parseFloat($("jExp").value)||0,zone:$("jZone").value||"",startHour:$("jHour").value===""?null:parseInt($("jHour").value,10),note:$("jNote").value.trim()};
   if(!e.gross&&!e.miles){toast("Kamida tushum yoki mil kiriting");return}
   if(editingId){const i=journal.findIndex(x=>x.id===editingId);if(i>=0)journal[i]=e;editingId=null;$("jAdd").textContent="Saqlash";toast("Yozuv yangilandi ✔")}
   else{journal.push(e);toast("Smena saqlandi ✔")}
-  saveJournal();renderJournal();renderHome();
-  $("jGross").value=$("jHours").value=$("jMiles").value=$("jExp").value=$("jNote").value="";
+  saveJournal();renderJournal();renderHome();renderCal();
+  $("jGross").value=$("jHours").value=$("jMiles").value=$("jExp").value=$("jNote").value="";$("jZone").value="";$("jHour").value="";
 });
 const jf=$("jFilter");if(jf)jf.addEventListener("change",renderJournal);
 $("jExport").addEventListener("click",()=>{
   if(!journal.length){toast("Eksport uchun yozuv yoʻq");return}
-  let csv="date,gross,hours,miles,expenses,net,note\n"+journal.map(e=>[e.date,e.gross,e.hours,e.miles,e.exp,netOf(e.gross,e.miles,e.exp).toFixed(2),'"'+String(e.note||"").replace(/"/g,'""')+'"'].join(",")).join("\n");
+  let csv="date,gross,hours,miles,expenses,net,zone,start_hour,note\n"+journal.map(e=>[e.date,e.gross,e.hours,e.miles,e.exp,netOf(e.gross,e.miles,e.exp).toFixed(2),'"'+String(e.zone||"").replace(/"/g,'""')+'"',e.startHour==null?"":e.startHour,'"'+String(e.note||"").replace(/"/g,'""')+'"'].join(",")).join("\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="driver-journal.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
 });
 $("jClear").addEventListener("click",()=>{if(confirm("Barcha jurnal yozuvlari oʻchirilsinmi?")){journal=[];saveJournal();renderJournal();renderHome();toast("Jurnal tozalandi")}});
@@ -887,7 +900,7 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
 document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
-$("bestGo").addEventListener("click",()=>{if(!bestPick)return;recs.unshift({t:new Date().toISOString(),zone:bestPick.z.n,score:bestPick.score,conf:bestPick.conf||null});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs))}catch(e){} gmaps(bestPick.z.lat,bestPick.z.lon)});
+$("bestGo").addEventListener("click",()=>{if(!bestPick)return;recs.unshift({t:new Date().toISOString(),zone:bestPick.z.n,score:bestPick.score,conf:bestPick.conf||null,c:{D:bestPick.D,F:bestPick.F,E:bestPick.E,W:bestPick.W,T:bestPick.T,P:bestPick.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs))}catch(e){} gmaps(bestPick.z.lat,bestPick.z.lon)});
 $("tileBestBtn").addEventListener("click",()=>{const b=$("bestCard");if(b)b.scrollIntoView({behavior:"smooth"})});
 $("camMapBtn").addEventListener("click",()=>{go("map");const ch=document.querySelector('[data-layer="cam"]');if(ch&&!ch.classList.contains("on"))ch.click()});
 $("wcRefresh").addEventListener("click",()=>refreshWC(true));
@@ -919,6 +932,60 @@ function renderAnalytics(){
       ctx.fillStyle=inkF();ctx.font="bold 10px sans-serif";ctx.textAlign="center";ctx.fillText("$"+Math.round(x.v),i*bw+bw/2,(x.v>=0?y-4:H-26));
       ctx.fillStyle="#9aa3af";ctx.font="10px sans-serif";ctx.fillText(x.d.slice(5),i*bw+bw/2,H-6);});}
   $("recList").innerHTML=recs.slice(0,10).map(r=>'<li><div class="r"><div><b>'+esc(r.zone)+'</b><div class="small">'+esc(String(r.t).slice(0,16).replace("T"," "))+' · Score '+r.score+(r.conf?" · Confidence "+r.conf+"%":"")+'</div></div><span class="badge b-est">LOG</span></div></li>').join("")||'<li class="small">Hozircha tavsiya yozuvi yoʻq — Home da GO bosing.</li>';
+  renderCal();
+}
+
+/* ================= Kalibrlash (2-bosqich) ================= */
+function entryRate(e){return e.hours>0?netOf(e.gross,e.miles,e.exp)/e.hours:null}
+function matchRecs(){
+  const base=realPerHour();if(!base)return {pairs:[],base:null};
+  const pairs=[];
+  recs.forEach(r=>{
+    const dstr=dayStr(new Date(r.t));
+    const cand=journal.filter(e=>e.date===dstr&&e.zone===r.zone&&e.hours>0);
+    if(!cand.length)return;
+    const rh=new Date(r.t).getHours();
+    cand.sort((a,b)=>{const ah=a.startHour==null?99:Math.abs(a.startHour-rh);const bh=b.startHour==null?99:Math.abs(b.startHour-rh);return ah-bh});
+    const rate=entryRate(cand[0]);
+    if(rate!=null)pairs.push({r:r,e:cand[0],rate:rate,hit:rate>=base.v});
+  });
+  return {pairs:pairs,base:base};
+}
+function pearson(xs,ys){const n=xs.length;if(n<3)return 0;const mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;let num=0,dx=0,dy=0;for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);dx+=(xs[i]-mx)*(xs[i]-mx);dy+=(ys[i]-my)*(ys[i]-my)}return (dx&&dy)?num/Math.sqrt(dx*dy):0}
+function suggestWeights(){
+  const zoned=journal.filter(e=>e.zone&&e.hours>0);
+  if(zoned.length<30)return {ok:false,reason:"Hudud belgilangan smenalar: "+zoned.length+"/30 — yana "+(30-zoned.length)+" ta kerak"};
+  const pairs=matchRecs().pairs.filter(x=>x.r.c);
+  if(pairs.length<5)return {ok:false,reason:"Komponentli tavsiya juftliklari kam ("+pairs.length+"/5) — GO bosib, o'sha hududda smena yozing"};
+  const comps=["D","F","E","W","T","P"];const out={};const rs={};
+  comps.forEach(c=>{rs[c]=pearson(pairs.map(x=>x.r.c[c]==null?0:x.r.c[c]),pairs.map(x=>x.rate))});
+  let sum=0;comps.forEach(c=>{out[c]=WEIGHTS[c]*Math.max(0.2,1+rs[c]);sum+=out[c]});
+  comps.forEach(c=>{out[c]=Math.round((out[c]/sum)*20)/20});
+  const drift=Math.round((1-comps.reduce((a,c)=>a+out[c],0))*20)/20;
+  const big=comps.reduce((a,c)=>out[c]>out[a]?c:a,"D");out[big]=Math.round((out[big]+drift)*20)/20;
+  return {ok:true,w:out,rs:rs,n:pairs.length};
+}
+function renderCal(){
+  const m=matchRecs();
+  const acc=$("accBox");
+  if(acc){
+    if(!recs.length)acc.innerHTML="Hali tavsiya yo'q — Home da GO bosing.";
+    else if(!m.pairs.length)acc.innerHTML="Tavsiyalar: "+recs.length+" ta yozilgan, lekin hali birontasi ham jurnal smenasi bilan bog'lanmadi. Bog'lanish uchun: GO bosgan hududingiz jurnal yozuvida 'Hudud' maydonida belgilanishi va sana bir xil bo'lishi kerak.";
+    else{const hits=m.pairs.filter(x=>x.hit).length;const avg=m.pairs.reduce((a,x)=>a+x.rate,0)/m.pairs.length;
+      acc.innerHTML="Bog'langan tavsiyalar: <b>"+m.pairs.length+"</b> · Aniqlik (o'rtachadan yuqori daromad): <b>"+Math.round(hits/m.pairs.length*100)+"%</b> ("+hits+"/"+m.pairs.length+")<br>Tavsiya qilingan hududlarda o'rtacha: <b>"+money(avg)+"/soat</b> · Umumiy o'rtachingiz: <b>"+money(m.base.v)+"/soat</b>"+(m.pairs.length<5?"<br><span class='med'>Namuna kichik — xulosa chiqarishga erta.</span>":"")}
+  }
+  const cal=$("calBox");if(!cal)return;
+  const cur=effW();
+  let h="<div>Amaldagi koeffitsiyentlar: D "+cur.D+" · F "+cur.F+" · E "+cur.E+" · W "+cur.W+" · T "+cur.T+" · P "+cur.P+(settings.weights?" (kalibrlangan)":" (standart)")+"</div>";
+  const sug=suggestWeights();
+  if(sug.ok){
+    h+="<div style='margin-top:6px'><b>Tavsiya etilgan koeffitsiyentlar</b> (n="+sug.n+" juftlik; korrelyatsiyalar: "+["D","F","E","W","T","P"].map(c=>c+" "+(sug.rs[c]>=0?"+":"")+sug.rs[c].toFixed(2)).join(", ")+"):<br>D "+sug.w.D+" · F "+sug.w.F+" · E "+sug.w.E+" · W "+sug.w.W+" · T "+sug.w.T+" · P "+sug.w.P+"</div><div style='margin-top:6px'><button class='ghost' id='calApply'>✔️ Tavsiyani qo'llash</button> <button class='ghost' id='calReset'>Standartga qaytarish</button></div>";
+  } else {
+    h+="<div style='margin-top:6px'>Kalibrlash holati: "+esc(sug.reason)+"</div>"+(settings.weights?"<div style='margin-top:6px'><button class='ghost' id='calReset'>Standartga qaytarish</button></div>":"");
+  }
+  cal.innerHTML=h;
+  const ap=$("calApply");if(ap)ap.addEventListener("click",()=>{settings.weights=sug.w;saveSettings();renderCal();renderHome();toast("Koeffitsiyentlar qo'llandi ✔")});
+  const rsx=$("calReset");if(rsx)rsx.addEventListener("click",()=>{settings.weights=null;saveSettings();renderCal();renderHome();toast("Standart koeffitsiyentlar qaytarildi")});
 }
 
 /* ================= Settings ================= */
@@ -929,6 +996,7 @@ function fillSettings(){
   $("sRefresh").value=String(settings.refresh);$("sNotif").value=String(settings.notif);
   document.querySelectorAll(".apref").forEach(c=>{c.checked=settings.airports.indexOf(c.value)>=0});
   const zs=$("sZone");zs.innerHTML='<option value="">— tanlanmagan —</option>'+ZONES.map(z=>'<option value="'+esc(z.n)+'">'+esc(z.n)+'</option>').join("");zs.value=settings.zone||"";
+  renderCal();
 }
 $("sSave").addEventListener("click",()=>{
   settings.name=$("sName").value.trim();settings.car=$("sCar").value.trim()||"Tesla Model Y";
@@ -955,6 +1023,8 @@ let wxTimer=null;function armWx(){if(wxTimer)clearInterval(wxTimer);wxTimer=setI
 
 /* ================= Init ================= */
 $("jDate").value=dayStr(nowNY());
+{const jz=$("jZone");if(jz)jz.innerHTML='<option value="">— belgilanmagan —</option>'+ZONES.map(z=>'<option value="'+esc(z.n)+'">'+esc(z.n)+'</option>').join("");
+const jh=$("jHour");if(jh)jh.innerHTML='<option value="">—</option>'+Array.from({length:24},(_,i)=>'<option value="'+i+'">'+String(i).padStart(2,"0")+":00</option>").join("");}
 applyTheme();fillSettings();setOnline();
 tickClock();setInterval(tickClock,30000);
 renderEventsClosures();renderParking();renderCams();

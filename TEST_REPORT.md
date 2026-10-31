@@ -77,3 +77,13 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 **Kalibrlash tuzatishi:** peakRef endi maksimum (2053.2) emas, 95-persentil (1243.8) — ertalabki ballar sun'iy past bo'lmasligi uchun.
 
 **NOT TESTED (v4.0):** iPhone fizik sinov; GPS ruxsati bilan jonli rejim; ADS-B (CORS sabab, yuqorida); offline rejimda zones.json keshdan o'qilishi.
+
+## v5.0 — 2-bosqich sinovi (2026-10-31)
+
+**Kalibrlash mantig'i (node harness, ajratilgan funksiyalar) — PASS**
+- matchRecs: sintetik 36 yozuv + 6 tavsiyada 6/6 juftlik bog'landi, aniqlik hisobi to'g'ri.
+- suggestWeights: vaznlar yig'indisi aniq 1.00; signal bo'lmasa (korrelyatsiya 0) standart vaznlar o'zgarmaydi.
+- Darvoza: 10/30 hududli smenada "yana 20 ta kerak" — taklif chiqmaydi ✔.
+- realPerHour qatlamlari: zoneHour scope ishladi (n=4).
+
+**NOT TESTED (v5.0):** brauzerda jurnal formasi (zona/soat selectlari) vizual tekshiruvi — jonli QA da qilinadi; iPhone fizik sinov.
