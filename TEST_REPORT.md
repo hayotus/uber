@@ -151,3 +151,9 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Lokal mantiq testlari 20/20 PASS: zoneScoresAt vaqt siljishi (Sat 21:30 → +3s = Sun 00:30, we[0]), patternSeries yarim tun va DST (2026-11-01 soat qaytishi — 01:00 ikki marta, devor-soat to'g'ri), zoneRates, sparkSVG, recordRecFor, hourIdx (floor).
 - Jonli QA: footer v7.0 (1 yuklashda keldi); chiplar (Hozir/+1/+2/+3) va selectlar bor; kartalar 10 → 20; 1-karta Williamsburg 43 (↗, 669 pikap/soat); +2 soat rejimida 47 ball / 855 pikap/soat ga o'zgardi; aeroport kartalarida AirLabs LIVE chiplar (LGA 44/6, EWR 88/7, JFK 109/13); ✔️ toast ishladi; Masofa saralashi Times Square (0.1 mi) ni birinchi qildi.
 - TOPILGAN XATO (v7.0): medallar "U0001F947" matni bo'lib chiqdi → v7.1 da haqiqiy emoji qo'yildi, qayta QA: 🥇🥈🥉 to'g'ri (Williamsburg 43 / Midtown 41 / Harlem 41), footer v7.1.
+
+## v8.0 — Airport Intelligence (2026-10-31, brauzer QA) — PASS
+
+- Lokal testlar ALL PASS: waveOf oraliqlari [1,1,1,0,1,1], airportScore L formulasi, monotonlik, jonli yo'q holatda renormalize, zoneRates bog'lanishi.
+- Jonli QA (2-yurinish; 1-si Pages tarqalishiga to'g'ri keldi — server fayllari md5 bilan v8.0 ekani isbotlangan): footer v8.0; banner "🏆 Hozir eng foydali: LGA — 31/100" + sabablar + ⏰ maslahat; taqqoslash jadvali (LGA 31 · EWR 23 · JFK 21 — JFK reyslari ko'p (107), lekin uzoq va piki kech (22:00) bo'lgani uchun past — ball mantiqi to'g'ri ishlayapti).
+- To'lqin ustunlari yig'indisi next60 ga mos (6+3+4+5+3+0=21); origins chiplar (Orlando ×5, Dallas ×3, Atlanta ×3); reyslar 8 qator; L·H·P chip; ✔️ toast ("LaGuardia Airport"); 24s grafik + izoh (eng kuchli soatlar, hozirgi soat reytingi, sariq ustun); LGA tabi almashadi.
