@@ -1,8 +1,8 @@
 /* NYC Driver Dashboard — Service Worker
    Asosiy interfeys va jurnal offline ishlashi uchun kesh.
    API javoblari keshlenmaydi (jonli ma'lumot eskirib qolmasligi uchun). */
-const CACHE = "driver-dash-v13";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json", "./style.css?v=81", "./app.js?v=81",
+const CACHE = "driver-dash-v14";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json", "./style.css?v=82", "./app.js?v=82",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
 self.addEventListener("install", e => {
@@ -21,6 +21,14 @@ self.addEventListener("fetch", e => {
     e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(r => {
       const cp = r.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); return r;
     })));
+    return;
+  }
+  /* Sahifa (navigatsiya) — avval tarmoq: yangi versiya darhol keladi; offline bo'lsa kesh */
+  if (e.request.mode === "navigate") {
+    e.respondWith(fetch(e.request).then(r => {
+      if (r.ok) { const cp = r.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); }
+      return r;
+    }).catch(() => caches.match(e.request)));
     return;
   }
   /* Ilova qobig'i — kesh, fonda yangilash */
