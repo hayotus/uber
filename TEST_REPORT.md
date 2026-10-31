@@ -124,3 +124,13 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Jonli brauzer QA: push dan keyin (Airports ekranida LIVE sonlar + Settings "AirLabs: OK").
 
 **NOT TESTED:** kvota tugagandagi xulq (fallback matni tayyor — "XATO — AirLabs javob bermadi" + tarixiy blok qoladi).
+
+## v6.1 — jonli QA natijasi (2026-10-31, brauzer) — PASS
+
+- Airports: JFK 118 kelayotgan / 12 yaqinda; LGA 43/6; EWR 81/9; eng yaqin reyslar ro'yxati (ft/mi) chiqdi; Settings "AirLabs (jonli reyslar): OK · 01:13 PM"; Home qatorlari mos.
+- QA topilmalari: (1) EWR da manfiy balandlik "-30 ft" — v6.2 da 0 ga qisqartirildi; (2) ikkita eskirgan "ADS-B" yorlig'i (Home tile + Airports intro) — v6.2 da AirLabs ga almashtirildi.
+
+## v6.2 — Radar uslubi (2026-10-31)
+
+- Foydalanuvchi savoli bilan tekshirildi: Radar dagi "vaqt + qayerdan" — qayerdan = AirLabs dep_iata (real), vaqt = Radar ning o'z taxminiy formulasi (masofa/tezlik + 10 daq; kod izohida ham "taxminiy"). Dashboard ga aynan shu usul, "taxminiy" yorlig'i bilan ko'chirildi.
+- Jonli QA: push dan keyin.

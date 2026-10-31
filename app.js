@@ -219,7 +219,7 @@ function renderAirports(){
     if(a){
       live='<div class="big mono">'+a.total+' <span style="font-size:14px;color:var(--mut)">ta reys kelmoqda (jonli)</span></div>'+
       '<div class="small">Yaqin atrofda (≤50 mi): <b>'+a.low+'</b> · Yangilandi: '+new Date(a.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+'</div>'+
-      (a.list.length?'<div class="small">Eng yaqin reyslar:<br>'+a.list.map(x=>esc(x.f||"—")+" · "+(x.alt!=null?Math.round(x.alt)+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"");
+      (a.list.length?'<div class="small">Eng yaqin reyslar (qoʻnish vaqti — taxminiy, masofa/tezlikdan):<br>'+a.list.map(x=>esc(x.f||"—")+" · "+esc(cityOf(x.dep))+" · ~"+new Date(x.eta).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+" · "+(x.alt!=null?Math.max(0,Math.round(x.alt))+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"");
     } else {
       live='<div class="med">Jonli maʼlumot hali yoʻq</div><div class="small">AirLabs soʻrovi kutilmoqda yoki javob bermadi — tarixiy naqsh pastda.</div>';
     }
@@ -271,6 +271,55 @@ function loadZoneWx(){
     renderHome();
   }).catch(()=>{});
 }
+const CITY = {
+    ABQ: 'Albukerke', ACA: 'Akapulko', AGS: 'Augusta', AKL: 'Oklend', ALB: 'Olbeni',
+    AMS: 'Amsterdam', ANC: 'Ankorij', ANU: 'Antigua', ASE: 'Aspen', ATL: 'Atlanta',
+    AUA: 'Aruba', AUH: 'Abu-Dabi', AUS: 'Ostin', AVL: 'Eshvill', BDL: 'Hartford',
+    BGR: 'Bangor', BGI: 'Barbados', BIL: 'Billings', BIS: 'Bismark', BKK: 'Bangkok',
+    BLR: 'Bangalor', BNA: 'Nashvill', BOD: 'Bordo', BOG: 'Bogota', BOI: 'Boyse',
+    BOM: 'Mumbay', BOS: 'Boston', BRU: 'Bryussel', BTR: 'Baton-Ruj', BUD: 'Budapesht',
+    BUF: 'Buffalo', BUR: 'Burbank', BWI: 'Baltimor', BZN: 'Bozeman', CAE: 'Kolambiya',
+    CAI: 'Qohira', CAN: 'Guanchjou', CCS: 'Karakas', CDG: 'Parij', CGK: 'Jakarta',
+    CHS: 'Charleston', CID: 'Sidar-Repids', CLE: 'Klivlend', CLT: 'Sharlotta', CMH: 'Kolambus',
+    CPH: 'Kopengagen', CRW: 'Charleston', CUN: 'Kankun', CUR: 'Kyurasao', CVG: 'Sinsinnati',
+    DAL: 'Dallas', DAY: 'Deyton', DCA: 'Vashington', DEL: 'Dehli', DEN: 'Denver',
+    DFW: 'Dallas', DOH: 'Doha', DSM: 'De-Moyn', DTW: 'Detroit', DUB: 'Dublin',
+    DXB: 'Dubay', EDI: 'Edinburg', EGE: 'Veyl', ELP: 'El-Paso', EWR: 'Nyuark',
+    EZE: 'Buenos-Ayres', FAI: 'Ferbenks', FAR: 'Fargo', FAT: 'Fresno', FCO: 'Rim',
+    FLL: 'Fort-Loderdeyl', FRA: 'Frankfurt', GDL: 'Gvadalaxara', GEG: 'Spokan', GEO: 'Jorjtaun',
+    GIG: 'Rio-de-Janeyro', GRR: 'Grand-Repids', GRU: 'San-Paulu', GUA: 'Gvatemala', GVA: 'Jeneva',
+    HAV: 'Gavana', HDN: 'Hayden', HEL: 'Xelsinki', HKG: 'Gonkong', HNL: 'Gonolulu',
+    HOU: 'Hyuston', HSV: 'Xantsvill', HYD: 'Haydarobod', IAD: 'Vashington', IAH: 'Hyuston',
+    ICN: 'Seul', ICT: 'Uichita', IND: 'Indianapolis', IST: 'Istanbul', ITO: 'Hilo',
+    JAC: 'Jekson', JAN: 'Jekson', JAX: 'Jeksonvill', JED: 'Jidda', JFK: 'Nyu-York',
+    JNB: 'Yoxannesburg', KBP: 'Kiyev', KEF: 'Reykyavik', KIN: 'Kingston', KOA: 'Kona',
+    KUL: 'Kuala-Lumpur', LAS: 'Las-Vegas', LAX: 'Los-Anjeles', LBB: 'Labbok', LCA: 'Larnaka',
+    LGA: 'Nyu-York', LHR: 'London', LGW: 'London', LIH: 'Lixue', LIM: 'Lima',
+    LIS: 'Lissabon', LIT: 'Litl-Rok', LUX: 'Lyuksemburg', MAA: 'Chennay', MAD: 'Madrid',
+    MAN: 'Manchester', MBJ: 'Montego-Bey', MCI: 'Kanzas-Siti', MCO: 'Orlando', MDW: 'Chikago',
+    MEL: 'Melburn', MEM: 'Memfis', MEX: 'Mexiko', MFE: 'Makallen', MGA: 'Managua',
+    MIA: 'Mayami', MKE: 'Miluoki', MLA: 'Malta', MNL: 'Manila', MOB: 'Mobil',
+    MSP: 'Minneapolis', MSY: 'Yangi Orlean', MTJ: 'Montrouz', MUC: 'Myunxen', MXP: 'Milan',
+    MYR: 'Mertl-Bich', NAP: 'Neapol', NAS: 'Nassau', NRT: 'Tokio', HND: 'Tokio',
+    OAK: 'Oukland', OGG: 'Kaxului', OKC: 'Oklaxoma-Siti', OMA: 'Omaxa', ORD: 'Chikago',
+    ORF: 'Norfolk', OSL: 'Oslo', OTP: 'Buxarest', PBI: 'Vest-Palm-Bich', PDX: 'Portlend',
+    PEK: 'Pekin', PHL: 'Filadelfiya', PHX: 'Finiks', PIA: 'Peoriya', PIE: 'Sent-Pitersburg',
+    PIT: 'Pitsburg', PLS: 'Providensiales', POS: 'Port-of-Speyn', PRG: 'Praga', PSP: 'Palm-Springs',
+    PTY: 'Panama', PUJ: 'Punta-Kana', PVG: 'Shanxay', PWM: 'Portlend', RDU: 'Roli',
+    RIC: 'Richmond', RNO: 'Reno', RSW: 'Fort-Mayers', RUH: 'Ar-Riyod', SAL: 'San-Salvador',
+    SAN: 'San-Diego', SAT: 'San-Antonio', SAV: 'Savanna', SBA: 'Santa-Barbara', SCL: 'Santyago',
+    SDQ: 'Santo-Domingo', SEA: 'Sietl', SFO: 'San-Fransisko', SGF: 'Springfild', SIN: 'Singapur',
+    SJC: 'San-Xose', SJO: 'San-Xose', SLC: 'Solt-Leyk-Siti', SMF: 'Sakramento', SNA: 'Santa-Ana',
+    SOF: 'Sofiya', SRQ: 'Sarasota', STL: 'Sent-Luis', STI: 'Santyago', STS: 'Santa-Roza',
+    SUN: 'San-Valli', SXM: 'Sen-Marten', SYD: 'Sidney', SYR: 'Sirakuza', TLV: 'Tel-Aviv',
+    TPA: 'Tampa', TPE: 'Taypey', TRI: 'Tri-Sitiz', TUL: 'Talsa', TUS: 'Tukson',
+    TVC: 'Travers-Siti', UIO: 'Kito', VCE: 'Venetsiya', VIE: 'Vena', VPS: 'Fort-Uolton',
+    WAW: 'Varshava', XNA: 'Fayettvill', YEG: 'Edmonton', YHZ: 'Galifaks', YOW: 'Ottava',
+    YQB: 'Kvebek', YUL: 'Monreal', YVR: 'Vankuver', YYC: 'Kalgari', YYZ: 'Toronto',
+    ZRH: 'Syurix'
+  };
+function cityOf(code){if(!code)return "—";return (CITY[code]?CITY[code]+" ("+code+")":code)}
+function etaMs(dMi,sp,alt,now){const km=dMi*1.60934;if(km<30)return now+8*60000;const v=(sp&&sp>0)?sp:(alt>10000?800:400);return now+(km/v*60+10)*60000}
 function loadLiveFlights(force){
   const now=Date.now();
   if(!force&&now-liveTs<600000)return;
@@ -279,7 +328,7 @@ function loadLiveFlights(force){
     const fl=(j&&j.response)||[];
     AIRPORTS.forEach(ap=>{
       const enr=fl.filter(f=>f.arr_iata===ap.code&&(f.status==="en-route"||f.status==="active")&&typeof f.lat==="number"&&typeof f.lng==="number");
-      const list=enr.map(f=>({f:f.flight_iata||"—",alt:(typeof f.alt==="number"?f.alt:null),d:hav(ap.lat,ap.lon,f.lat,f.lng)})).sort((a,b)=>a.d-b.d);
+      const list=enr.map(f=>{const d=hav(ap.lat,ap.lon,f.lat,f.lng);return {f:f.flight_iata||"—",alt:(typeof f.alt==="number"?f.alt:null),d:d,dep:f.dep_iata||"",eta:etaMs(d,f.speed,f.alt,now)}}).sort((a,b)=>a.d-b.d);
       const near=list.filter(x=>x.d<=50).length;
       adsb[ap.code]={ts:now,total:enr.length,low:near,list:list.slice(0,5)};
     });
