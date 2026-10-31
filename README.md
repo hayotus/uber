@@ -7,6 +7,7 @@ Jonli sayt: **https://hayotus.github.io/uber/** · Case12 uber dashboard
 
 ## Versiyalar
 
+- **v4.0 (2026-10-30) — 1-bosqich: haqiqiy ma'lumot.** Qo'lda yozilgan talab ballari (d/f/e) olib tashlandi — talab endi **NYC TLC HVFHS** real safarlaridan hisoblangan `zones.json` dan olinadi (pastda "Ma'lumot manbai" bo'limi). `perHour = 16 + score*0.52` uydirma formulasi o'chirildi: $/soat faqat foydalanuvchi jurnalidagi real smenalardan ko'rsatiladi, bo'lmasa "ma'lumot yo'q". Aeroport seed-random modeli o'chirildi — o'rniga jonli **ADS-B (adsb.lol, LIVE)** + TLC tarixiy oqim (HISTORICAL); uydirma navbat/kutish raqamlari yo'q. Ob-havo komponenti zona koordinatasi bo'yicha (Open-Meteo ko'p nuqtali so'rov), yo'l komponenti faqat faol yopilish radiusi ichidagi zonalarga ta'sir qiladi. Events/Closures aniq start/end oynalariga ega; eskirgan tadbirlar avtomatik yashiriladi. HOUR_MULT o'chirildi — soatlik naqsh ma'lumotning o'zidan (ish kuni / dam olish kuni alohida).
 - **v3.0 (2026-10-30)** — Master Development Prompt bo'yicha professional darajaga ko'tarildi: Tesla uslubidagi dark tema (Settings da Light variant ham bor), 9 ekran (Home, Map, Airports, Demand, Menu, Tools, Analytics, Settings, Journal), Smart Engine confidence + 2-variant + tavsiya logi, Journal tahrirlash/filtr, to'liq Settings, API holati paneli, offline indikatori.
 - **v2.0 (2026-10-30)** — yorug' redesign (konsept skrinshoti asosida). Endi Settings → Tema → Light orqali tanlanadi.
 - **v1.0 (2026-10-30)** — 16 modulli birinchi to'liq versiya (eski HTML5 UP shablon-stub o'rniga).
@@ -21,13 +22,13 @@ Bitta `index.html` (200 KB dan kichik) ichida aniq qatlamlar:
 4. **UI modullari** — har biri alohida funksiya: DemandModule (heatmap/reyting), AirportModule, EarningsModule, EventsModule, ClosuresModule, JournalModule, VoiceModule, WeatherModule, CameraModule, RestroomModule, ParkingModule, ChargingModule, FlightModule, AnalyticsModule, SettingsModule.
 5. **Storage** — `localStorage`: `drv_settings`, `drv_journal`, `drv_recs`. Server yo'q, ma'lumot qurilmadan chiqmaydi.
 
-PWA yordamchilari: `manifest.json`, `sw.js` (kesh: driver-dash-v3), `icon.svg`.
+PWA yordamchilari: `manifest.json`, `sw.js` (kesh: driver-dash-v4; Leaflet + zones.json ham keshlanadi), `icon.svg`.
 
 ## Ekranlar
 
 - **Home (Main Display)** — GPS hudud, talab, katta soat, ob-havo, Best Next Location + sabablar, Bugun gross/net/net-soat, Smart Score + Confidence + 2-variant, Airport activity, Demand mini-xarita, Hotspot TOP 5, Main navigation.
 - **Map** — Leaflet qatlamlari: Talab, Kameralar, Zaryadlash, Hojatxona, Yomg'ir radari (RainViewer), Yopilishlar.
-- **Airports** — Queue Monitor (ESTIMATED) + Flight Arrival Predictor grafigi.
+- **Airports** — Airport Monitor: jonli ADS-B (LIVE) + TLC tarixiy oqim kartalari + keyingi 6 soat oqim grafigi (HISTORICAL).
 - **Demand** — Smart Engine tafsiloti + Hotspot Ranking jadvali.
 - **Menu** — barcha 16 modul panjarasi.
 - **Tools** — Earnings Calculator, Events, Closures, Voice, Weather, Camera, Restroom, Parking, EV Charging panellari.
@@ -66,3 +67,20 @@ iPhone Safari → saytni ochish → Share → **Add to Home Screen**. Standalone
 ## Sinov
 
 `TEST_REPORT.md` — funksiya kesimida PASS / FAIL / NOT TESTED ro'yxati (halol holat bilan).
+
+## Ma'lumot manbai — zones.json (TLC)
+
+`zones.json` qo'lda yozilmaydi. Uni `tools/build_zones.py` quradi:
+
+- **Manba:** NYC Open Data (Socrata API) — *2025 High Volume FHV Trip Data*, dataset `nt46-nv3c` — ya'ni TLC e'lon qiladigan Uber/Lyft safarlari. Zona ID lari TLC `taxi_zone_lookup.csv` dan tekshirilgan.
+- **Davr:** 2025-09-01..2025-09-28 (4 to'liq hafta: 20 ish kuni + 8 dam olish kuni).
+- **Hisob:** har bir ilova-zonasi = bir nechta TLC LocationID yig'indisi (xarita skript ichida). Har zona uchun `wd[24]` (ish kuni) va `we[24]` (dam olish) — o'rtacha pikap/soat; `daily` — o'rtacha kunlik pikap; `peakRef` — normalash uchun global pik.
+- **EWR (Newark, ID=1):** NJ hududi bo'lgani uchun HVFHS da pikap deyarli yo'q — EWR uchun **dropoff** soni ishlatiladi (skriptda va shu yerda ochiq yozilgan).
+- **Yangilash:** `python3 tools/build_zones.py` (faqat standart kutubxona; ixtiyoriy `SOCRATA_APP_TOKEN` tezlashtiradi). Fayl ~10 KB.
+- Bu **tarixiy naqsh** — jonli talab emas; ilovada HISTORICAL deb belgilanadi.
+
+## Parvozlar — ADS-B
+
+- **adsb.lol** (kalitsiz, ochiq ADS-B jamoat tarmog'i): aeroport atrofidagi jonli samolyotlar, past balandlikdagilar soni, eng yaqin reyslar ro'yxati — LIVE.
+- Tekshirilib ishlamaganlari: **OpenSky** anonim API (yetib bo'lmadi + anonim kirish yopilgan), **FAA status** endpointi (yetib bo'lmadi). Ular ishlatilmaydi.
+- Uber ichki navbat/surge ochiq emas — ilova uni uydirmaydi.

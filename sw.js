@@ -1,8 +1,8 @@
 /* NYC Driver Dashboard — Service Worker
    Asosiy interfeys va jurnal offline ishlashi uchun kesh.
    API javoblari keshlenmaydi (jonli ma'lumot eskirib qolmasligi uchun). */
-const CACHE = "driver-dash-v3";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg",
+const CACHE = "driver-dash-v4";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
 self.addEventListener("install", e => {
@@ -15,7 +15,7 @@ self.addEventListener("fetch", e => {
   const u = new URL(e.request.url);
   if (e.request.method !== "GET") return;
   /* API chaqiriqlar — tarmoq avval (jonli ma'lumot) */
-  if (u.hostname.indexOf("open-meteo.com") >= 0 || u.hostname.indexOf("overpass-api.de") >= 0 || u.hostname.indexOf("rainviewer.com") >= 0) return;
+  if (u.hostname.indexOf("open-meteo.com") >= 0 || u.hostname.indexOf("overpass-api.de") >= 0 || u.hostname.indexOf("rainviewer.com") >= 0 || u.hostname.indexOf("adsb.lol") >= 0) return;
   if (u.hostname.indexOf("arcgisonline.com") >= 0) {
     /* Xarita tile'lari — kesh avval */
     e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(r => {

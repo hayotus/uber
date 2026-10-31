@@ -123,7 +123,7 @@ canvas.wx{width:100%;height:70px;display:block}
 
   <div class="tiles">
     <button class="tile" id="tileBestBtn"><div class="t"><span style="color:var(--grn)">◎</span>Best Location</div><div class="v" id="tileBest">—</div><div class="s">Estimated opportunity</div></button>
-    <button class="tile" data-go="airports"><div class="t"><span style="color:var(--blu)">✈️</span>Airports</div><div class="v">JFK · LGA · EWR</div><div class="s">Flights and queue estimates</div></button>
+    <button class="tile" data-go="airports"><div class="t"><span style="color:var(--blu)">✈️</span>Airports</div><div class="v">JFK · LGA · EWR</div><div class="s">Jonli ADS-B + TLC tarixiy</div></button>
     <button class="tile" data-go="journal"><div class="t"><span style="color:var(--grn)">💳</span>Earnings</div><div class="v mono" id="todayEarn">$0</div><div class="s">Today's net earnings</div></button>
     <button class="tile" data-go="tools" data-mod="modClose"><div class="t"><span style="color:var(--amb)">⚠️</span>Road Alerts</div><div class="v" id="alertVal">Live</div><div class="s">Closures and incidents</div></button>
   </div>
@@ -159,7 +159,7 @@ canvas.wx{width:100%;height:70px;display:block}
   </div>
 
   <div class="card">
-    <h3>Airport activity <span class="badge b-est">ESTIMATED</span></h3>
+    <h3>Airport activity <span class="badge b-live">LIVE</span> <span class="badge b-hist">HISTORICAL</span></h3>
     <div id="homeAirports" class="small">Yuklanmoqda…</div>
   </div>
 
@@ -182,7 +182,7 @@ canvas.wx{width:100%;height:70px;display:block}
   </div>
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
-  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v3.0 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v4.0 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -204,10 +204,10 @@ canvas.wx{width:100%;height:70px;display:block}
 
 <!-- ============ AIRPORTS ============ -->
 <section id="view-airports" class="view">
-  <div class="card"><h3>Airport Queue Monitor <span class="badge b-est">ESTIMATED</span></h3><div class="small">JFK · LGA · EWR — kelishlar ritmi boʻyicha taxminiy navbat va kutish. Uber/Lyft ichki navbat raqamlari ochiq maʼlumot emas.</div></div>
+  <div class="card"><h3>Airport Monitor <span class="badge b-live">LIVE</span></h3><div class="small">JFK · LGA · EWR — jonli ADS-B faollik (adsb.lol) va TLC tarixiy oqim. Uber/Lyft ichki navbat raqamlari ochiq maʼlumot emas — bu yerda uydirma navbat/kutish koʻrsatilmaydi.</div></div>
   <div id="apCards"></div>
   <div class="card">
-    <h3>Flight Arrival Predictor <span class="badge b-est">ESTIMATED</span></h3>
+    <h3>Aeroport oqimi — keyingi 6 soat <span class="badge b-hist">HISTORICAL</span></h3>
     <div class="chips" id="apTabs">
       <button class="chip on" data-ap="JFK">JFK</button>
       <button class="chip" data-ap="LGA">LGA</button>
@@ -215,14 +215,14 @@ canvas.wx{width:100%;height:70px;display:block}
     </div>
     <canvas class="wx" id="flightChart" width="680" height="140"></canvas>
     <div class="small" id="flightNote"></div>
-    <div class="src">Kelishlar ritmi boʻyicha taxminiy model. Aniq reyslar uchun aeroport/aviakompaniya ilovasini tekshiring. Uber/Lyft ichki navbati ochiq maʼlumot emas — kutish vaqti taxminiy.</div>
+    <div class="src">Grafik: TLC HVFHS 2025-09 tarixiy oʻrtacha pikap oqimi — kelgan yoʻlovchilarning aeroportdan chiqish proksi. Jonli samolyotlar yuqoridagi ADS-B (LIVE) blokida. Aniq reyslar uchun aviakompaniya ilovasini tekshiring.</div>
   </div>
 </section>
 
 <!-- ============ DEMAND ============ -->
 <section id="view-demand" class="view">
-  <div class="card"><h3>Demand &amp; Smart Intelligence</h3><div class="small">Talab xaritasi (HISTORICAL), hududlar reytingi va Smart Engine tafsiloti. Jonli Uber talabi ochiq emas — barcha baholar belgilangan model asosida.</div></div>
-<details class="mod" id="modHot"><summary><span>🏆 NYC Hotspot Ranking</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="hotList"></div><div class="src">Ball: talab, masofa va kutilayotgan $/soat boʻyicha. Smart Engine hisoblaydi.</div></div></details>
+  <div class="card"><h3>Demand &amp; Smart Intelligence</h3><div class="small">Talab xaritasi (HISTORICAL), hududlar reytingi va Smart Engine tafsiloti. Talab — TLC HVFHS tarixiy maʼlumotidan (zones.json); ball — ochiq komponentlar modeli. Jonli Uber talabi ochiq emas.</div></div>
+<details class="mod" id="modHot"><summary><span>🏆 NYC Hotspot Ranking</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="hotList"></div><div class="src">Ball: TLC tarixiy talab, jonli ob-havo (zona boʻyicha), faol tadbir/yopilish oynalari va masofa. $/soat faqat jurnalingizdan olinadi.</div></div></details>
 
   <details class="mod" id="modSmart"><summary><span>🧠 Smart Driver Intelligence</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="smartBox"></div><div class="src">Formula: Score = 0.30·Talab + 0.20·Reyslar + 0.15·Tadbirlar + 0.15·Ob-havo + 0.10·Yoʻl + 0.10·Masofa. Koeffitsiyentlar boshlangʻich — real natijalar bilan sozlanadi.</div></div></details>
 
@@ -233,7 +233,7 @@ canvas.wx{width:100%;height:70px;display:block}
   <div class="card"><h3>Main Menu — barcha 16 modul</h3><div class="small">Har bir modul o'z ekrani yoki panelini ochadi.</div></div>
   <div class="mgrid">
     <button class="mtile" data-go="demand"><span class="ic">🔥</span><div class="n">1. Demand Heatmap</div><div class="s">TLC tarixiy talab xaritasi</div></button>
-    <button class="mtile" data-go="airports"><span class="ic">✈️</span><div class="n">2. Airport Queue Monitor</div><div class="s">JFK · LGA · EWR (ESTIMATED)</div></button>
+    <button class="mtile" data-go="airports"><span class="ic">✈️</span><div class="n">2. Airport Monitor</div><div class="s">JFK · LGA · EWR (LIVE + HISTORICAL)</div></button>
     <button class="mtile" data-go="home"><span class="ic">◎</span><div class="n">3. Best Next Location</div><div class="s">Smart tavsiya — Home ekrani</div></button>
     <button class="mtile" data-go="tools" data-mod="modEarn"><span class="ic">💵</span><div class="n">4. Earnings Calculator</div><div class="s">Sof foyda hisoblagichi</div></button>
     <button class="mtile" data-go="tools" data-mod="modEvents"><span class="ic">🎉</span><div class="n">5. Events &amp; Surge Forecast</div><div class="s">Tadbirlar (ESTIMATED)</div></button>
@@ -247,7 +247,7 @@ canvas.wx{width:100%;height:70px;display:block}
     <button class="mtile" data-go="tools" data-mod="modRest"><span class="ic">🚻</span><div class="n">13. Restroom &amp; Rest Stop</div><div class="s">OSM jonli + zaxira</div></button>
     <button class="mtile" data-go="tools" data-mod="modPark"><span class="ic">🅿️</span><div class="n">14. Parking Assistant</div><div class="s">ASP va garajlar</div></button>
     <button class="mtile" data-go="tools" data-mod="modEv"><span class="ic">⚡</span><div class="n">15. EV Charging Assistant</div><div class="s">Zaryadlash stansiyalari</div></button>
-    <button class="mtile" data-go="airports"><span class="ic">🛬</span><div class="n">16. Flight Arrival Predictor</div><div class="s">Kelishlar modeli (ESTIMATED)</div></button>
+    <button class="mtile" data-go="airports"><span class="ic">🛬</span><div class="n">16. Aeroport oqimi grafigi</div><div class="s">TLC tarixiy (HISTORICAL)</div></button>
     <button class="mtile" data-go="analytics"><span class="ic">📊</span><div class="n">Analytics</div><div class="s">Statistika va tavsiyalar tarixi</div></button>
     <button class="mtile" data-go="settings"><span class="ic">⚙️</span><div class="n">Settings</div><div class="s">Profil, avtomobil, tema, API holati</div></button>
   </div>
@@ -257,7 +257,7 @@ canvas.wx{width:100%;height:70px;display:block}
 <section id="view-tools" class="view">
   <div class="card"><h3>Barcha modullar — 16</h3>
     <div class="small" style="line-height:2">
-    1. Demand Heatmap (Xarita) · 2. Airport Queue Monitor (Airports) · 3. Best Next Location (Home) · 4. Earnings Calculator · 5. Events &amp; Surge Forecast · 6. Road Closure Monitor · 7. Driver Journal · 8. Voice Assistant · 9. Smart Driver Intelligence · 10. Hotspot Ranking · 11. Weather &amp; Rain Radar · 12. Speed &amp; Traffic Camera · 13. Restroom &amp; Rest Stop · 14. Parking Assistant · 15. EV Charging Assistant · 16. Flight Arrival Predictor (Airports)
+    1. Demand Heatmap (Xarita) · 2. Airport Monitor (Airports) · 3. Best Next Location (Home) · 4. Earnings Calculator · 5. Events &amp; Surge Forecast · 6. Road Closure Monitor · 7. Driver Journal · 8. Voice Assistant · 9. Smart Driver Intelligence · 10. Hotspot Ranking · 11. Weather &amp; Rain Radar · 12. Speed &amp; Traffic Camera · 13. Restroom &amp; Rest Stop · 14. Parking Assistant · 15. EV Charging Assistant · 16. Aeroport oqimi (Airports)
     </div></div>
   <details class="mod" id="modEvents"><summary><span>🎉 Events &amp; Surge Forecast</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><ul class="list" id="eventList"></ul><div class="src">Uber ichki surge maʼlumoti ochiq emas — koʻpaytiruvchi faqat taxmin. Tadbir jadvalini rasmiy manbadan tekshiring.</div></div></details>
 
@@ -354,7 +354,7 @@ canvas.wx{width:100%;height:70px;display:block}
     <div class="src">Sozlamalar faqat shu qurilmada (localStorage) saqlanadi. Maxfiy kalitlar saqlanmaydi.</div>
   </div>
   <div class="card"><h3>API ulanish holati</h3><div id="apiStat" class="small">Tekshirilmagan</div>
-    <div class="src">Barcha manbalar kalitsiz va ochiq: Open-Meteo, RainViewer, OpenStreetMap (Overpass), Esri tiles. Uber ichki maʼlumoti (navbat/surge) API orqali berilmaydi — modellar ESTIMATED deb belgilanadi.</div>
+    <div class="src">Barcha manbalar kalitsiz va ochiq: Open-Meteo, RainViewer, OpenStreetMap (Overpass), Esri tiles, adsb.lol (ADS-B jonli), NYC Open Data — TLC HVFHS (zones.json). Uber ichki maʼlumoti (navbat/surge) berilmaydi — uydirma raqamlar koʻrsatilmaydi.</div>
   </div>
   <div class="card"><h3>Maʼlumot va maxfiylik</h3>
     <div class="frow"><button class="ghost" id="sExport">⬇️ Eksport (JSON)</button><button class="ghost" id="sWipe">🗑️ Barcha lokal maʼlumotni oʻchirish</button></div>
@@ -407,53 +407,49 @@ function hav(a,b,c,d){const R=3958.8,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,s=M
 function inkF(){return document.documentElement.getAttribute("data-theme")==="light"?"#111214":"#f4f6f8"}
 function money(n){return "$"+(Math.round(n*100)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function nowNY(){return new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}))}
-function seedRand(seed){let x=seed%2147483647;if(x<=0)x+=2147483646;return()=> (x=x*16807%2147483647)/2147483647}
 function gmaps(lat,lon){window.open("https://www.google.com/maps/dir/?api=1&destination="+lat+","+lon,"_blank")}
 
 /* ================= Data ================= */
 /* TLC tarixiy talab balli (0-100) — HISTORICAL */
 const ZONES=[
-{n:"Midtown Manhattan",lat:40.7549,lon:-73.9840,d:95,f:30,e:85},
-{n:"Times Square / Theater",lat:40.7590,lon:-73.9845,d:92,f:25,e:95},
-{n:"Grand Central / Midtown East",lat:40.7527,lon:-73.9772,d:90,f:30,e:70},
-{n:"Penn Station / Hudson Yards",lat:40.7505,lon:-73.9934,d:88,f:35,e:75},
-{n:"Financial District",lat:40.7075,lon:-74.0113,d:85,f:25,e:55},
-{n:"Chelsea / Meatpacking",lat:40.7420,lon:-74.0064,d:78,f:15,e:70},
-{n:"SoHo / Tribeca",lat:40.7233,lon:-74.0020,d:76,f:15,e:60},
-{n:"East Village / LES",lat:40.7265,lon:-73.9815,d:74,f:10,e:65},
-{n:"Upper East Side",lat:40.7736,lon:-73.9566,d:72,f:20,e:40},
-{n:"Upper West Side",lat:40.7870,lon:-73.9754,d:70,f:20,e:40},
-{n:"Downtown Brooklyn",lat:40.6930,lon:-73.9870,d:68,f:20,e:55},
-{n:"Williamsburg",lat:40.7081,lon:-73.9571,d:66,f:10,e:60},
-{n:"Harlem",lat:40.8116,lon:-73.9465,d:62,f:15,e:35},
-{n:"Astoria",lat:40.7720,lon:-73.9301,d:58,f:25,e:30},
-{n:"Flushing",lat:40.7670,lon:-73.8331,d:55,f:20,e:30},
-{n:"Yankee Stadium / S. Bronx",lat:40.8296,lon:-73.9262,d:52,f:10,e:45},
-{n:"JFK Airport",lat:40.6413,lon:-73.7781,d:80,f:100,e:20,ap:"JFK"},
-{n:"LaGuardia Airport",lat:40.7769,lon:-73.8740,d:78,f:90,e:15,ap:"LGA"},
-{n:"Newark Airport (EWR)",lat:40.6895,lon:-74.1745,d:70,f:85,e:10,ap:"EWR"},
-{n:"St. George / SI Ferry",lat:40.6437,lon:-74.0736,d:42,f:15,e:25}
+{n:"Midtown Manhattan",lat:40.7549,lon:-73.9840,type:"office"},
+{n:"Times Square / Theater",lat:40.7590,lon:-73.9845,type:"nightlife"},
+{n:"Grand Central / Midtown East",lat:40.7527,lon:-73.9772,type:"office"},
+{n:"Penn Station / Hudson Yards",lat:40.7505,lon:-73.9934,type:"office"},
+{n:"Financial District",lat:40.7075,lon:-74.0113,type:"office"},
+{n:"Chelsea / Meatpacking",lat:40.7420,lon:-74.0064,type:"nightlife"},
+{n:"SoHo / Tribeca",lat:40.7233,lon:-74.0020,type:"nightlife"},
+{n:"East Village / LES",lat:40.7265,lon:-73.9815,type:"nightlife"},
+{n:"Upper East Side",lat:40.7736,lon:-73.9566,type:"residential"},
+{n:"Upper West Side",lat:40.7870,lon:-73.9754,type:"residential"},
+{n:"Downtown Brooklyn",lat:40.6930,lon:-73.9870,type:"office"},
+{n:"Williamsburg",lat:40.7081,lon:-73.9571,type:"nightlife"},
+{n:"Harlem",lat:40.8116,lon:-73.9465,type:"residential"},
+{n:"Astoria",lat:40.7720,lon:-73.9301,type:"residential"},
+{n:"Flushing",lat:40.7670,lon:-73.8331,type:"residential"},
+{n:"Yankee Stadium / S. Bronx",lat:40.8296,lon:-73.9262,type:"residential"},
+{n:"JFK Airport",lat:40.6413,lon:-73.7781,type:"airport",ap:"JFK"},
+{n:"LaGuardia Airport",lat:40.7769,lon:-73.8740,type:"airport",ap:"LGA"},
+{n:"Newark Airport (EWR)",lat:40.6895,lon:-74.1745,type:"airport",ap:"EWR"},
+{n:"St. George / SI Ferry",lat:40.6437,lon:-74.0736,type:"residential"}
 ];
-const HOUR_MULT=[.45,.35,.30,.35,.50,.75,1.0,1.15,1.10,.85,.80,.85,.90,.85,.85,.90,1.05,1.20,1.15,1.0,.95,.90,.80,.60];
 const AIRPORTS=[
-{code:"JFK",name:"John F. Kennedy Intl",lat:40.6413,lon:-73.7781,size:1.0,term:"T4 va T8 eng band",base:46},
-{code:"LGA",name:"LaGuardia",lat:40.7769,lon:-73.8740,size:.82,term:"Terminal B asosiy oqim",base:38},
-{code:"EWR",name:"Newark Liberty Intl",lat:40.6895,lon:-74.1745,size:.88,term:"Terminal A va C",base:40}
+{code:"JFK",name:"John F. Kennedy Intl",lat:40.6413,lon:-73.7781,term:"T4 va T8 eng band"},
+{code:"LGA",name:"LaGuardia",lat:40.7769,lon:-73.8740,term:"Terminal B asosiy oqim"},
+{code:"EWR",name:"Newark Liberty Intl",lat:40.6895,lon:-74.1745,term:"Terminal A va C"}
 ];
-const ARR_PAT=[.08,.05,.04,.05,.10,.22,.42,.58,.66,.72,.78,.84,.88,.86,.84,.88,.94,1.0,.97,.90,.82,.70,.48,.25];
 const EVENTS=[
-{n:"Village Halloween Parade",place:"6th Ave, Greenwich Village",lat:40.7312,lon:-74.0000,date:"2026-10-31",time:"19:00–23:00",surge:2.2},
-{n:"NYC Marathon 2026",place:"5 borough boʻylab",lat:40.7720,lon:-73.9300,date:"2026-11-01",time:"08:00–18:00",surge:1.8,note:"Koʻplab koʻchalar yopiladi — marshrutni oldindan rejalang"},
-{n:"Broadway shoulari tugashi",place:"Times Square",lat:40.7590,lon:-73.9845,date:"",time:"har kuni ≈22:30",surge:1.5},
-{n:"MSG tadbir kechalari",place:"Madison Square Garden",lat:40.7505,lon:-73.9934,date:"",time:"≈19:00–23:00",surge:1.7,note:"Oʻyin/konsert jadvalini tekshiring"},
-{n:"Barclays Center tadbirlari",place:"Atlantic Ave, Brooklyn",lat:40.6826,lon:-73.9754,date:"",time:"≈19:00–23:00",surge:1.6,note:"Oʻyin/konsert jadvalini tekshiring"},
-{n:"Radio City / Rockefeller",place:"6th Ave, Midtown",lat:40.7600,lon:-73.9800,date:"",time:"kechki",surge:1.4}
+{n:"Village Halloween Parade",place:"6th Ave, Greenwich Village",lat:40.7312,lon:-74.0000,start:"2026-10-31T19:00",end:"2026-10-31T23:30",surge:2.2},
+{n:"NYC Marathon 2026",place:"5 borough boʻylab",lat:40.7720,lon:-73.9300,start:"2026-11-01T08:00",end:"2026-11-01T18:00",surge:1.8,note:"Koʻplab koʻchalar yopiladi — marshrutni oldindan rejalang"},
+{n:"Broadway shoulari tugashi",place:"Times Square",lat:40.7590,lon:-73.9845,daily:[21.5,23.5],surge:1.5},
+{n:"MSG tadbir kechalari",place:"Madison Square Garden",lat:40.7505,lon:-73.9934,surge:null,note:"Jadval oʻzgaruvchan — aniq vaqt yoʻq, ballga taʼsir qilmaydi"},
+{n:"Barclays Center tadbirlari",place:"Atlantic Ave, Brooklyn",lat:40.6826,lon:-73.9754,surge:null,note:"Jadval oʻzgaruvchan — aniq vaqt yoʻq, ballga taʼsir qilmaydi"},
+{n:"Radio City / Rockefeller",place:"6th Ave, Midtown",lat:40.7600,lon:-73.9800,surge:null,note:"Mavsumiy jadval — ballga taʼsir qilmaydi"}
 ];
 const CLOSURES=[
-{n:"NYC Marathon marshruti (1-noyabr)",place:"Verrazzano, 4th Ave (Brooklyn), Queensboro Bridge, 5th Ave",date:"2026-11-01",sev:"Yuqori"},
-{n:"BQE (I-278) qurilish ishlari",place:"Brooklyn Heights atrofida davriy torayishlar",date:"",sev:"Oʻrtacha"},
-{n:"FDR Drive davriy tungi ishlar",place:"Manhattan East Side, tungi soatlarda qisman",date:"",sev:"Past"},
-{n:"Hafta oxiri koʻcha yarmarkalari",place:"Manhattan va Brooklyn markaziy koʻchalari",date:"",sev:"Oʻrtacha"}
+{n:"NYC Marathon marshruti yopilishlari",place:"Verrazzano, 4th Ave (Brooklyn), Queensboro Bridge, 5th Ave",lat:40.7300,lon:-73.9950,radiusKm:9,sev:"Yuqori",start:"2026-11-01T05:00",end:"2026-11-01T20:00"},
+{n:"BQE (I-278) qurilish ishlari",place:"Brooklyn Heights atrofida davriy torayishlar",lat:40.7000,lon:-73.9900,radiusKm:4,sev:"Oʻrtacha",start:null,end:null},
+{n:"FDR Drive davriy tungi ishlar",place:"Manhattan East Side, tungi soatlarda qisman",lat:40.7300,lon:-73.9750,radiusKm:3.5,sev:"Past",start:null,end:null}
 ];
 const CAMS_FB=[
 {n:"Queens Blvd",lat:40.7431,lon:-73.9223},{n:"Northern Blvd",lat:40.7623,lon:-73.9186},{n:"Atlantic Ave",lat:40.6892,lon:-73.9855},
@@ -482,35 +478,61 @@ const ASP_OFF=["2026-01-01","2026-01-19","2026-02-16","2026-05-25","2026-06-19",
 /* ================= State & Settings ================= */
 const DEF_POS={lat:40.7580,lon:-73.9855}; /* Times Square — GPS kelguncha */
 let pos=null, wxData=null, rainProb3h=0;
+let ZD=null, zoneWx={}, adsb={}, lastRPH=null;
 let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,airports:["JFK","LGA","EWR"],zone:""};
 try{const s=JSON.parse(localStorage.getItem("drv_settings")||"null");if(s)settings=Object.assign(settings,s)}catch(e){}
 function saveSettings(){localStorage.setItem("drv_settings",JSON.stringify(settings))}
 function applyTheme(){document.documentElement.setAttribute("data-theme",settings.theme==="light"?"light":"dark")}
 function distTxt(mi){return settings.units==="km"?(mi*1.60934).toFixed(1)+" km":mi.toFixed(1)+" mi"}
 function spdTxt(mph){return settings.speed==="kmh"?Math.round(mph*1.60934)+" km/h":mph+" mph"}
-const apiStat={weather:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
+const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
 let lastCalcAt=null;
-function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
+function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>ADS-B adsb.lol (jonli): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
 function userLat(){return pos?pos.lat:DEF_POS.lat}
 function userLon(){return pos?pos.lon:DEF_POS.lon}
 
 /* ================= Smart Driver Intelligence (Modul 9) ================= */
+/* zones.json — TLC HVFHS 2025-09 tarixiy naqsh (tools/build_zones.py) */
+function isWE(){const d=nowNY().getDay();return d===0||d===6}
+function zdata(name){if(!ZD)return null;return ZD.zones.find(z=>z.name===name)||null}
+function patternRaw(z){const zd=zdata(z.n);if(!zd)return null;return (isWE()?zd.we:zd.wd)[nowNY().getHours()]}
+function apZoneName(code){return code==="JFK"?"JFK Airport":code==="LGA"?"LaGuardia Airport":"Newark Airport (EWR)"}
+function airportD(code){const zd=zdata(apZoneName(code));if(!zd||!ZD)return null;const raw=(isWE()?zd.we:zd.wd)[nowNY().getHours()];return Math.min(100,raw/ZD.meta.peakRef*100)}
+function evWin(ev){const now=nowNY();
+  if(ev.daily){const s=new Date(now);s.setHours(0,0,0,0);s.setMinutes(Math.round(ev.daily[0]*60));const e=new Date(now);e.setHours(0,0,0,0);e.setMinutes(Math.round(ev.daily[1]*60));return {s:s,e:e}}
+  if(ev.start&&ev.end)return {s:new Date(ev.start),e:new Date(ev.end)};
+  return null}
+function evState(ev){const w=evWin(ev);if(!w)return "info";const now=nowNY();if(now>w.e)return "past";if(now>=new Date(w.s.getTime()-2*3600e3))return "active";return "later"}
+function clActive(c){if(!c.start||!c.end)return false;const now=nowNY();return now>=new Date(c.start)&&now<=new Date(c.end)}
+function realPerHour(){const es=journal.filter(e=>e.hours>0);if(!es.length)return null;let tn=0,th=0;es.forEach(e=>{tn+=netOf(e.gross,e.miles,e.exp);th+=e.hours});if(th<=0)return null;return {v:tn/th,n:es.length}}
+const WEIGHTS={D:0.30,F:0.20,E:0.15,W:0.15,T:0.10,P:0.10};
+const SEVP={"Yuqori":26,"Oʻrtacha":14,"Past":6};
 function zoneScores(){
-  const h=nowNY().getHours();
-  const mult=HOUR_MULT[h];
-  const wBoost=Math.min(25,rainProb3h*0.35); /* yomgʻir — talab oshadi */
+  const peakRef=ZD?ZD.meta.peakRef:0;
+  const apD={JFK:airportD("JFK"),LGA:airportD("LGA"),EWR:airportD("EWR")};
   return ZONES.map(z=>{
     const dist=hav(userLat(),userLon(),z.lat,z.lon);
-    const D=Math.min(100,z.d*mult)+ (z.ap?0:wBoost*0.6);
-    const F=z.f*(0.7+0.5*ARR_PAT[h]);
-    let E=z.e*0.5;
-    EVENTS.forEach(ev=>{const dd=hav(z.lat,z.lon,ev.lat,ev.lon);if(dd<1.2)E=Math.max(E,Math.min(100,(ev.surge-1)*90))});
-    let T=92;CLOSURES.forEach(c=>{if(c.sev==="Yuqori")T-=6});
+    const raw=patternRaw(z);
+    const D=(raw!=null&&peakRef)?Math.min(100,raw/peakRef*100):null;
+    let F=0;
+    if(z.ap){F=apD[z.ap]!=null?apD[z.ap]:0}
+    else{AIRPORTS.forEach(ap=>{if(apD[ap.code]==null)return;const dd=hav(z.lat,z.lon,ap.lat,ap.lon);const v=apD[ap.code]*Math.max(0,1-dd/28);if(v>F)F=v})}
+    let E=0;
+    EVENTS.forEach(ev=>{if(!ev.surge)return;if(evState(ev)!=="active")return;const dd=hav(z.lat,z.lon,ev.lat,ev.lon);if(dd<1.9)E=Math.max(E,Math.min(100,(ev.surge-1)*110*(1-dd/2.2)))});
+    const zwx=zoneWx[z.n];
+    const wBase=(zwx!=null)?zwx:(wxData?rainProb3h:null);
+    const sens=z.type==="nightlife"?0.55:z.type==="airport"?0.5:z.type==="office"?0.4:0.3;
+    const W=(wBase!=null)?Math.max(15,Math.min(98,45+wBase*sens)):55;
+    let T=88;
+    CLOSURES.forEach(c=>{if(!clActive(c))return;const dd=hav(z.lat,z.lon,c.lat,c.lon);if(dd<c.radiusKm)T-=(SEVP[c.sev]||6)*(1-dd/c.radiusKm)});
+    T=Math.max(5,Math.min(95,T));
     let P=Math.max(5,100-dist*7);if(settings.zone&&settings.zone===z.n)P=Math.min(100,P+6);
-    const score=Math.round(0.30*Math.min(100,D)+0.20*F+0.15*E+0.15*(50+wBoost*2)+0.10*T+0.10*P);
-    const perHour=Math.round((16+score*0.52)*100)/100;
+    let acc=0,wsum=0;
+    const comps=[["D",D],["F",F],["E",E],["W",W],["T",T],["P",P]];
+    comps.forEach(function(kv){if(kv[1]==null)return;acc+=WEIGHTS[kv[0]]*kv[1];wsum+=WEIGHTS[kv[0]]});
+    const score=wsum?Math.round(acc/wsum):0;
     const etaMin=Math.max(2,Math.round(dist*3.2));
-    return {z,dist,score,D:Math.round(Math.min(100,D)),F:Math.round(F),E:Math.round(E),W:Math.round(50+wBoost*2),T,P:Math.round(P),perHour,etaMin};
+    return {z:z,dist:dist,score:score,D:D==null?null:Math.round(D),F:Math.round(F),E:Math.round(E),W:Math.round(W),T:Math.round(T),P:Math.round(P),raw:raw,etaMin:etaMin};
   }).sort((a,b)=>b.score-a.score);
 }
 function demandLabel(v){return v>=75?'<span class="hi">HIGH</span>':v>=50?'<span class="med">MEDIUM</span>':'<span class="low">LOW</span>'}
@@ -522,19 +544,19 @@ function renderHome(){
   $("curZoneSub").textContent=pos?("Eng yaqin hududgacha "+distTxt(nz.d)+" · GPS faol"):"GPS ruxsati berilsa aniq hudud koʻrinadi";
   const sc=zoneScores();
   const cur=sc.find(s=>s.z===nz.z)||sc[0];
-  $("curDemand").innerHTML=demandLabel(cur.D)+' <span style="font-size:14px;color:var(--mut)">'+cur.D+"/100</span>";
+  $("curDemand").innerHTML=cur.D==null?'<span class="med">Maʼlumot yoʻq</span>':demandLabel(cur.D)+' <span style="font-size:14px;color:var(--mut)">'+cur.D+"/100</span>";
   bestPick=sc[0];
   const tb=$("tileBest");if(tb)tb.textContent=bestPick.z.n.replace(" Airport","");
   const av=$("alertVal");if(av)av.textContent=CLOSURES.length+" ta ogohlantirish";
   $("bestName").textContent=bestPick.z.n;
-  $("bestMeta").textContent="Ball "+bestPick.score+"/100 · "+distTxt(bestPick.dist)+" · ≈"+bestPick.etaMin+" daq yoʻl · taxminiy "+money(bestPick.perHour)+"/soat";
+  lastRPH=realPerHour();$("bestMeta").textContent="Ball "+bestPick.score+"/100 · "+distTxt(bestPick.dist)+" · ≈"+bestPick.etaMin+" daq yoʻl · "+(lastRPH?("Real oʻrtacha: "+money(lastRPH.v)+"/soat (jurnal, "+lastRPH.n+" smena)"):"Real $/soat: maʼlumot yoʻq");
   lastCalcAt=nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-  let conf=58;if(pos)conf+=20;if(wxData)conf+=12;if(sc.length>1&&(sc[0].score-sc[1].score)<5)conf-=10;if(rainProb3h>0)conf+=3;
+  let conf=58;if(pos)conf+=20;if(wxData)conf+=12;if(!ZD)conf-=18;if(!Object.keys(zoneWx).length)conf-=6;if(bestPick.D==null)conf-=10;if(sc.length>1&&(sc[0].score-sc[1].score)<5)conf-=10;if(rainProb3h>0)conf+=3;
   bestPick.conf=Math.max(30,Math.min(95,conf));
   const hs=$("homeScore");if(hs)hs.textContent=bestPick.score;
   const hc2=$("homeConf");if(hc2)hc2.textContent=bestPick.conf+"%";
   const hsec=$("homeSecond");if(hsec&&sc[1])hsec.textContent=sc[1].z.n.replace(" Airport","");
-  const hf=$("homeFresh");if(hf)hf.textContent="Yangilandi: "+lastCalcAt+" · Confidence "+bestPick.conf+"% ("+(pos?"GPS bor":"GPS yoʻq")+", "+(wxData?"ob-havo jonli":"ob-havo kutilmoqda")+")";
+  const hf=$("homeFresh");if(hf)hf.textContent="Yangilandi: "+lastCalcAt+" · Confidence "+bestPick.conf+"% ("+(pos?"GPS bor":"GPS yoʻq")+", "+(wxData?"ob-havo jonli":"ob-havo kutilmoqda")+", "+(ZD?"TLC tarixiy yuklangan":"TLC yuklanmagan")+")";
   const rs=[];
   if(bestPick.D>=70)rs.push("Tarixiy talab koʻrsatkichi yuqori ("+bestPick.D+")");
   if(bestPick.F>=60)rs.push("Reyslar oqimi kuchli — aeroport faktori "+bestPick.F);
@@ -543,13 +565,15 @@ function renderHome(){
   if(bestPick.dist<=3)rs.push("Hozirgi joydan borish qulay");
   if(!rs.length)rs.push("Balanslangan variant: talab va masofa uygʻunligi eng yaxshi");
   $("bestReasons").innerHTML="<b>Nima uchun bu joy?</b><br>• "+rs.map(esc).join("<br>• ");
-  $("hotTop").innerHTML=sc.slice(0,5).map((s,i)=>'<div class="r" style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)"><span>'+(i+1)+". "+esc(s.z.n)+'</span><b class="mono">'+s.score+" · "+money(s.perHour)+"/soat</b></div>").join("");
-  renderHotList(sc);renderSmart(sc);
+  $("hotTop").innerHTML=sc.slice(0,5).map((s,i)=>'<div class="r" style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)"><span>'+(i+1)+". "+esc(s.z.n)+'</span><b class="mono">'+s.score+" · "+(s.raw!=null?Math.round(s.raw)+" pikap/s":"—")+"</b></div>").join("");
+  renderHotList(sc);renderSmart(sc);renderEventsClosures();
 }
 /* Hotspot Ranking (Modul 10) */
 function renderHotList(sc){
-  $("hotList").innerHTML='<table><tr><th>#</th><th>Hudud</th><th>Talab</th><th>Masofa</th><th>$/soat*</th><th>Ball</th></tr>'+
-  sc.map((s,i)=>"<tr><td>"+(i+1)+"</td><td>"+esc(s.z.n)+"</td><td>"+s.D+"</td><td>"+distTxt(s.dist)+"</td><td>"+money(s.perHour)+"</td><td><b>"+s.score+"</b></td></tr>").join("")+"</table><div class='small'>* Taxminiy baho, kafolat emas. Confidence Demand ekranidagi Smart kartada.</div>";
+  const rph=lastRPH||realPerHour();
+  $("hotList").innerHTML='<table><tr><th>#</th><th>Hudud</th><th>Talab</th><th>TLC pikap/soat</th><th>Masofa</th><th>Ball</th></tr>'+
+  sc.map((s,i)=>"<tr><td>"+(i+1)+"</td><td>"+esc(s.z.n)+"</td><td>"+(s.D==null?"—":s.D)+"</td><td>"+(s.raw!=null?Math.round(s.raw):"—")+"</td><td>"+distTxt(s.dist)+"</td><td><b>"+s.score+"</b></td></tr>").join("")+"</table>"+
+  "<div class='small'>TLC pikap/soat — tarixiy oʻrtacha (TLC HVFHS, 2025-09). Real $/soat (jurnalingiz): "+(rph?("<b>"+money(rph.v)+"/soat</b> ("+rph.n+" smena)"):"<b>maʼlumot yoʻq</b> — jurnalga smena qoʻshing")+".</div>";
 }
 /* Smart breakdown */
 function renderSmart(sc){
@@ -557,56 +581,87 @@ function renderSmart(sc){
   const row=(n,v)=>"<div class='small' style='display:flex;justify-content:space-between'><span>"+n+"</span><b>"+v+"</b></div><div class='bar'><i style='width:"+Math.min(100,v)+"%'></i></div>";
   $("smartBox").innerHTML="<div class='mid'>Eng kuchli tavsiya: "+esc(s.z.n)+" — "+s.score+"/100</div>"+
    row("Talab (D) ×0.30",s.D)+row("Reyslar (F) ×0.20",s.F)+row("Tadbirlar (E) ×0.15",s.E)+row("Ob-havo (W) ×0.15",s.W)+row("Yoʻl holati (T) ×0.10",s.T)+row("Masofa mosligi (P) ×0.10",s.P)+
-   "<div class='small'>Taxminiy daromad: "+money(s.perHour)+"/soat · borish ≈"+s.etaMin+" daq ("+distTxt(s.dist)+") · Confidence: "+(bestPick&&bestPick.conf?bestPick.conf+"%":"—")+"</div>";
+   "<div class='small'>Real $/soat: "+(lastRPH?money(lastRPH.v)+" (jurnal, "+lastRPH.n+" smena)":"maʼlumot yoʻq")+" · borish ≈"+s.etaMin+" daq ("+distTxt(s.dist)+") · Confidence: "+(bestPick&&bestPick.conf?bestPick.conf+"%":"—")+"</div>";
 }
 
 /* ================= Airports (Modul 2 + 16) ================= */
-function airportModel(ap){
-  const t=nowNY(),h=t.getHours();
-  const rnd=seedRand(t.getFullYear()*10000+(t.getMonth()+1)*100+t.getDate());
-  const hours=[];
-  for(let i=0;i<6;i++){
-    const hh=(h+i)%24;
-    const arr=Math.round(ap.base*ARR_PAT[hh]*(0.92+rnd()*0.16));
-    hours.push({h:hh,arr});
-  }
-  const arrNow=hours[0].arr;
-  const wait=Math.round(6+arrNow*0.55+(ap.code==="JFK"?6:ap.code==="EWR"?3:0));
-  const queue=arrNow>=42?"Yuqori":arrNow>=26?"Oʻrtacha":"Past";
-  return {hours,arrNow,wait,queue};
-}
+/* ================= Airports (Modul 2 + 16) — LIVE ADS-B + TLC tarixiy ================= */
+let curAp="JFK";
 function renderAirports(){
+  const h=nowNY().getHours();
   $("apCards").innerHTML=AIRPORTS.map(ap=>{
-    const m=airportModel(ap);
-    const qc=m.queue==="Yuqori"?"hi":m.queue==="Oʻrtacha"?"med":"low";
-    return '<div class="card"><h3>✈️ '+ap.code+" — "+esc(ap.name)+' <span class="badge b-est">ESTIMATED</span></h3>'+
-    '<div class="big mono">'+m.arrNow+' <span style="font-size:14px;color:var(--mut)">reys/soat (kelish)</span></div>'+
-    '<div class="small">Taxminiy kutish: <b>'+m.wait+' daq</b> · Navbat holati: <span class="'+qc+'">'+m.queue+'</span></div>'+
+    const a=adsb[ap.code];
+    const zd=zdata(apZoneName(ap.code));
+    const arr=zd?(isWE()?zd.we:zd.wd):null;
+    const raw=arr?arr[h]:null;
+    const peak=arr?Math.max.apply(null,arr):null;
+    let live;
+    if(a){
+      live='<div class="big mono">'+a.total+' <span style="font-size:14px;color:var(--mut)">samolyot atrofda (25 nm)</span></div>'+
+      '<div class="small">Pastda (&lt;6000 ft): <b>'+a.low+'</b> · Yangilandi: '+new Date(a.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+'</div>'+
+      (a.list.length?'<div class="small">'+a.list.map(x=>esc(x.f||"—")+" · "+(x.alt!=null?Math.round(x.alt)+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"");
+    } else {
+      live='<div class="med">Jonli manba mavjud emas</div><div class="small">adsb.lol hali javob bermadi yoki yetib boʻlmadi. Tarixiy naqsh pastda.</div>';
+    }
+    return '<div class="card"><h3>✈️ '+ap.code+" — "+esc(ap.name)+'</h3>'+
+    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">LIVE</span> ADS-B (adsb.lol, kalitsiz)</div>'+live+
+    '<div class="small" style="margin-top:8px"><span class="badge b-hist">HISTORICAL</span> TLC 2025-09: hozirgi soatda oʻrtacha '+(raw!=null?("<b>"+Math.round(raw)+" pikap</b>/soat"):"—")+" · kun pik: "+(peak!=null?Math.round(peak):"—")+" pikap/soat</div>"+
     '<div class="small">'+esc(ap.term)+'</div>'+
     '<button class="go" onclick="gmaps('+ap.lat+","+ap.lon+')">📍 Google Maps — aeroportga</button>'+
-    '<div class="src">Yangilandi: '+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+' · Model: kelishlar ritmi. Uber ichki navbati ochiq emas.</div></div>';
+    '<div class="src">Uber ichki navbati/surge ochiq emas — bu yerda faqat ochiq manbalar: jonli ADS-B va TLC tarixi. Navbat/kutish raqamlari uydirilmaydi.</div></div>';
   }).join("");
   drawFlights(curAp);
   const ha=$("homeAirports");
-  if(ha)ha.innerHTML=AIRPORTS.filter(ap=>settings.airports.indexOf(ap.code)>=0).map(ap=>{const m=airportModel(ap);return "<b>"+ap.code+"</b>: "+m.arrNow+" reys/soat · kutish ≈"+m.wait+" daq · navbat "+esc(m.queue)}).join("<br>")||"Sozlamalarda aeroport tanlanmagan";
+  if(ha)ha.innerHTML=AIRPORTS.filter(ap=>settings.airports.indexOf(ap.code)>=0).map(ap=>{
+    const a=adsb[ap.code];const zd=zdata(apZoneName(ap.code));const raw=zd?(isWE()?zd.we:zd.wd)[h]:null;
+    return "<b>"+ap.code+"</b>: "+(a?("jonli "+a.total+" samolyot · pastda "+a.low):"jonli maʼlumot yoʻq")+" · tarixiy oqim "+(raw!=null?Math.round(raw)+" pikap/soat":"—");
+  }).join("<br>")||"Sozlamalarda aeroport tanlanmagan";
 }
-let curAp="JFK";
 function drawFlights(code){
-  const ap=AIRPORTS.find(a=>a.code===code);const m=airportModel(ap);
-  const cv=$("flightChart"),ctx=cv.getContext("2d");const W=cv.width,H=cv.height;
-  ctx.clearRect(0,0,W,H);const mx=Math.max.apply(null,m.hours.map(x=>x.arr))*1.15||1;
-  const bw=W/m.hours.length;
-  m.hours.forEach((x,i)=>{
-    const bh=(H-34)*(x.arr/mx);
+  const zd=zdata(apZoneName(code));
+  const cv=$("flightChart");if(!cv)return;const ctx=cv.getContext("2d");const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  if(!zd){$("flightNote").textContent="TLC maʼlumoti (zones.json) hali yuklanmadi.";return}
+  const arr=isWE()?zd.we:zd.wd;const h=nowNY().getHours();const hrs=[];
+  for(let i=0;i<6;i++)hrs.push({h:(h+i)%24,v:arr[(h+i)%24]});
+  const mx=Math.max.apply(null,hrs.map(x=>x.v))*1.15||1;const bw=W/hrs.length;
+  hrs.forEach((x,i)=>{
+    const bh=(H-34)*(x.v/mx);
     ctx.fillStyle=i===0?"#22c55e":"#3b82f6";
     ctx.fillRect(i*bw+10,H-22-bh,bw-20,bh);
     ctx.fillStyle=inkF();ctx.font="bold 12px sans-serif";ctx.textAlign="center";
-    ctx.fillText(x.arr,i*bw+bw/2,H-28-bh);
+    ctx.fillText(Math.round(x.v),i*bw+bw/2,H-28-bh);
     ctx.fillStyle="#6f7278";ctx.font="11px sans-serif";
     ctx.fillText(String(x.h).padStart(2,"0")+":00",i*bw+bw/2,H-6);
   });
-  const peak=m.hours.reduce((a,b)=>b.arr>a.arr?b:a);
-  $("flightNote").textContent=code+": keyingi 6 soatda eng kuchli kelish toʻlqini ≈ "+String(peak.h).padStart(2,"0")+":00 ("+peak.arr+" reys/soat, taxminiy). Yoʻlovchi oqimi shu soatda eng yuqori boʻladi.";
+  const peak=hrs.reduce((a,b)=>b.v>a.v?b:a);
+  $("flightNote").textContent=code+": keyingi 6 soatda eng kuchli oqim ≈ "+String(peak.h).padStart(2,"0")+":00 ("+Math.round(peak.v)+" pikap/soat, TLC tarixiy oʻrtacha). Bu — kelgan yoʻlovchilarning aeroportdan chiqish oqimi proksi; reyslar jadvali emas.";
+}
+/* ================= Maʼlumot yuklagichlar (TLC / zona ob-havo / ADS-B) ================= */
+function loadZones(){
+  fetchT("zones.json",9000).then(r=>r.json()).then(j=>{ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
+  .catch(()=>{apiStat.zones="XATO — zones.json yuklanmadi (talab: maʼlumot yoʻq)";renderApiStat()});
+}
+function loadZoneWx(){
+  const lats=ZONES.map(z=>z.lat).join(","),lons=ZONES.map(z=>z.lon).join(",");
+  const u="https://api.open-meteo.com/v1/forecast?latitude="+lats+"&longitude="+lons+"&hourly=precipitation_probability&forecast_days=1&timezone=America%2FNew_York";
+  fetchT(u,12000).then(r=>r.json()).then(j=>{
+    const arr=Array.isArray(j)?j:[j];const h=nowNY().getHours();
+    arr.forEach((w,i)=>{if(!ZONES[i]||!w||!w.hourly||!w.hourly.precipitation_probability)return;const pp=w.hourly.precipitation_probability;zoneWx[ZONES[i].n]=Math.max(pp[h]||0,pp[h+1]||0,pp[h+2]||0)});
+    renderHome();
+  }).catch(()=>{});
+}
+function loadAdsb(){
+  AIRPORTS.forEach(ap=>{
+    fetchT("https://api.adsb.lol/v2/point/"+ap.lat+"/"+ap.lon+"/25",12000).then(r=>r.json()).then(j=>{
+      const ac=j.ac||[];
+      const list=ac.filter(a=>a.lat&&a.lon).map(a=>({f:(a.flight||a.r||"").trim(),alt:(typeof a.alt_baro==="number"?a.alt_baro:null),d:hav(ap.lat,ap.lon,a.lat,a.lon)})).sort((x,y)=>x.d-y.d);
+      const low=ac.filter(a=>typeof a.alt_baro==="number"&&a.alt_baro<6000).length;
+      adsb[ap.code]={ts:Date.now(),total:ac.length,low:low,list:list.slice(0,5)};
+      apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+      renderApiStat();renderAirports();
+    }).catch(()=>{apiStat.adsb="XATO — adsb.lol yetib boʻlmadi";renderApiStat()});
+  });
 }
 
 /* ================= Weather (Modul 11) ================= */
@@ -643,9 +698,9 @@ const layerGroups={};
 function tiles(){return L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Esri, OpenStreetMap",maxZoom:18})}
 function heatCircles(target){
   const g=L.layerGroup();const sc=zoneScores();
-  sc.forEach(s=>{const col=s.D>=75?"#ef4444":s.D>=50?"#f5b301":"#22c55e";
-    L.circle([s.z.lat,s.z.lon],{radius:500+s.D*14,color:col,weight:1,fillColor:col,fillOpacity:.32}).addTo(g)
-     .bindPopup("<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy): "+s.D+"/100<br>Ball: "+s.score+" · ≈"+money(s.perHour)+"/soat");});
+  sc.forEach(s=>{const col=s.D==null?"#9ca3af":s.D>=75?"#ef4444":s.D>=50?"#f5b301":"#22c55e";
+    L.circle([s.z.lat,s.z.lon],{radius:500+(s.D||0)*14,color:col,weight:1,fillColor:col,fillOpacity:.32}).addTo(g)
+     .bindPopup("<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy): "+(s.D==null?"\u2014":s.D)+"/100<br>Ball: "+s.score+(s.raw!=null?" \u00b7 TLC: "+Math.round(s.raw)+" pikap/soat":""));});
   return g;
 }
 function initMaps(){
@@ -653,8 +708,8 @@ function initMaps(){
   map=L.map("map").setView([userLat(),userLon()],12);tiles().addTo(map);
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();
-  CAMS_FB.forEach(c=>L.marker([c.lat,c.lon]).addTo(layerGroups.cam).bindPopup("📷 Kamera — "+esc(c.n)+"<br><span>OSM maʼlumoti</span>"));
-  CLOSURES.forEach(c=>{ if(c.place&&EVENTS[1]&&c.n.indexOf("Marathon")>=0)L.marker([40.7720,-73.9300]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n))});
+  CAMS_FB.forEach(c=>L.marker([c.lat,c.lon]).addTo(layerGroups.cam).bindPopup("📷 Kamera — "+esc(c.n)+"<br><span>Taxminiy nuqta — OSM tekshiruvi 3-bosqichda</span>"));
+  CLOSURES.forEach(c=>{ if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))});
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
   mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);
   heatHome=heatCircles(mapHome);heatHome.addTo(mapHome);
@@ -707,14 +762,19 @@ function renderCams(){
   $("camList").innerHTML=listHTML(distSort(CAMS_FB),"📷");
 }
 function renderEventsClosures(){
-  const today=nowNY().toISOString().slice(0,10);
-  $("eventList").innerHTML=EVENTS.map(ev=>{
-    const when=ev.date?(ev.date===today?"BUGUN":ev.date):"har kuni";
-    return '<li><div class="r"><div><b>'+esc(ev.n)+'</b><div class="small">'+esc(ev.place)+" · "+esc(ev.time)+" · "+esc(when)+'</div>'+(ev.note?'<div class="small">'+esc(ev.note)+'</div>':'')+'</div><span class="med mono">×'+ev.surge+'</span></div></li>';
-  }).join("");
-  $("closeList").innerHTML=CLOSURES.map(c=>'<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place)+(c.date?" · "+esc(c.date):"")+'</div></div><span class="'+(c.sev==="Yuqori"?"hi":c.sev==="Oʻrtacha"?"med":"low")+'">'+esc(c.sev)+'</span></div></li>').join("")+
+  const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  const evs=EVENTS.map(ev=>({ev:ev,st:evState(ev),w:evWin(ev)})).filter(x=>x.st!=="past");
+  $("eventList").innerHTML=evs.map(x=>{const ev=x.ev;
+    const stTxt=x.st==="active"?'<span class="hi">FAOL</span>':x.st==="later"?'<span class="med">KEYINROQ</span>':'<span class="med">INFO</span>';
+    const when=x.w?(fmtD(x.w.s)+" → "+fmtD(x.w.e)):"aniq vaqt yoʻq";
+    return '<li><div class="r"><div><b>'+esc(ev.n)+'</b><div class="small">'+esc(ev.place)+" · "+esc(when)+'</div>'+(ev.note?'<div class="small">'+esc(ev.note)+'</div>':'')+'</div><div style="text-align:right">'+stTxt+(ev.surge?'<div class="med mono">×'+ev.surge+'</div>':'')+'</div></div></li>';
+  }).join("")||'<li class="small">Yaqin tadbirlar yoʻq.</li>';
+  $("closeList").innerHTML=CLOSURES.map(c=>{const act=clActive(c);
+    const when=c.start?(fmtD(new Date(c.start))+" → "+fmtD(new Date(c.end))):"muddat aniqlanmagan — ballga taʼsir qilmaydi";
+    return '<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place)+" · "+esc(when)+'</div></div><span class="'+(c.sev==="Yuqori"?"hi":c.sev==="Oʻrtacha"?"med":"low")+'">'+(act?"FAOL · ":"")+esc(c.sev)+'</span></div></li>'}).join("")+
    '<li class="small">Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a> va 511NY ilovasi.</li>';
 }
+
 function renderParking(){
   const t=nowNY();const ds=t.toISOString().slice(0,10);const dow=t.getDay();
   const off=ASP_OFF.indexOf(ds)>=0;
@@ -901,7 +961,9 @@ renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
+loadZones();loadZoneWx();loadAdsb();
 loadWeather();armWx();
+setInterval(loadAdsb,300000);setInterval(loadZoneWx,1800000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 </script>
