@@ -115,3 +115,12 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Test yozuvi tozalandi. (QA brauzeri localStorage dagi 1 ta test tavsiya yozuvi o'sha profilning o'zida qoladi — foydalanuvchi telefoniga ta'siri yo'q.)
 
 **NOT TESTED (yakuniy holat):** iPhone fizik sinov, PWA Home Screen o'rnatish, offline qayta ishga tushirish, IDB dan tiklash yo'li (localStorage tozalangan holat), CSV eksport tugmasini bosish — barchasi foydalanuvchi qurilmasida tekshirilishi kerak.
+
+## v6.1 — AirLabs integratsiyasi (2026-10-31)
+
+- Server tomondan API tekshiruvi: kalit ishlaydi (free, muddat 2026-11-24, qolgan limit ~939/1000). Javob: 9,189 reys; sinov paytida JFK 120, LGA 44, EWR 82 ta kelayotgan (en-route).
+- **Topilma:** bepul /flights javobida arr_time/arr_estimated maydonlari YO'Q (faqat pozitsiya: lat/lng/alt/speed/status). Shunga moslab LIVE blok: kelayotgan reyslar soni + ≤50 mi yaqindagilar + eng yaqin 5 (ft/masofa). Vaqt asosidagi "qo'nishlar" ko'rsatilmaydi — uydirma bo'lardi.
+- Throttle: 10 daqiqa (kvota Radar bilan umumiy). SW da airlabs.co tarmoq-only.
+- Jonli brauzer QA: push dan keyin (Airports ekranida LIVE sonlar + Settings "AirLabs: OK").
+
+**NOT TESTED:** kvota tugagandagi xulq (fallback matni tayyor — "XATO — AirLabs javob bermadi" + tarixiy blok qoladi).

@@ -96,9 +96,10 @@ function saveSettings(){localStorage.setItem("drv_settings",JSON.stringify(setti
 function applyTheme(){document.documentElement.setAttribute("data-theme",settings.theme==="light"?"light":"dark")}
 function distTxt(mi){return settings.units==="km"?(mi*1.60934).toFixed(1)+" km":mi.toFixed(1)+" mi"}
 function spdTxt(mph){return settings.speed==="kmh"?Math.round(mph*1.60934)+" km/h":mph+" mph"}
+const AIRLABS_KEY="e47a4224-471e-4631-8e57-67aea417485e";
 const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
 let lastCalcAt=null;
-function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>ADS-B adsb.lol (jonli): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
+function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
 function userLat(){return pos?pos.lat:DEF_POS.lat}
 function userLon(){return pos?pos.lon:DEF_POS.lon}
 
@@ -204,7 +205,7 @@ function renderSmart(sc){
 }
 
 /* ================= Airports (Modul 2 + 16) ================= */
-/* ================= Airports (Modul 2 + 16) — LIVE ADS-B + TLC tarixiy ================= */
+/* ================= Airports (Modul 2 + 16) — LIVE AirLabs + TLC tarixiy ================= */
 let curAp="JFK";
 function renderAirports(){
   const h=nowNY().getHours();
@@ -216,24 +217,24 @@ function renderAirports(){
     const peak=arr?Math.max.apply(null,arr):null;
     let live;
     if(a){
-      live='<div class="big mono">'+a.total+' <span style="font-size:14px;color:var(--mut)">samolyot atrofda (25 nm)</span></div>'+
-      '<div class="small">Pastda (&lt;6000 ft): <b>'+a.low+'</b> · Yangilandi: '+new Date(a.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+'</div>'+
-      (a.list.length?'<div class="small">'+a.list.map(x=>esc(x.f||"—")+" · "+(x.alt!=null?Math.round(x.alt)+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"");
+      live='<div class="big mono">'+a.total+' <span style="font-size:14px;color:var(--mut)">ta reys kelmoqda (jonli)</span></div>'+
+      '<div class="small">Yaqin atrofda (≤50 mi): <b>'+a.low+'</b> · Yangilandi: '+new Date(a.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+'</div>'+
+      (a.list.length?'<div class="small">Eng yaqin reyslar:<br>'+a.list.map(x=>esc(x.f||"—")+" · "+(x.alt!=null?Math.round(x.alt)+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"");
     } else {
-      live='<div class="med">Jonli manba mavjud emas</div><div class="small">adsb.lol brauzerdan toʻgʻridan-toʻgʻri ochilmaydi (CORS) — jonli ADS-B hozircha ishlamaydi. Tarixiy naqsh pastda.</div>';
+      live='<div class="med">Jonli maʼlumot hali yoʻq</div><div class="small">AirLabs soʻrovi kutilmoqda yoki javob bermadi — tarixiy naqsh pastda.</div>';
     }
     return '<div class="card"><h3>✈️ '+ap.code+" — "+esc(ap.name)+'</h3>'+
-    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">LIVE</span> ADS-B (adsb.lol, kalitsiz)</div>'+live+
+    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">LIVE</span> AirLabs — jonli reyslar (Radar loyihasidagi manba)</div>'+live+
     '<div class="small" style="margin-top:8px"><span class="badge b-hist">HISTORICAL</span> TLC 2025-09: hozirgi soatda oʻrtacha '+(raw!=null?("<b>"+Math.round(raw)+" pikap</b>/soat"):"—")+" · kun pik: "+(peak!=null?Math.round(peak):"—")+" pikap/soat</div>"+
     '<div class="small">'+esc(ap.term)+'</div>'+
     '<button class="go" onclick="gmaps('+ap.lat+","+ap.lon+')">📍 Google Maps — aeroportga</button>'+
-    '<div class="src">Uber ichki navbati/surge ochiq emas — bu yerda faqat ochiq manbalar: jonli ADS-B va TLC tarixi. Navbat/kutish raqamlari uydirilmaydi.</div></div>';
+    '<div class="src">Uber ichki navbati/surge ochiq emas — bu yerda faqat ochiq manbalar: AirLabs jonli reyslar va TLC tarixi. Navbat/kutish raqamlari uydirilmaydi.</div></div>';
   }).join("");
   drawFlights(curAp);
   const ha=$("homeAirports");
   if(ha)ha.innerHTML=AIRPORTS.filter(ap=>settings.airports.indexOf(ap.code)>=0).map(ap=>{
     const a=adsb[ap.code];const zd=zdata(apZoneName(ap.code));const raw=zd?(isWE()?zd.we:zd.wd)[h]:null;
-    return "<b>"+ap.code+"</b>: "+(a?("jonli "+a.total+" samolyot · pastda "+a.low):"jonli maʼlumot yoʻq")+" · tarixiy oqim "+(raw!=null?Math.round(raw)+" pikap/soat":"—");
+    return "<b>"+ap.code+"</b>: "+(a?("jonli "+a.total+" reys kelmoqda · yaqinda "+a.low):"jonli maʼlumot yoʻq")+" · tarixiy oqim "+(raw!=null?Math.round(raw)+" pikap/soat":"—");
   }).join("<br>")||"Sozlamalarda aeroport tanlanmagan";
 }
 function drawFlights(code){
@@ -256,7 +257,7 @@ function drawFlights(code){
   const peak=hrs.reduce((a,b)=>b.v>a.v?b:a);
   $("flightNote").textContent=code+": keyingi 6 soatda eng kuchli oqim ≈ "+String(peak.h).padStart(2,"0")+":00 ("+Math.round(peak.v)+" pikap/soat, TLC tarixiy oʻrtacha). Bu — kelgan yoʻlovchilarning aeroportdan chiqish oqimi proksi; reyslar jadvali emas.";
 }
-/* ================= Maʼlumot yuklagichlar (TLC / zona ob-havo / ADS-B) ================= */
+/* ================= Maʼlumot yuklagichlar (TLC / zona ob-havo / AirLabs) ================= */
 function loadZones(){
   fetchT("zones.json",9000).then(r=>r.json()).then(j=>{ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
   .catch(()=>{apiStat.zones="XATO — zones.json yuklanmadi (talab: maʼlumot yoʻq)";renderApiStat()});
@@ -270,18 +271,23 @@ function loadZoneWx(){
     renderHome();
   }).catch(()=>{});
 }
-function loadAdsb(){
-  AIRPORTS.forEach(ap=>{
-    fetchT("https://api.adsb.lol/v2/point/"+ap.lat+"/"+ap.lon+"/25",12000).then(r=>r.json()).then(j=>{
-      const ac=j.ac||[];
-      const list=ac.filter(a=>a.lat&&a.lon).map(a=>({f:(a.flight||a.r||"").trim(),alt:(typeof a.alt_baro==="number"?a.alt_baro:null),d:hav(ap.lat,ap.lon,a.lat,a.lon)})).sort((x,y)=>x.d-y.d);
-      const low=ac.filter(a=>typeof a.alt_baro==="number"&&a.alt_baro<6000).length;
-      adsb[ap.code]={ts:Date.now(),total:ac.length,low:low,list:list.slice(0,5)};
-      apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-      renderApiStat();renderAirports();
-    }).catch(()=>{apiStat.adsb="BLOKLANGAN — brauzer CORS (adsb.lol da ACAO yoʻq)";renderApiStat()});
-  });
+function loadLiveFlights(force){
+  const now=Date.now();
+  if(!force&&now-liveTs<600000)return;
+  liveTs=now;
+  fetchT("https://airlabs.co/api/v9/flights?api_key="+AIRLABS_KEY,15000).then(r=>r.json()).then(j=>{
+    const fl=(j&&j.response)||[];
+    AIRPORTS.forEach(ap=>{
+      const enr=fl.filter(f=>f.arr_iata===ap.code&&(f.status==="en-route"||f.status==="active")&&typeof f.lat==="number"&&typeof f.lng==="number");
+      const list=enr.map(f=>({f:f.flight_iata||"—",alt:(typeof f.alt==="number"?f.alt:null),d:hav(ap.lat,ap.lon,f.lat,f.lng)})).sort((a,b)=>a.d-b.d);
+      const near=list.filter(x=>x.d<=50).length;
+      adsb[ap.code]={ts:now,total:enr.length,low:near,list:list.slice(0,5)};
+    });
+    apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+    renderApiStat();renderAirports();
+  }).catch(()=>{apiStat.adsb="XATO — AirLabs javob bermadi";renderApiStat()});
 }
+let liveTs=0;
 
 /* ================= Weather (Modul 11) ================= */
 const WX_TXT={0:"Ochiq osmon",1:"Asosan ochiq",2:"Qisman bulutli",3:"Bulutli",45:"Tuman",48:"Tuman",51:"Yengil yomgʻir",53:"Yomgʻir",55:"Yomgʻir",61:"Yomgʻir",63:"Kuchli yomgʻir",65:"Jala",71:"Qor",73:"Qor",75:"Kuchli qor",80:"Yomgʻir shovashi",81:"Yomgʻir shovashi",82:"Kuchli shova",95:"Momaqaldiroq"};
@@ -530,7 +536,7 @@ function go(view,modId){
   $("view-"+view).classList.add("act");
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
-  if(view==="airports")renderAirports();
+  if(view==="airports"){loadLiveFlights(false);renderAirports()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
   if(modId){const d=$(modId);if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:"smooth"}),60)}}
@@ -674,9 +680,9 @@ renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
-loadZones();loadZoneWx();loadAdsb();
+loadZones();loadZoneWx();loadLiveFlights(true);
 loadWeather();armWx();
-setInterval(loadAdsb,300000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
+setInterval(()=>loadLiveFlights(false),600000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 
