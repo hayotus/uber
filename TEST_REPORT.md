@@ -139,3 +139,9 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 
 - Dastlabki QA lar ro'yxatni eski formatda ko'rsatdi. Chuqur tekshiruv: (1) jonli app.js lokal bilan baytma-bayt bir xil (md5 mos, Last-Modified 13:17:50); (2) kodda ikkinchi render yo'li yo'q (bitta renderAirports); (3) QA brauzerida `app.js?probe=62` ochilganda yangi kod BORligi ko'rindi — demak tarmoq to'g'ri, aybdor profilning SW keshi (v8 install paytida deployment hali tarqalmagan edi) + stale-while-revalidate.
 - **Tuzatish (v6.3):** asset URL larga versiya (`?v=63`) — yangi URL = hamma keshlarda yangi kalit. QA eski (zaharланган) profilda qayta o'tkaziladi: yangi format darhol chiqsa, tuzatish isbotlanadi.
+
+## v6.3 — yakuniy sinov (2026-10-31, brauzer) — PASS
+
+- Eski (keshi zaharlangan) profilda ham yangi format darhol chiqdi: sarlavha "Eng yaqin reyslar (qo'nish vaqti — taxminiy, masofa/tezlikdan):"; yozuvlar: "AA95 · Madrid (MAD) · ~01:37 PM · — · 0.9 mi" (JFK), "UA1442 · Denver (DEN) · ~01:37 PM · 208 ft · 3.1 mi" (LGA), "UA2823 · Vashington (IAD) · ~01:37 PM · 893 ft · 13.4 mi" (EWR).
+- Manfiy balandlik yo'q (15/15 yozuv); yetishmagan balandlik "—" bo'lib chiqadi (halol).
+- Sonlar: JFK 114/8, LGA 42/5, EWR 89/6. Kesh tuzatishi (?v=63) isbotlandi.
