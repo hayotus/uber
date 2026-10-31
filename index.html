@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=71">
+<link rel="stylesheet" href="./style.css?v=80">
 </head>
 <body>
 <main>
@@ -118,7 +118,7 @@
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v7.1 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">NYC Driver Dashboard · v8.0 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -140,16 +140,18 @@
 
 <!-- ============ AIRPORTS ============ -->
 <section id="view-airports" class="view">
-  <div class="card"><h3>Airport Monitor <span class="badge b-live">LIVE</span></h3><div class="small">JFK · LGA · EWR — jonli AirLabs faolligi va TLC tarixiy oqim. Uber/Lyft ichki navbat raqamlari ochiq maʼlumot emas — bu yerda uydirma navbat/kutish koʻrsatilmaydi.</div></div>
+  <div class="card"><h3>✈️ Airport Intelligence <span class="badge b-live">LIVE</span></h3><div class="small">JFK · LGA · EWR — jonli qoʻnish toʻlqini (AirLabs), TLC tarixiy oqim, sizning jurnalingiz va masofa — bitta qaror ekranida. Uber ichki navbati ochiq emas — uydirilmaydi.</div></div>
+  <div id="apBest"></div>
+  <div id="apCompare"></div>
   <div id="apCards"></div>
   <div class="card">
-    <h3>Aeroport oqimi — keyingi 6 soat <span class="badge b-hist">HISTORICAL</span></h3>
+    <h3>Aeroport oqimi — 24 soat <span class="badge b-hist">HISTORICAL</span></h3>
     <div class="chips" id="apTabs">
       <button class="chip on" data-ap="JFK">JFK</button>
       <button class="chip" data-ap="LGA">LGA</button>
       <button class="chip" data-ap="EWR">EWR</button>
     </div>
-    <canvas class="wx" id="flightChart" width="680" height="140"></canvas>
+    <canvas class="wx" id="flightChart" width="680" height="150"></canvas>
     <div class="small" id="flightNote"></div>
     <div class="src">Grafik: TLC HVFHS 2025-09 tarixiy oʻrtacha pikap oqimi — kelgan yoʻlovchilarning aeroportdan chiqish proksi. Jonli reyslar yuqoridagi AirLabs (LIVE) blokida. Aniq reyslar uchun aviakompaniya ilovasini tekshiring.</div>
   </div>
@@ -189,7 +191,7 @@
     <button class="mtile" data-go="tools" data-mod="modRest"><span class="ic">🚻</span><div class="n">13. Restroom &amp; Rest Stop</div><div class="s">OSM jonli + zaxira</div></button>
     <button class="mtile" data-go="tools" data-mod="modPark"><span class="ic">🅿️</span><div class="n">14. Parking Assistant</div><div class="s">ASP va garajlar</div></button>
     <button class="mtile" data-go="tools" data-mod="modEv"><span class="ic">⚡</span><div class="n">15. EV Charging Assistant</div><div class="s">Zaryadlash stansiyalari</div></button>
-    <button class="mtile" data-go="airports"><span class="ic">🛬</span><div class="n">16. Aeroport oqimi grafigi</div><div class="s">TLC tarixiy (HISTORICAL)</div></button>
+    <button class="mtile" data-go="airports"><span class="ic">🛬</span><div class="n">16. Airport Intelligence</div><div class="s">Jonli toʻlqin + ball + 24s grafik</div></button>
     <button class="mtile" data-go="analytics"><span class="ic">📊</span><div class="n">Analytics</div><div class="s">Statistika va tavsiyalar tarixi</div></button>
     <button class="mtile" data-go="settings"><span class="ic">⚙️</span><div class="n">Settings</div><div class="s">Profil, avtomobil, tema, API holati</div></button>
   </div>
@@ -344,6 +346,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=71"></script>
+<script type="module" src="./app.js?v=80"></script>
 </body>
 </html>

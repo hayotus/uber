@@ -114,3 +114,12 @@ body.drive #voiceCmds{display:block}
 .hbtns{display:flex;gap:6px}
 .hbtns .go{flex:1.4;margin-top:0}
 .hbtns .ghost{flex:1}
+
+/* Airport Intelligence (v8.0) */
+.apbest{border-color:var(--grn);box-shadow:0 0 0 1px var(--grn)}
+.wave{display:flex;gap:4px;margin:4px 0 8px}
+.wcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.wcol b{font-size:12px}
+.wcol span{font-size:10px;color:var(--mut)}
+.wbar{height:46px;display:flex;align-items:flex-end;width:100%}
+.wb{width:100%;background:#3b82f6;border-radius:4px 4px 0 0;min-height:3px}

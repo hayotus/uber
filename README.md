@@ -99,3 +99,14 @@ iPhone Safari → saytni ochish → Share → **Add to Home Screen**. Standalone
 - Har kartada GO va "Yozib qo'yish" — recordRecFor(s) orqali kalibrlash zanjiriga yoziladi.
 - hourIdx: Math.floor (prognoz massivi indeksi soat boshiga mos; DST kechasida ham tekshirildi).
 - Lokal mantiq testlari: 20/20 PASS (vaqt siljishi, yarim tun/DST o'tishlari, zoneRates, sparkSVG, recordRecFor).
+
+## v8.0 (2026-10-31) — Airport Intelligence
+
+- Aeroportlar ko'rinishi (Menu #2/#16) to'liq qayta ishlandi — qaror dashboardi.
+- Ma'lumot qatlami: AirLabs bitta so'rovdan endi **qo'nish to'lqini** ham hisoblanadi (waveOf: taxminiy qo'nishlar 6×10 daqiqalik oraliqlarda, next60/next30), kelish yo'nalishlari top-3 (origins), eng yaqin reyslar 8 tagacha.
+- **Aeroport balli** (airportScore, ESTIMATED): L jonli to'lqin ×0.45 (next60 / shu soatdagi tarixiy oqim nisbati) + H tarixiy oqim borish vaqtiga ×0.35 + P masofa ×0.20; jonli bo'lmasa H+P renormalize.
+- Banner: "Hozir eng foydali aeroport" + sabablar + chiqish vaqti maslahati (to'lqin cho'qqisi + yo'lovchi chiqishi ~20 daq vs borish vaqti).
+- Taqqoslash jadvali (ball, jonli, to'lqin, oqim, real $/soat — zoneRates, masofa), batafsil kartalar (KPI, to'lqin grafigi, origins, reyslar, L·H·P shaffoflik).
+- GO/✔️ tugmalari aeroport zonasi tavsiyasini kalibrlashga yozadi (apGo/apRec → zoneScores + recordRecFor).
+- 24 soatlik oqim grafigi: hozirgi soat yashil, borib yetish soati sariq, eng kuchli soatlar va hozirgi soatning kun reytingi izohda.
+- Lokal testlar: waveOf, airportScore (L formula, monotonlik, renormalize, zr) — ALL PASS.
