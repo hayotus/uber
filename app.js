@@ -227,7 +227,7 @@ function renderHot(){
   lastHotList=shown;
   const at=new Date(nowNY().getTime()+hotOff*3600e3);
   const tLbl=hotOff===0?"Hozir":at.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+" (+"+hotOff+" soat)";
-  const medals=["\U0001F947","\U0001F948","\U0001F949"];
+  const medals=["🥇","🥈","🥉"];
   const sortLbl=hotSort==="score"?"Ball":hotSort==="rate"?"Real $/soat":hotSort==="dist"?"Masofa":"Talab";
   box.innerHTML='<div class="small" style="margin-bottom:8px">Vaqt: <b>'+tLbl+'</b> · '+shown.length+'/'+list.length+' hudud · Saralash: '+sortLbl+'</div>'+
   shown.map((s,i)=>{
