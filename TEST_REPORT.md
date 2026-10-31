@@ -157,3 +157,9 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Lokal testlar ALL PASS: waveOf oraliqlari [1,1,1,0,1,1], airportScore L formulasi, monotonlik, jonli yo'q holatda renormalize, zoneRates bog'lanishi.
 - Jonli QA (2-yurinish; 1-si Pages tarqalishiga to'g'ri keldi — server fayllari md5 bilan v8.0 ekani isbotlangan): footer v8.0; banner "🏆 Hozir eng foydali: LGA — 31/100" + sabablar + ⏰ maslahat; taqqoslash jadvali (LGA 31 · EWR 23 · JFK 21 — JFK reyslari ko'p (107), lekin uzoq va piki kech (22:00) bo'lgani uchun past — ball mantiqi to'g'ri ishlayapti).
 - To'lqin ustunlari yig'indisi next60 ga mos (6+3+4+5+3+0=21); origins chiplar (Orlando ×5, Dallas ×3, Atlanta ×3); reyslar 8 qator; L·H·P chip; ✔️ toast ("LaGuardia Airport"); 24s grafik + izoh (eng kuchli soatlar, hozirgi soat reytingi, sariq ustun); LGA tabi almashadi.
+
+## v8.1 — TLC Radar tugmasi (2026-10-31, brauzer QA) — PASS
+
+- Footer v8.1; pastki nav 6 element: Home, Map, Airports, Menu, Journal, 📡 TLC Radar (oxirida, havola).
+- TLC Radar bosilganda yangi varaqda https://hayotus.github.io/ ochildi ("NYC Airport Radar 🚕", Radar v3.27).
+- Qolgan nav tugmalari ishlaydi (Airports tekshirildi).
