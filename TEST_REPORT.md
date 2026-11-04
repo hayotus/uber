@@ -163,3 +163,9 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Footer v8.1; pastki nav 6 element: Home, Map, Airports, Menu, Journal, 📡 TLC Radar (oxirida, havola).
 - TLC Radar bosilganda yangi varaqda https://hayotus.github.io/ ochildi ("NYC Airport Radar 🚕", Radar v3.27).
 - Qolgan nav tugmalari ishlaydi (Airports tekshirildi).
+
+## v8.4 — Project nomi TLC Pro (2026-11-04, brauzer QA) — PASS
+
+- Tab sarlavhasi: "TLC Pro — Driver Intelligence"; header: "TLC PRO"; footer: "TLC Pro · v8.4 · Case12 uber dashboard".
+- manifest.json: name "TLC Pro — Driver Intelligence", short_name "TLC Pro".
+- Pastki navda 📡 TLC Radar tugmasi o'zgarishsiz.
