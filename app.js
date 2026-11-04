@@ -839,7 +839,7 @@ $("sSave").addEventListener("click",()=>{
 });
 $("sExport").addEventListener("click",()=>{
   const data=JSON.stringify({settings:settings,journal:journal,recommendations:recs},null,1);
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="driver-dashboard-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="tlc-pro-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
 });
 $("sWipe").addEventListener("click",()=>{if(confirm("Barcha lokal maʼlumot (jurnal, sozlamalar, tavsiyalar) oʻchirilsinmi?")){localStorage.removeItem("drv_journal");localStorage.removeItem("drv_settings");localStorage.removeItem("drv_recs");location.reload()}});
 $("sReset").addEventListener("click",()=>{if(confirm("Sozlamalar standart qiymatlarga qaytarilsinmi? (Jurnal saqlanadi)")){localStorage.removeItem("drv_settings");location.reload()}});

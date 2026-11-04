@@ -1,4 +1,4 @@
-# TEST REPORT — NYC Driver Dashboard v3.0
+# TEST REPORT — TLC Pro (avvalgi nomi: NYC Driver Dashboard)
 
 Sana: 2026-10-30 · Muhit: jonli GitHub Pages (desktop Chromium, mobil kenglik) + lokal statik tekshiruvlar.
 Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.

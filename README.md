@@ -1,4 +1,4 @@
-# NYC Driver Dashboard — Driver Intelligence Platform
+# TLC Pro — Driver Intelligence Platform
 
 NYC Uber/TLC haydovchilari uchun professional Driver Intelligence platformasi.
 Jonli sayt: **https://hayotus.github.io/uber/** · Case12 uber dashboard
@@ -28,7 +28,7 @@ Bitta `index.html` (200 KB dan kichik) ichida aniq qatlamlar:
 4. **UI modullari** — har biri alohida funksiya: DemandModule (heatmap/reyting), AirportModule, EarningsModule, EventsModule, ClosuresModule, JournalModule, VoiceModule, WeatherModule, CameraModule, RestroomModule, ParkingModule, ChargingModule, FlightModule, AnalyticsModule, SettingsModule.
 5. **Storage** — `localStorage`: `drv_settings`, `drv_journal`, `drv_recs`. Server yo'q, ma'lumot qurilmadan chiqmaydi.
 
-PWA yordamchilari: `manifest.json`, `sw.js` (kesh: driver-dash-v4; Leaflet + zones.json ham keshlanadi), `icon.svg`.
+PWA yordamchilari: `manifest.json`, `sw.js` (kesh: tlc-pro-v16; Leaflet + zones.json ham keshlanadi), `icon.svg`.
 
 ## Ekranlar
 
