@@ -1,8 +1,8 @@
 /* NYC Driver Dashboard — Service Worker
    Asosiy interfeys va jurnal offline ishlashi uchun kesh.
    API javoblari keshlenmaydi (jonli ma'lumot eskirib qolmasligi uchun). */
-const CACHE = "driver-dash-v14";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json", "./style.css?v=82", "./app.js?v=82",
+const CACHE = "driver-dash-v15";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json", "./style.css?v=83", "./app.js?v=83",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
 self.addEventListener("install", e => {

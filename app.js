@@ -440,9 +440,10 @@ const CITY = {
 function cityOf(code){if(!code)return "—";return (CITY[code]?CITY[code]+" ("+code+")":code)}
 function waveOf(list,now){const w=[0,0,0,0,0,0];list.forEach(x=>{const b=Math.floor((x.eta-now)/600000);if(b>=0&&b<6)w[b]++});return w}
 function etaMs(dMi,sp,alt,now){const km=dMi*1.60934;if(km<30)return now+8*60000;const v=(sp&&sp>0)?sp:(alt>10000?800:400);return now+(km/v*60+10)*60000}
+function apViewOpen(){const v=document.getElementById("view-airports");return !!(v&&v.classList.contains("act"))}
 function loadLiveFlights(force){
   const now=Date.now();
-  if(!force&&now-liveTs<600000)return;
+  if(!force&&now-liveTs<1800000)return;
   liveTs=now;
   fetchT("https://airlabs.co/api/v9/flights?api_key="+AIRLABS_KEY,15000).then(r=>r.json()).then(j=>{
     const fl=(j&&j.response)||[];
@@ -859,9 +860,9 @@ renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
-loadZones();loadZoneWx();loadLiveFlights(true);
+loadZones();loadZoneWx();
 loadWeather();armWx();
-setInterval(()=>loadLiveFlights(false),600000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
+setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 
