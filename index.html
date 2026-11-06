@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=90">
+<link rel="stylesheet" href="./style.css?v=91">
 </head>
 <body>
 <main>
@@ -119,7 +119,7 @@
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v9.0 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v9.1 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -160,7 +160,7 @@
 
 <!-- ============ DEMAND ============ -->
 <section id="view-demand" class="view">
-  <div class="card"><h3>Demand &amp; Smart Intelligence</h3><div class="small">Talab xaritasi (HISTORICAL), hududlar reytingi va Smart Engine tafsiloti. Talab — TLC HVFHS tarixiy maʼlumotidan (zones.json); ball — ochiq komponentlar modeli. Jonli Uber talabi ochiq emas.</div></div>
+  <div class="card"><h3>🔥 Demand Heatmap &amp; Hotspots</h3><div class="small">Talab xaritasi (HISTORICAL), hududlar reytingi va Smart Engine tafsiloti. Talab — TLC HVFHS tarixiy maʼlumotidan (zones.json); ball — ochiq komponentlar modeli. Jonli Uber talabi ochiq emas.</div></div>
 <details class="mod" id="modHot"><summary><span>🏆 NYC Hotspot Ranking</span><span class="badge b-est">ESTIMATED</span></summary><div class="in">
 <div class="hotctl"><div class="hctlrow" id="hotChips"><button class="hchip on" data-hoff="0">Hozir</button><button class="hchip" data-hoff="1">+1 soat</button><button class="hchip" data-hoff="2">+2 soat</button><button class="hchip" data-hoff="3">+3 soat</button></div>
 <div class="hrow"><select id="hotSort"><option value="score">Saralash: Ball</option><option value="rate">Saralash: Real $/soat</option><option value="dist">Saralash: Masofa</option><option value="demand">Saralash: Talab (D)</option></select><select id="hotMax"><option value="0">Masofa: hammasi</option><option value="3">≤3 mi</option><option value="6">≤6 mi</option><option value="10">≤10 mi</option></select></div></div>
@@ -169,7 +169,7 @@
 <div class="src" id="hotNote">Ball: TLC tarixiy talab, ob-havo, tadbir/yopilish va masofa. $/soat faqat jurnalingizdan olinadi.</div>
 </div></details>
 
-  <details class="mod" id="modSmart"><summary><span>🧠 Smart Driver Intelligence</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="smartBox"></div><div class="src">Formula: Score = 0.30·Talab + 0.20·Reyslar + 0.15·Tadbirlar + 0.15·Ob-havo + 0.10·Yoʻl + 0.10·Masofa. Koeffitsiyentlar boshlangʻich — real natijalar bilan sozlanadi.</div></div></details>
+  
 
   </section>
 
@@ -177,22 +177,14 @@
 <section id="view-menu" class="view">
   <div class="card"><h3>Main Menu — barcha 16 modul</h3><div class="small">Har bir modul o'z ekrani yoki panelini ochadi.</div></div>
   <div class="mgrid">
-    <button class="mtile" data-go="demand"><span class="ic">🔥</span><div class="n">1. Demand Heatmap</div><div class="s">TLC tarixiy talab xaritasi</div></button>
-    <button class="mtile" data-go="airports"><span class="ic">✈️</span><div class="n">2. Airport Monitor</div><div class="s">JFK · LGA · EWR (LIVE + HISTORICAL)</div></button>
+    <button class="mtile" data-go="demand"><span class="ic">🔥</span><div class="n">1. Demand &amp; Hotspots</div><div class="s">Heatmap + Hotspot Ranking</div></button>
+    <button class="mtile" data-go="airports"><span class="ic">✈️</span><div class="n">2. Airports</div><div class="s">Monitor + Intelligence (LIVE)</div></button>
     <button class="mtile" data-go="home"><span class="ic">◎</span><div class="n">3. Best Next Location</div><div class="s">Smart tavsiya — Home ekrani</div></button>
-    <button class="mtile" data-go="tools" data-mod="modEarn"><span class="ic">💵</span><div class="n">4. Earnings Calculator</div><div class="s">Sof foyda hisoblagichi</div></button>
-    <button class="mtile" data-go="tools" data-mod="modEvents"><span class="ic">🎉</span><div class="n">5. Events &amp; Surge Forecast</div><div class="s">Tadbirlar — jonli (NYC Permitted)</div></button>
-    <button class="mtile" data-go="tools" data-mod="modClose"><span class="ic">🚧</span><div class="n">6. Road Closure Monitor</div><div class="s">Yopilishlar — NYC DOT (jonli)</div></button>
-    <button class="mtile" data-go="journal"><span class="ic">📓</span><div class="n">7. Driver Journal</div><div class="s">Smena jurnali (LOCAL)</div></button>
-    <button class="mtile" data-go="tools" data-mod="modVoice"><span class="ic">🎙️</span><div class="n">8. Voice Assistant</div><div class="s">Ovozli buyruqlar</div></button>
-    <button class="mtile" data-go="demand"><span class="ic">🧠</span><div class="n">9. Smart Driver Intelligence</div><div class="s">Ball + confidence tafsiloti</div></button>
-    <button class="mtile" data-go="demand"><span class="ic">🏆</span><div class="n">10. NYC Hotspot Ranking</div><div class="s">Reyting + vaqt prognozi + GO</div></button>
-    <button class="mtile" data-go="tools" data-mod="modWx"><span class="ic">🌦️</span><div class="n">11. Weather &amp; Rain Radar</div><div class="s">Open-Meteo (LIVE)</div></button>
-    <button class="mtile" data-go="tools" data-mod="modCam"><span class="ic">📷</span><div class="n">12. Speed &amp; Traffic Camera</div><div class="s">Limit va kameralar</div></button>
-    <button class="mtile" data-go="tools" data-mod="modRest"><span class="ic">🚻</span><div class="n">13. Restroom &amp; Rest Stop</div><div class="s">OSM jonli + zaxira</div></button>
-    <button class="mtile" data-go="tools" data-mod="modPark"><span class="ic">🅿️</span><div class="n">14. Parking Assistant</div><div class="s">ASP va garajlar</div></button>
-    <button class="mtile" data-go="tools" data-mod="modEv"><span class="ic">⚡</span><div class="n">15. EV Charging Assistant</div><div class="s">Zaryadlash stansiyalari</div></button>
-    <button class="mtile" data-go="airports"><span class="ic">🛬</span><div class="n">16. Airport Intelligence</div><div class="s">Jonli toʻlqin + ball + 24s grafik</div></button>
+    <button class="mtile" data-grp="smart"><span class="ic">🧠</span><div class="n">4. Smart Assistant</div><div class="s">Smart Intelligence + Voice Assistant</div></button>
+    <button class="mtile" data-grp="events"><span class="ic">🎉</span><div class="n">5. Events &amp; Road</div><div class="s">Events (jonli) + Road Closures (jonli)</div></button>
+    <button class="mtile" data-go="journal"><span class="ic">💵</span><div class="n">6. Earnings &amp; Journal</div><div class="s">Earnings Calculator + Driver Journal</div></button>
+    <button class="mtile" data-grp="wx"><span class="ic">🌦️</span><div class="n">7. Weather &amp; Cameras</div><div class="s">Weather Radar + Speed &amp; Traffic Camera</div></button>
+    <button class="mtile" data-grp="stops"><span class="ic">🚻</span><div class="n">8. Stops &amp; Charging</div><div class="s">Restroom + Parking + EV Charging</div></button>
     <button class="mtile" data-go="analytics"><span class="ic">📊</span><div class="n">Analytics</div><div class="s">Statistika va tavsiyalar tarixi</div></button>
     <button class="mtile" data-go="settings"><span class="ic">⚙️</span><div class="n">Settings</div><div class="s">Profil, avtomobil, tema, API holati</div></button>
   </div>
@@ -202,29 +194,14 @@
 <section id="view-tools" class="view">
   <div class="card"><h3>Barcha modullar — 16</h3>
     <div class="small" style="line-height:2">
-    1. Demand Heatmap (Xarita) · 2. Airport Monitor (Airports) · 3. Best Next Location (Home) · 4. Earnings Calculator · 5. Events &amp; Surge Forecast · 6. Road Closure Monitor · 7. Driver Journal · 8. Voice Assistant · 9. Smart Driver Intelligence · 10. Hotspot Ranking · 11. Weather &amp; Rain Radar · 12. Speed &amp; Traffic Camera · 13. Restroom &amp; Rest Stop · 14. Parking Assistant · 15. EV Charging Assistant · 16. Aeroport oqimi (Airports)
+    1. Demand &amp; Hotspots · 2. Airports · 3. Best Next Location · 4. Smart Assistant · 5. Events &amp; Road · 6. Earnings &amp; Journal · 7. Weather &amp; Cameras · 8. Stops &amp; Charging · Analytics · Settings
     </div></div>
+  <details class="mod" id="modSmart"><summary><span>🧠 Smart Driver Intelligence</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="smartBox"></div><div class="src">Formula: Score = 0.30·Talab + 0.20·Reyslar + 0.15·Tadbirlar + 0.15·Ob-havo + 0.10·Yoʻl + 0.10·Masofa. Koeffitsiyentlar boshlangʻich — real natijalar bilan sozlanadi.</div></div></details>
   <details class="mod" id="modEvents"><summary><span>🎉 Events &amp; Surge Forecast</span><span class="badge b-est" id="evBadge">ESTIMATED</span></summary><div class="in"><div class="frow"><button class="ghost" id="evRefresh2">🔄 Yangilash</button><span class="small" id="evUpd"></span></div><div class="hctlrow" style="margin:6px 0"><button class="hchip on" id="evViewList">📋 Roʻyxat</button><button class="hchip" id="evViewMap">🗺️ Xarita</button></div><ul class="list" id="eventList"></ul><div id="evMapWrap" style="display:none"><div id="evMap" style="height:320px;border-radius:14px;overflow:hidden;border:1px solid var(--line)"></div><div class="small" id="evMapNote" style="margin-top:6px"></div></div><div class="src">Manba: NYC Permitted Events (Open Data) — rasmiy ruxsat berilgan tadbirlar, har 10 daqiqada yangilanadi. Joylashuv: maʼlum joylar lugʻati + NYC GeoSearch. Uber ichki surge ochiq emas — koʻpaytiruvchi taxminiy.</div></div></details>
 
   <details class="mod" id="modClose"><summary><span>🚧 Road Closure Monitor</span><span class="badge b-est" id="closeBadge">ESTIMATED</span></summary><div class="in"><div class="frow"><button class="ghost" id="clRefresh">🔄 Yangilash</button><span class="small" id="clUpd"></span></div><ul class="list" id="closeList"></ul><div class="src">Rasmiy manba: NYC DOT va 511NY. Favqulodda yopilishlar kechikib eʼlon qilinishi mumkin — chiqishdan oldin tekshiring.</div></div></details>
 
-  <details class="mod" id="modEarn"><summary><span>💵 Driver Earnings Calculator</span><span class="badge b-live">LOCAL</span></summary><div class="in">
-    <div class="frow">
-      <div><label>Umumiy tushum ($)</label><input id="eGross" type="number" inputmode="decimal" placeholder="0"></div>
-      <div><label>Ishlangan soat</label><input id="eHours" type="number" inputmode="decimal" placeholder="0"></div>
-    </div>
-    <div class="frow">
-      <div><label>Bosilgan mil</label><input id="eMiles" type="number" inputmode="decimal" placeholder="0"></div>
-      <div><label>Toll ($)</label><input id="eTolls" type="number" inputmode="decimal" placeholder="0"></div>
-    </div>
-    <div class="frow">
-      <div><label>Parking ($)</label><input id="ePark" type="number" inputmode="decimal" placeholder="0"></div>
-      <div><label>Boshqa xarajat ($)</label><input id="eOther" type="number" inputmode="decimal" placeholder="0"></div>
-    </div>
-    <button class="go" id="eCalc">Hisoblash</button>
-    <div id="eOut" style="margin-top:10px"></div>
-    <div class="src">Elektr xarajati: mil × sarf (kWh/mil) × narx ($/kWh) — Sozlamalardan oʻzgartiriladi. Tesla Model Y standart sarfi ≈ 0.28 kWh/mil.</div>
-  </div></details>
+  
 
   <details class="mod" id="modWx"><summary><span>🌦️ Weather &amp; Rain Radar</span><span class="badge b-live">LIVE</span></summary><div class="in"><div id="wxBox">Yuklanmoqda…</div><canvas class="wx" id="wxChart" width="680" height="140"></canvas><div class="src">Manba: Open-Meteo (prognoz). Radar qatlami: RainViewer — Xarita boʻlimida yoqiladi. Prognoz xato qilishi mumkin.</div></div></details>
 
@@ -317,6 +294,23 @@
 </section>
 
 <section id="view-journal" class="view">
+  <details class="mod" id="modEarn"><summary><span>💵 Driver Earnings Calculator</span><span class="badge b-live">LOCAL</span></summary><div class="in">
+    <div class="frow">
+      <div><label>Umumiy tushum ($)</label><input id="eGross" type="number" inputmode="decimal" placeholder="0"></div>
+      <div><label>Ishlangan soat</label><input id="eHours" type="number" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <div class="frow">
+      <div><label>Bosilgan mil</label><input id="eMiles" type="number" inputmode="decimal" placeholder="0"></div>
+      <div><label>Toll ($)</label><input id="eTolls" type="number" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <div class="frow">
+      <div><label>Parking ($)</label><input id="ePark" type="number" inputmode="decimal" placeholder="0"></div>
+      <div><label>Boshqa xarajat ($)</label><input id="eOther" type="number" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <button class="go" id="eCalc">Hisoblash</button>
+    <div id="eOut" style="margin-top:10px"></div>
+    <div class="src">Elektr xarajati: mil × sarf (kWh/mil) × narx ($/kWh) — Sozlamalardan oʻzgartiriladi. Tesla Model Y standart sarfi ≈ 0.28 kWh/mil.</div>
+  </div></details>
   <div class="card"><h3>Smena qoʻshish</h3>
     <label>Sana</label><input id="jDate" type="date">
     <div class="frow">
@@ -353,6 +347,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=90"></script>
+<script type="module" src="./app.js?v=91"></script>
 </body>
 </html>

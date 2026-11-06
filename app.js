@@ -859,31 +859,35 @@ function go(view,modId){
 }
 
 /* ================= Modul oynasi (har bir modul alohida ekran) ================= */
-let modHome=null,modPrev="menu";
+let modHomes={},modPrev="menu";
+function showModView(){document.querySelectorAll(".view").forEach(v=>v.classList.remove("act"));$("view-mod").classList.add("act");window.scrollTo(0,0)}
+function modMoveIn(d){const body=$("modBody");if(!body)return;if(d.parentElement!==body){modHomes[d.id]={p:d.parentNode,n:d.nextSibling};body.appendChild(d)}d.open=true}
 function openModule(id){
   const d=$(id);if(!d)return;
-  const body=$("modBody");if(!body)return;
-  if(d.parentElement!==body){
-    modHome={p:d.parentNode,n:d.nextSibling};
-    const cur=document.querySelector(".view.act");if(cur)modPrev=cur.id.replace("view-","");
-    const t=d.querySelector("summary span");$("modTitle").textContent=t?t.textContent.replace(/\s+/g," ").trim():"Modul";
-    body.appendChild(d);
-  }
-  d.open=true;
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("act"));
-  $("view-mod").classList.add("act");
-  window.scrollTo(0,0);
+  const cur=document.querySelector(".view.act");if(cur)modPrev=cur.id.replace("view-","");
+  const t=d.querySelector("summary span");$("modTitle").textContent=t?t.textContent.replace(/\s+/g," ").trim():"Modul";
+  modMoveIn(d);showModView();
   if(id==="modEvents")setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
 }
+const GRPS={smart:["Smart Assistant",["modSmart","modVoice"]],events:["Events & Road",["modEvents","modClose"]],wx:["Weather & Cameras",["modWx","modCam"]],stops:["Stops & Charging",["modRest","modPark","modEv"]]};
+function openGroup(key){
+  const g=GRPS[key];if(!g)return;
+  const cur=document.querySelector(".view.act");if(cur)modPrev=cur.id.replace("view-","");
+  $("modTitle").textContent=g[0];
+  g[1].forEach(id=>{const d=$(id);if(d)modMoveIn(d)});
+  showModView();
+  setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
+}
 function closeModule(){
-  const body=$("modBody");const d=body?body.querySelector("details.mod"):null;
-  if(d&&modHome){d.open=false;if(modHome.n)modHome.p.insertBefore(d,modHome.n);else modHome.p.appendChild(d)}
+  const body=$("modBody");
+  if(body){body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}})}
   go(modPrev||"menu");
 }
 {const mb=$("modBack");if(mb)mb.addEventListener("click",closeModule);}
 document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",()=>{if(d.open&&d.parentElement!==$("modBody"))openModule(d.id)}));
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
+document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>openGroup(b.getAttribute("data-grp"))));
 document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
