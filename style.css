@@ -152,3 +152,8 @@ body{background:radial-gradient(1200px 620px at 50% -10%,rgba(34,197,94,.14) 0%,
 .modTitle{font-size:16.5px;font-weight:800}
 #modBody details.mod{display:block;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:20px;padding:6px 14px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
 #modBody details.mod>summary{display:none}
+
+/* v10.7: Map — to'liq ekran, kartalar yo'q, tugmalar xarita ostida */
+#view-map.act{display:flex;flex-direction:column;height:calc(100dvh - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+#view-map #map{flex:1 1 auto;height:auto;min-height:320px}
+#view-map .chips{flex:0 0 auto;margin-top:10px}

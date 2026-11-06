@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=106">
+<link rel="stylesheet" href="./style.css?v=107">
 </head>
 <body>
 <main>
@@ -119,24 +119,19 @@
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v10.6 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v10.7 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
 <section id="view-map" class="view">
   <div id="map"></div>
   <div class="chips" id="layerChips">
-    <button class="chip on" data-layer="heat">🔥 Talab</button>
-    <button class="chip" data-layer="cam">📷 Kameralar</button>
-    <button class="chip" data-layer="ev">⚡ Zaryadlash</button>
-    <button class="chip" data-layer="wc">🚻 Hojatxona</button>
-    <button class="chip" data-layer="rain">🌧️ Yomgʻir radari</button>
-    <button class="chip" data-layer="close">🚧 Yopilishlar</button>
+    <button class="chip" data-layer="wc">🚻 Restroom</button>
+    <button class="chip" data-layer="ev">⚡ Tesla</button>
+    <button class="chip" data-layer="loc">📍 Location</button>
+    <button class="chip" data-layer="cruise">🚢 Cruise</button>
+    <button class="chip" data-layer="air">✈️ Airport</button>
   </div>
-  <div class="card"><h3>Qatlamlar haqida</h3>
-    <div class="small">Talab — <span class="badge b-hist">HISTORICAL</span> TLC tarixiy maʼlumoti, jonli Uber talabi emas. Kameralar — OpenStreetMap nuqtalari, har bir kameraning hozir ishlashi kafolatlanmaydi. Yomgʻir radari — <span class="badge b-live">LIVE</span> RainViewer. Zaryadlash/hojatxona — OSM jonli soʻrov, ishlamasa zaxira roʻyxat.</div>
-  </div>
-  <div class="card"><h3>Tezlik chegarasi</h3><div class="mid" id="speedCard">NYC umumiy limit: 25 mph</div><div class="small">Maktab zonalarida va belgili joylarda pastroq boʻlishi mumkin — doim yoʻl belgisiga qarang. <span class="badge b-hist">HISTORICAL</span></div></div>
 </section>
 
 <!-- ============ AIRPORTS ============ -->
@@ -347,6 +342,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=106"></script>
+<script type="module" src="./app.js?v=107"></script>
 </body>
 </html>

@@ -39,6 +39,24 @@ const AIRPORTS=[
 {code:"LGA",name:"LaGuardia",lat:40.7769,lon:-73.8740,term:"Terminal B asosiy oqim"},
 {code:"EWR",name:"Newark Liberty Intl",lat:40.6895,lon:-74.1745,term:"Terminal A va C"}
 ];
+const PLACES=[
+{n:"Office 40w St",lat:40.75696,lon:-73.99338},
+{n:"Office 10e St",lat:40.72818,lon:-73.98279},
+{n:"Virgin Hotel",lat:40.74674,lon:-73.98865},
+{n:"Times Square",lat:40.7580,lon:-73.9855},
+{n:"Exit 13",lat:40.63072,lon:-73.89528}
+];
+const TOCHKA5=[
+{n:"W 39th St & 8th Ave",lat:40.75526,lon:-73.99241,h:14},
+{n:"W 37th St & 6th Ave",lat:40.75091,lon:-73.98472,h:9},
+{n:"W 46th St & Broadway",lat:40.75782,lon:-73.98367,h:10},
+{n:"6th Ave & W 28th St",lat:40.74619,lon:-73.99029,h:14},
+{n:"W 48th St & 8th Ave",lat:40.76032,lon:-73.98579,h:10}
+];
+const CRUISE2=[
+{n:"Manhattan Cruise Terminal (Pier 88/90)",lat:40.7672,lon:-73.9985},
+{n:"Brooklyn Cruise Terminal (Red Hook)",lat:40.6827,lon:-74.0132}
+];
 let EVENTS=[
 {n:"Village Halloween Parade",place:"6th Ave, Greenwich Village",lat:40.7312,lon:-74.0000,start:"2026-10-31T19:00",end:"2026-10-31T23:30",surge:2.2},
 {n:"NYC Marathon 2026",place:"5 borough boʻylab",lat:40.7720,lon:-73.9300,start:"2026-11-01T08:00",end:"2026-11-01T18:00",surge:1.8,note:"Koʻplab koʻchalar yopiladi — marshrutni oldindan rejalang"},
@@ -507,6 +525,11 @@ function initMaps(){
   map=L.map("map").setView([userLat(),userLon()],12);tiles().addTo(map);
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
+  layerGroups.loc=L.layerGroup();layerGroups.cruise=L.layerGroup();layerGroups.air=L.layerGroup();
+  PLACES.forEach(p=>L.marker([p.lat,p.lon]).addTo(layerGroups.loc).bindPopup("📍 "+esc(p.n)));
+  TOCHKA5.forEach(p=>L.circleMarker([p.lat,p.lon],{radius:9,color:"#fff",weight:1.5,fillColor:"#ff3b30",fillOpacity:.85}).addTo(layerGroups.loc).bindPopup("⭐ Tochka — "+esc(p.n)+"<br>"+p.h+" ta mehmonxona yaqinida"));
+  CRUISE2.forEach(p=>L.marker([p.lat,p.lon]).addTo(layerGroups.cruise).bindPopup("🚢 "+esc(p.n)));
+  AIRPORTS.forEach(p=>L.marker([p.lat,p.lon]).addTo(layerGroups.air).bindPopup("✈️ "+p.code+" — "+esc(p.name)));
   CAMS_FB.forEach(c=>L.marker([c.lat,c.lon]).addTo(layerGroups.cam).bindPopup("📷 Kamera — "+esc(c.n)+"<br><span>Taxminiy nuqta — OSM tekshiruvi 3-bosqichda</span>"));
   CLOSURES.forEach(c=>{ if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))});
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
