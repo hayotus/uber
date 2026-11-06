@@ -242,3 +242,27 @@ Analytics/Settings plitalari va **pastki menyu o'zgarmadi**.
 **Muammo (foydalanuvchi skrinshoti, 2026-11-06 07:48 EST):** o'rnatilgan ilovada eng tepadagi «TLC PRO» sarlavha qatori ko'rinmaydi — telefon status paneli / Dynamic Island ostida qolgan (skrinshotda yozuv xira, yarim kesilgan). Sabab: viewport-fit=cover rejimida sahifa eng tepadan boshlanadi, lekin kodda tepa xavfsiz bo'shliq (env(safe-area-inset-top)) umuman yo'q edi — faqat pastki (bottom) inset hisobga olingan.
 **Tuzatish (faqat style.css):** `main` padding-top: 12px → calc(12px + env(safe-area-inset-top)); `.modHead` (modul oynasi sarlavhasi, sticky) padding-top: 10px → calc(10px + env(safe-area-inset-top)) + pastki 10px. Pastki menyu va boshqa hech narsaga tegilmadi. SW cache tlc-pro-v23, assetlar ?v=92.
 **Tekshiruv:** push bc261f7; jonli serverda footer v9.2 va style.css da ikkala qoida ham borligi curl bilan tasdiqlandi. Yakuniy vizual tasdiq faqat foydalanuvchi telefonida bo'ladi (brauzer QA kesimni emulyatsiya qila olmaydi) — foydalanuvchidan telefonda tekshirish so'raldi.
+
+## v9.3 — Road Closure Monitor: tepa xarita + filtrlar + 5 talik sahifalar (2026-11-06)
+
+**Buyruq (foydalanuvchi yozma, 07:53 EST; aniqlashtirish variantlari orqali tasdiqlandi 07:55; "Ha, bajar" 07:56):** Road alerts ochilganda tepa qismida to'liq map ochilsin; map tagida refresh tugmasi va 3 ta tugma (foydalanuvchi tanladi: **Faol / Kelgusi / Hammasi** filtrlari); map ostida ro'yxat — faqat ekranga sig'adigani (5 ta) + Next tugmasi bilan keyingi 5 ta.
+
+**Amalga oshirish:** modClose ichi qayta tuzildi — #clMap (300px) modul ichidagi BIRINCHI element, #clMapNote izohi, keyin mavjud 🔄 #clRefresh + #clUpd qatori, filtr chiplari #clFAct/#clFUp/#clFAll (standart Faol), #closeList, sahifalash qatori (#clPrev / #clPageInfo / #clNext). app.js: clFilter/clPage/clMap/clMarkers holati; clFiltered(); renderClosures() qayta yozildi — ro'yxat = filtrdan sahifadagi 5 ta, "1–5 / N · Sahifa X/Y"; clPopup() (🚧 nom, 📍 joy, 📅 muddat, 🔴 FAOL / 🕐 YAQINDA); drawClMarkers() filtrga mos, cap 120; fitClMap() fitBounds maxZoom 13; refreshClMap() (kenglik>0 himoyasi, lazy init); setClFilter(); openModule/openGroup dan keyin setTimeout(refreshClMap,160). Asosiy Map ekranining yopilishlar qatlami va Home plitasi o'zgarmadi. SW tlc-pro-v24, assetlar ?v=93.
+
+**QA: PASS** (jonli, 08:00–08:02 EST) — footer v9.3; xarita modul tepasida; "Xaritada: 120 ta yopilish (filtr: Faol)"; popup aynan tekshirildi (Union Square West ∩ East 14 Street, Nov 2 → Nov 14, 🔴 FAOL); Faol 292 ta ("1–5 / 292 · Sahifa 1/59"), Keyingi→2-sahifa, Oldingi→orqaga; Kelgusi 8 ta; Hammasi 300 ta. Kuzatuvlar: (1) sahifalash+scroll dan keyin xarita bir marta Meksika ko'rfazi tomonga qochdi; (2) izohda "koʼha" imlo xatosi — v9.4 da tuzatildi.
+
+## v9.4 — Road xarita hotfix (2026-11-06)
+
+1. **Imlo:** "ko\u02bcha" yozuvi JS da "koʼha" bo'lib chiqardi — \u02bc escape'ning 4-hex belgisi so'zdagi 'c' ni yutib yuborgan. "ko\u02bccha" qilib tuzatildi. Audit: boshqa \u02bc/\u02bb yozuvlari tekshirildi — "ko\u02bcrilmoqda" va "O\u02bbchirish" to'g'ri.
+2. **Caption aniqroq:** "Xaritada eng yaqin N ta yopilish · filtrda jami M ta (filtr). Markerni bosing — ko'cha va muddati chiqadi."
+3. **Himoya:** clPts() — 60 km dan uzoq nuqtalar marker/fit ga kirmaydi; refreshClMap() oxirida markaz foydalanuvchidan >150 km uzoqda bo'lsa fitClMap() bilan o'z-o'zini tuzatish.
+SW tlc-pro-v25, assetlar ?v=94.
+
+**QA: qisman** (08:07–08:09 EST) — caption va imlo tuzatilgani tasdiqlandi; lekin scroll dan keyin xarita yana bo'sh kulrang bo'lib qoldi (markaz qochmagan — himoya ishlamadi, chunki nuqson markazda emasligi aniqlandi). Sabab tahlili v9.5 da.
+
+## v9.5 — Mini-xaritalarda scrollWheelZoom o'chirish (2026-11-06)
+
+**Sabab (v9.3/v9.4 QA kuzatuvlaridan):** sahifaga joylashtirilgan Leaflet mini-xarita sichqoncha g'ildiragini ushlab qoladi — kursor xarita ustida turganda sahifa scroll'i xaritani zoom/pan qilib yuboradi (QA brauzerida "Meksika ko'rfazi"ga qochish va bo'sh kulrang shundan). Telefonda (sensorli scroll) bu mexanizm ishlamaydi, lekin ish stoli/tekshiruv muhiti va foydalanuvchi tajribasi uchun himoya kerak.
+**Tuzatish:** clMap va evMap yaratishda {scrollWheelZoom:false} — xarita barmoq/sichqoncha bilan tortib (drag) va tugmalar bilan ishlayveradi, g'ildirak esa sahifani aylantiradi. SW tlc-pro-v26, assetlar ?v=95.
+
+**QA: PASS** (08:16–08:19 EST) — footer v9.5; kursorni xarita ustida tutib g'ildirak bilan pastga/yuqoriga bir necha marta aylantirishda sahifa aylandi, xarita QIMIRLAMADI (Manhattan, markerlar, plitkalar joyida); "Keyingi →" ×2 (sahifa 3/59) dan keyin ham xarita Nyu-Yorkda qoldi; caption to'g'ri. Kichik kuzatuv: modul jonli ma'lumot kelguncha bir necha soniya "0 ta / yuklanmadi" zaxira holatini ko'rsatadi — yuklanish holati matni kelajakda "yuklanmoqda" deb aniqlashtirilishi mumkin (nuqson emas, ma'lumot o'z vaqtida keladi).
