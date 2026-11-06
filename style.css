@@ -187,3 +187,6 @@ body{background:radial-gradient(1200px 620px at 50% -10%,rgba(34,197,94,.14) 0%,
 /* v10.14: Traffic/EZPass yorliqlari */
 #btnEzpass .tab-lb{font-size:9.5px}
 #btnTraffic .tab-lb{font-size:10px}
+
+/* v10.17: marshrut rangi nuqtasi */
+.loc-dot{flex:none;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.6)}

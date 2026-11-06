@@ -632,16 +632,17 @@ function ttRoute(x){
     return {dist:rt.summary.lengthInMeters/1609.34,mins:Math.round(rt.summary.travelTimeInSeconds/60),pts:pts};
   });
 }
-const ROUTE_COLORS={wc:"#0A84FF",ev:"#CC0000",loc:"#34C759",cruise:"#BF5AF2",air:"#FF9500"};
+const ROUTE_PALETTE=["#0A84FF","#FF3B30","#30D158","#FF9F0A","#BF5AF2","#FF375F","#00C7BE","#CA8A04","#32ADE6","#7D7AFF","#FF6482","#AC8E68"];
+function routeColor(i){return ROUTE_PALETTE[i%ROUTE_PALETTE.length]}
 let routeGroup=null;
 function syncRouteLines(){
   if(!routeGroup)return;
   routeGroup.clearLayers();
   Object.keys(mapOn).forEach(l=>{
     if(!mapOn[l])return;
-    sortedItems(l).slice(0,visCount[l]).forEach(x=>{
+    sortedItems(l).slice(0,visCount[l]).forEach((x,i)=>{
       const ri=routeInfo[routeKey(l,x)];
-      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:ROUTE_COLORS[l]||"#0A84FF",weight:4,opacity:.85}).addTo(routeGroup);
+      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:routeColor(i),weight:4,opacity:.85}).addTo(routeGroup);
     });
   });
 }
@@ -725,11 +726,11 @@ function renderMapPanel(){
     p.innerHTML='<div class="location-option" style="cursor:default"><span class="loc-main"><span class="loc-name">'+(loading?"Yuklanmoqda...":"Yaqin atrofda topilmadi")+'</span></span></div>';
     return;
   }
-  let html=vis.map(x=>{
+  let html=vis.map((x,i)=>{
     const ri=routeInfo[routeKey(layer,x)];
     const dv=ri&&ri.dist!=null?ri.dist.toFixed(1):"--";
     const mv=ri&&ri.mins!=null?String(ri.mins):"--";
-    return '<button class="location-option" data-lat="'+x.lat+'" data-lon="'+x.lon+'"><span class="loc-main"><span class="loc-name">'+esc(x.n)+'</span>'+(x.sub?'<span class="loc-addr">'+esc(x.sub)+'</span>':"")+'</span><span class="loc-badges"><span class="loc-badge"><span class="v">'+dv+'</span><span class="u">mi</span></span><span class="loc-badge min"><span class="v">'+mv+'</span><span class="u">min</span></span></span></button>';
+    return '<button class="location-option" data-lat="'+x.lat+'" data-lon="'+x.lon+'"><span class="loc-dot" style="background:'+routeColor(i)+'"></span><span class="loc-main"><span class="loc-name">'+esc(x.n)+'</span>'+(x.sub?'<span class="loc-addr">'+esc(x.sub)+'</span>':"")+'</span><span class="loc-badges"><span class="loc-badge"><span class="v">'+dv+'</span><span class="u">mi</span></span><span class="loc-badge min"><span class="v">'+mv+'</span><span class="u">min</span></span></span></button>';
   }).join("");
   if(items.length>visCount[layer])html+='<button class="location-option more" style="justify-content:center"><span class="loc-name">\u2B07 More</span></button>';
   p.innerHTML=html;
