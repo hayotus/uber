@@ -169,3 +169,10 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - Tab sarlavhasi: "TLC Pro — Driver Intelligence"; header: "TLC PRO"; footer: "TLC Pro · v8.4 · Case12 uber dashboard".
 - manifest.json: name "TLC Pro — Driver Intelligence", short_name "TLC Pro".
 - Pastki navda 📡 TLC Radar tugmasi o'zgarishsiz.
+
+## v8.5/v8.6 — Road Closure Monitor jonli (2026-11-06, brauzer QA) — PASS
+
+- Muammo: monitor statik edi (3 ta qo'lda yozilgan yozuv) — jonli manba umuman ulanmagan ekan.
+- v8.5: NYC DOT Open Data (Socrata 478a-yykk kesishmalar + i6b5-j7bu bloklar), within_circle 20 km, 5 daqiqada yangilanish, "Oxirgi yangilanish" belgisi, 🔄 tugma, badge LIVE; SW: data.cityofnewyork.us network-only.
+- v8.6 (hotfix): boot chaqiruvi alohida qatorga olindi, timeout 30 s, birinchi xatoda 20 s dan keyin qayta urinish, modul ochilganda so'rov.
+- QA: 🔄 bosilmasdan o'zi LIVE bo'ldi — 908 yozuv (20 km), haqiqiy ko'chalar (W 46 St ∩ 8 Ave ...), Home Alerts da 5 ta 🚧 bandi. Eski statik uchlik yo'qolgan.
