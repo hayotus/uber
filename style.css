@@ -157,3 +157,29 @@ body{background:radial-gradient(1200px 620px at 50% -10%,rgba(34,197,94,.14) 0%,
 #view-map.act{display:flex;flex-direction:column;height:calc(100dvh - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 #view-map #map{flex:1 1 auto;height:auto;min-height:320px}
 #view-map .chips{flex:0 0 auto;margin-top:10px}
+
+/* v10.9: Map — Radar uslubi: tugmalar bir qatorda, suzuvchi panel, dumaloq markerlar */
+#view-map .mapstrip{flex:0 0 auto;display:flex;gap:2px;padding:4px 0 0}
+.mpill{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:none;cursor:pointer;padding:8px 2px 6px;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.mpill:active{transform:scale(.96)}
+.mpill .tab-ic{font-size:23px;line-height:1.1;filter:grayscale(1);opacity:.45}
+.mpill .tab-ic svg{width:27px;height:27px;display:block}
+.mpill .tab-lb{font-size:10.5px;font-weight:700;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.mpill.on .tab-ic{filter:none;opacity:1}
+.mpill.on .tab-lb{color:var(--txt);font-weight:800}
+#mapPanel{display:none;position:fixed;top:calc(env(safe-area-inset-top) + 100px);right:16px;width:min(260px,calc(100vw - 32px));padding:4px;z-index:1300;max-height:min(350px,55vh);overflow-y:auto}
+#mapPanel.open{display:block}
+#mapPanel .location-option{display:flex;align-items:center;gap:6px;width:100%;margin:3px 0;padding:6px 8px;text-align:left;color:#fff;background:rgba(17,24,39,.45);border:1.5px solid rgba(255,255,255,.5);border-radius:12px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-family:inherit}
+#mapPanel .loc-main{flex:1;min-width:0}
+#mapPanel .loc-name{display:block;font-size:14px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mapPanel .loc-addr{display:block;margin-top:2px;color:#D1D5DB;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mapPanel .loc-badges{display:flex;gap:4px;flex:none}
+#mapPanel .loc-badge{width:34px;height:34px;border-radius:50%;background:rgba(28,28,30,.55);border:2px solid #0A84FF;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#mapPanel .loc-badge.min{border-color:#30D158}
+#mapPanel .loc-badge .v{color:#fff;font-size:11px;font-weight:800;line-height:1}
+#mapPanel .loc-badge .u{color:#D1D5DB;font-size:8px;font-weight:600;margin-top:1px}
+.mk{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.6);cursor:pointer}
+.mk-wc{background:rgba(255,255,255,.95);border:2px solid #0A84FF}
+.mk-tesla{background:rgba(255,255,255,.95);border:2px solid #F59E0B}
+.mk-loc{background:#0A84FF;border:2px solid #fff;color:#fff;font-size:13px}
+.mk-tochka{background:#FF3B30;border:2px solid #fff;color:#fff;font-size:13px;font-weight:800}

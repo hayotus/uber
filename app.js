@@ -526,10 +526,6 @@ function initMaps(){
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
   layerGroups.loc=L.layerGroup();layerGroups.cruise=L.layerGroup();layerGroups.air=L.layerGroup();
-  PLACES.forEach(p=>L.marker([p.lat,p.lon]).addTo(layerGroups.loc).bindPopup("📍 "+esc(p.n)));
-  TOCHKA5.forEach(p=>L.circleMarker([p.lat,p.lon],{radius:9,color:"#fff",weight:1.5,fillColor:"#ff3b30",fillOpacity:.85}).addTo(layerGroups.loc).bindPopup("⭐ Tochka — "+esc(p.n)+"<br>"+p.h+" ta mehmonxona yaqinida"));
-  CRUISE2.forEach(p=>L.marker([p.lat,p.lon]).addTo(layerGroups.cruise).bindPopup("🚢 "+esc(p.n)));
-  AIRPORTS.forEach(p=>L.marker([p.lat,p.lon]).addTo(layerGroups.air).bindPopup("✈️ "+p.code+" — "+esc(p.name)));
   CAMS_FB.forEach(c=>L.marker([c.lat,c.lon]).addTo(layerGroups.cam).bindPopup("📷 Kamera — "+esc(c.n)+"<br><span>Taxminiy nuqta — OSM tekshiruvi 3-bosqichda</span>"));
   CLOSURES.forEach(c=>{ if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))});
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
@@ -555,6 +551,82 @@ function toggleLayer(name,on){
 }
 
 /* ================= OSM jonli roʻyxatlar (fallback bilan) ================= */
+/* ===== Map: Radar uslubidagi qatlamlar (v10.9) ===== */
+let TESLA_ITEMS=null,mapOn={wc:false,ev:false,loc:false,cruise:false,air:false},panelLayer=null;
+const visCount={wc:5,ev:5,loc:5,cruise:5,air:5};
+const routeInfo={};
+function mkIcon(cls,html){return L.divIcon({className:"",html:'<div class="mk '+cls+'">'+html+'</div>',iconSize:[28,28],iconAnchor:[14,14]})}
+function layerItems(layer){
+  if(layer==="wc")return (WC_ITEMS||[]).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon}));
+  if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon}));
+  if(layer==="loc")return distSort(PLACES.map(p=>({n:p.n,sub:"Saqlangan joy",lat:p.lat,lon:p.lon,kind:"loc"})).concat(TOCHKA5.map(p=>({n:p.n,sub:p.h+" ta mehmonxona yaqinida",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h}))));
+  if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon})));
+  if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon})));
+  return [];
+}
+function drawMapLayer(layer){
+  if(typeof layerGroups==="undefined")return;
+  const items=layerItems(layer),vis=items.slice(0,visCount[layer]);
+  const put=(g,x,icon)=>{const m=L.marker([x.lat,x.lon],{icon:icon}).addTo(g);m.bindTooltip("<b>"+esc(x.n)+"</b>",{direction:"top",offset:[0,-14]});m.on("click",()=>gmaps(x.lat,x.lon))};
+  if(layer==="wc"){const g=layerGroups.wc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-wc","\uD83D\uDEBB")))}
+  if(layer==="ev"){const g=layerGroups.tesla;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-tesla","\u26A1")))}
+  if(layer==="loc"){const g=layerGroups.loc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,x.kind==="tochka"?mkIcon("mk-tochka",String(x.h)):mkIcon("mk-loc","\uD83D\uDCCD")))}
+  if(layer==="cruise"){const g=layerGroups.cruise;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-loc","\uD83D\uDEA2")))}
+  if(layer==="air"){const g=layerGroups.air;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-loc","\u2708\uFE0F")))}
+}
+function routeKey(layer,x){return layer+"@"+x.lat.toFixed(4)+","+x.lon.toFixed(4)}
+function kickRoutes(layer){
+  layerItems(layer).slice(0,visCount[layer]).forEach(x=>{
+    const k=routeKey(layer,x);
+    if(routeInfo[k])return;
+    routeInfo[k]={wait:1};
+    const url="https://router.project-osrm.org/route/v1/driving/"+userLon()+","+userLat()+";"+x.lon+","+x.lat+"?overview=false";
+    fetchT(url,9000).then(r=>r.json()).then(j=>{
+      const rt=j&&j.routes&&j.routes[0];
+      routeInfo[k]=rt?{dist:rt.distance/1609.34,mins:Math.round(rt.duration/60)}:{dist:hav(userLat(),userLon(),x.lat,x.lon),mins:null};
+      if(panelLayer===layer)renderMapPanel();
+    }).catch(()=>{routeInfo[k]={dist:hav(userLat(),userLon(),x.lat,x.lon),mins:null};if(panelLayer===layer)renderMapPanel()});
+  });
+}
+function renderMapPanel(){
+  const p=$("mapPanel");if(!p)return;
+  if(!panelLayer){p.classList.remove("open");p.innerHTML="";return}
+  const layer=panelLayer,items=layerItems(layer),vis=items.slice(0,visCount[layer]);
+  p.classList.add("open");
+  if(!items.length){
+    const loading=(layer==="wc"&&WC_ITEMS===null)||(layer==="ev"&&TESLA_ITEMS===null);
+    p.innerHTML='<div class="location-option" style="cursor:default"><span class="loc-main"><span class="loc-name">'+(loading?"Yuklanmoqda...":"Yaqin atrofda topilmadi")+'</span></span></div>';
+    return;
+  }
+  let html=vis.map(x=>{
+    const ri=routeInfo[routeKey(layer,x)];
+    const dv=ri&&ri.dist!=null?ri.dist.toFixed(1):"--";
+    const mv=ri&&ri.mins!=null?String(ri.mins):"--";
+    return '<button class="location-option" data-lat="'+x.lat+'" data-lon="'+x.lon+'"><span class="loc-main"><span class="loc-name">'+esc(x.n)+'</span>'+(x.sub?'<span class="loc-addr">'+esc(x.sub)+'</span>':"")+'</span><span class="loc-badges"><span class="loc-badge"><span class="v">'+dv+'</span><span class="u">mi</span></span><span class="loc-badge min"><span class="v">'+mv+'</span><span class="u">min</span></span></span></button>';
+  }).join("");
+  if(items.length>visCount[layer])html+='<button class="location-option more" style="justify-content:center"><span class="loc-name">\u2B07 More</span></button>';
+  p.innerHTML=html;
+  p.querySelectorAll(".location-option[data-lat]").forEach(b=>b.addEventListener("click",()=>gmaps(parseFloat(b.getAttribute("data-lat")),parseFloat(b.getAttribute("data-lon")))));
+  const mb=p.querySelector(".more");
+  if(mb)mb.addEventListener("click",()=>{visCount[layer]+=5;drawMapLayer(layer);renderMapPanel();kickRoutes(layer)});
+}
+function zoomHalfMile(){
+  if(!map)return;
+  const la=userLat(),lo=userLon(),dLa=805/111320,dLo=805/(111320*Math.cos(la*Math.PI/180));
+  try{map.fitBounds([[la-dLa,lo-dLo],[la+dLa,lo+dLo]],{paddingTopLeft:[24,24],paddingBottomRight:[276,24]})}catch(e){}
+}
+function mapToggle(layer,btn){
+  if(!map)initMaps();
+  const on=!mapOn[layer];mapOn[layer]=on;
+  if(btn)btn.classList.toggle("on",on);
+  if(layer==="wc"){if(on){layerGroups.wc.addTo(map);drawMapLayer("wc");refreshWC(false);zoomHalfMile()}else map.removeLayer(layerGroups.wc)}
+  if(layer==="ev"){if(on){layerGroups.ev.addTo(map);layerGroups.tesla.addTo(map);drawMapLayer("ev");refreshEV(false);refreshTesla()}else{map.removeLayer(layerGroups.ev);map.removeLayer(layerGroups.tesla)}}
+  if(layer==="loc"){if(on){drawMapLayer("loc");layerGroups.loc.addTo(map)}else map.removeLayer(layerGroups.loc)}
+  if(layer==="cruise"){if(on){drawMapLayer("cruise");layerGroups.cruise.addTo(map)}else map.removeLayer(layerGroups.cruise)}
+  if(layer==="air"){if(on){drawMapLayer("air");layerGroups.air.addTo(map)}else map.removeLayer(layerGroups.air)}
+  if(on){panelLayer=layer;renderMapPanel();kickRoutes(layer)}
+  else if(panelLayer===layer){const other=Object.keys(mapOn).find(k=>mapOn[k]);panelLayer=other||null;renderMapPanel();if(other)kickRoutes(other)}
+}
 function distSort(a){return a.map(x=>Object.assign({},x,{d:hav(userLat(),userLon(),x.lat,x.lon)})).sort((x,y)=>x.d-y.d)}
 function listHTML(items,icon){
   return items.slice(0,10).map(x=>'<li><div class="r"><div><b>'+icon+" "+esc(x.n)+'</b><div class="small">'+distTxt(x.d)+' uzoqlikda</div></div><button onclick="gmaps('+x.lat+","+x.lon+')">GO</button></div></li>').join("")||'<li class="small">Yaqin atrofda topilmadi</li>';
@@ -564,15 +636,16 @@ function overpass(q){
   return fetchT("https://overpass-api.de/api/interpreter",15000,opt).then(r=>r.json())
    .catch(()=>fetchT("https://overpass.kumi.systems/api/interpreter",15000,opt).then(r=>r.json()));
 }
-function drawMapWc(items){if(typeof layerGroups==="undefined"||!layerGroups.wc)return;layerGroups.wc.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#2f7cf6",fillOpacity:.9}).addTo(layerGroups.wc).bindPopup("<b>\uD83D\uDEBB "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
+function drawMapWc(){drawMapLayer("wc");if(panelLayer==="wc"){renderMapPanel();kickRoutes("wc")}}
 function drawMapEv(items){if(typeof layerGroups==="undefined"||!layerGroups.ev)return;layerGroups.ev.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#30d158",fillOpacity:.9}).addTo(layerGroups.ev).bindPopup("<b>\u26A1 "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
 function refreshTesla(){
   const url="https://photon.komoot.io/api/?q="+encodeURIComponent("Tesla Supercharger")+"&lat="+userLat()+"&lon="+userLon()+"&limit=15";
   fetchT(url,25000).then(r=>r.json()).then(j=>{
-    if(typeof layerGroups==="undefined"||!layerGroups.tesla)return;
-    layerGroups.tesla.clearLayers();const seen={};
-    (j.features||[]).forEach(f=>{const c=f.geometry&&f.geometry.coordinates,p=f.properties||{};if(!c)return;const lat=c[1],lon=c[0],d=hav(userLat(),userLon(),lat,lon);if(d>31)return;const key=(p.name||"")+"@"+lat.toFixed(3)+","+lon.toFixed(3);if(seen[key])return;seen[key]=1;
-      L.marker([lat,lon]).addTo(layerGroups.tesla).bindPopup("<b>\u26A1 "+esc(p.name||"Tesla Supercharger")+"</b>"+((p.street||p.city)?"<br>\uD83D\uDCCD "+esc([p.street,p.city].filter(Boolean).join(", ")):"")+"<br>"+distTxt(d)+" uzoqlikda")});
+    const seen={},items=[];
+    (j.features||[]).forEach(f=>{const c=f.geometry&&f.geometry.coordinates,p=f.properties||{};if(!c)return;const lat=c[1],lon=c[0],d=hav(userLat(),userLon(),lat,lon);if(d>31)return;const key=(p.name||"")+"@"+lat.toFixed(3)+","+lon.toFixed(3);if(seen[key])return;seen[key]=1;items.push({n:p.name||"Tesla Supercharger",addr:[p.street,p.city].filter(Boolean).join(", "),lat:lat,lon:lon})});
+    TESLA_ITEMS=distSort(items);
+    drawMapLayer("ev");
+    if(panelLayer==="ev"){renderMapPanel();kickRoutes("ev")}
   }).catch(()=>{});
 }
 function refreshWC(notify=true){
@@ -1038,7 +1111,7 @@ document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
 document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60);const sb=b.getAttribute("data-sttab");if(sb)setTimeout(()=>setStTab(sb),60)}));
-document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));
+document.querySelectorAll("#layerChips .mpill").forEach(b=>b.addEventListener("click",()=>mapToggle(b.getAttribute("data-layer"),b)));
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
 function recordRecFor(s){if(!s)return false;recs.unshift({t:new Date().toISOString(),zone:s.z.n,score:s.score,conf:s.conf||null,c:{D:s.D,F:s.F,E:s.E,W:s.W,T:s.T,P:s.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs));idbMirror()}catch(e){}renderCal();return true}
