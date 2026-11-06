@@ -348,3 +348,18 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 **Amalga oshirish:** FIT_LAYERS=[wc, ev, cruise, air] (Location tegilmadi); fitLayerBounds() — foydalanuvchi + yoniq qatlamlarning ko'rinadigan (visCount) markerlari fitBounds, paddingTopLeft [24,24], paddingBottomRight [290,24] (panel hisobga olingan), maxZoom 16. mapToggle: birinchi fitted qatlam ochilganda savedMapView saqlanadi; ON → fit; OFF → boshqa fitted qatlam qolsa qayta fit, qolmasa savedMapView ga recenter. More handler → qayta fit. Ma'lumot kech kelganda ham fit: drawMapWc va refreshTesla ichida fit hook. Restroom ning alohida zoomHalfMile chaqiruvi olib tashlandi (funksiya kodi qoldi, chaqirilmaydi). Qo'shimcha tuzatish: More handler da wc uchun OSRM kickRoutes o'rniga kickRoutesWc (TomTom) — avval More bosilganda wc qatorlari OSRM dan ham so'ralishi mumkin edi. SW tlc-pro-v40, assetlar ?v=113.
 
 **QA: PASS** (jonli, 14:29–14:32, 6/6) — Airport: 3 marker ham (EWR/LGA/JFK) metro masshtabida sig'di, OFF → boshlang'ich ko'rinish; Cruise: 2 terminal ham sig'di, OFF → qaytdi; Restroom: eng yaqin 5 + «Siz» ko'cha masshtabida, More → 10 marker, ko'rinish W 53rd–W 35th dan W 60th–E 28th ga kengaydi, OFF → qaytdi; Tesla: 5 marker ham ekranda (masshtab o'zgarmadi — boshlang'ich shahar ko'rinishi ularni allaqachon sig'dirib turgan ekan, fit natijasi shu); ustma-ust: Restroom+Airport birgalikda fit, Airport OFF → faqat Restroom ga qayta fit, Restroom OFF → boshlang'ich ko'rinish. Kosmetik kuzatuv: More dan keyin 10-marker (Grand Central atrofi) qo'shnisi bilan vizual ustma-ust tushadi — ikkalasi ham chegarada, zichlik tabiiy.
+
+## v10.14 (2026-11-06, 5b605fa) — Traffic + EZPass (Radar parity) + TomTom hamma qatlamda + yo'nalish chiziqlari
+- Strip 7 tugma: + Traffic (🚦, TomTom flow tile qatlami, ⚠ degradatsiya Radar dagidek) + EZPass (🛣️ ON/OFF yorliq, toast Radar matni). Ikkalasi drv_settings da (standart ON), Settings da ham katakchalar.
+- Panel marshrutlari OSRM dan TomTom ga o'tdi (traffic + avoid=tollRoads, routeRepresentation=polyline). syncRouteLines: yoniq qatlamlarning ko'rinadigan joylariga sizdan chiziq (qatlam rangi).
+- QA: tugmalar/overlay/EZPass/Airport chiziqlari PASS; LEKIN Restroom birinchi to'lqinda 0/5 to'ldi (TomTom vaqtinchalik xatolari + 60s lockout) → v10.15 tuzatish.
+
+## v10.15 (2026-11-06, c4daf67) — marshrut retry
+- kickRoutes: o'z-o'zini qayta urinish (3 urinish, 8s/20s backoff, 150s muddat); routeDegraded faqat ko'rinadigan xato qolsagina qoladi.
+
+## v10.16 (2026-11-06, 1a2ccbb; 0d0901c = bo'sh push, patch anchor xatosi) — fit masshtab tuzatish
+- fitLayerBounds: paddingBottomRight ekran kengligiga mos (≥700px → 290, aks holda 24) + fit zoom floor z10. Sabab: telefonda 290px padding Airport fit ni z8 ga tushirardi (foydalanuvchi xabar berdi; Cruise kichik span da to'g'ri edi).
+
+## v10.17 (2026-11-06, d57cbda) — har marshrutga alohida rang
+- ROUTE_PALETTE (12 rang): chiziq rangi panel tartibi bo'yicha; panel qatorida .loc-dot mos rangda.
+- Birlashtirilgan QA (2026-11-06 15:04–15:07 EST, desktop 1919px): footer v10.17 ✓; Restroom retry PASS (30s→2/5, 60s→5/5, hech narsa bosilmasdan; ⚠ to'lgach yo'qoldi); Airport 3 chiziq 3 rang (LGA ko'k 9.5mi/51min, EWR qizil 16.4/45, JFK yashil 17.4/86), nuqtalar mos, fit z≈10 (desktopda); Cruise 2 rang ✓; Tesla 3 chiziq rangli ✓, yana 2 qator 30s kuzatuvda to'lmadi (retry davom etardi, qatlam o'chirildi). Tor ekran (telefon) fit QA brauzerida tekshirilmadi — oyna toraytirish imkoni bo'lmadi.
