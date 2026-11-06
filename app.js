@@ -47,7 +47,7 @@ const EVENTS=[
 {n:"Barclays Center tadbirlari",place:"Atlantic Ave, Brooklyn",lat:40.6826,lon:-73.9754,surge:null,note:"Jadval oʻzgaruvchan — aniq vaqt yoʻq, ballga taʼsir qilmaydi"},
 {n:"Radio City / Rockefeller",place:"6th Ave, Midtown",lat:40.7600,lon:-73.9800,surge:null,note:"Mavsumiy jadval — ballga taʼsir qilmaydi"}
 ];
-const CLOSURES=[
+let CLOSURES=[
 {n:"NYC Marathon marshruti yopilishlari",place:"Verrazzano, 4th Ave (Brooklyn), Queensboro Bridge, 5th Ave",lat:40.7300,lon:-73.9950,radiusKm:9,sev:"Yuqori",start:"2026-11-01T05:00",end:"2026-11-01T20:00"},
 {n:"BQE (I-278) qurilish ishlari",place:"Brooklyn Heights atrofida davriy torayishlar",lat:40.7000,lon:-73.9900,radiusKm:4,sev:"Oʻrtacha",start:null,end:null},
 {n:"FDR Drive davriy tungi ishlar",place:"Manhattan East Side, tungi soatlarda qisman",lat:40.7300,lon:-73.9750,radiusKm:3.5,sev:"Past",start:null,end:null}
@@ -98,9 +98,9 @@ function applyTheme(){document.documentElement.setAttribute("data-theme",setting
 function distTxt(mi){return settings.units==="km"?(mi*1.60934).toFixed(1)+" km":mi.toFixed(1)+" mi"}
 function spdTxt(mph){return settings.speed==="kmh"?Math.round(mph*1.60934)+" km/h":mph+" mph"}
 const AIRLABS_KEY="e47a4224-471e-4631-8e57-67aea417485e";
-const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
+const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",closures:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
 let lastCalcAt=null;
-function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
+function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>NYC DOT yopilishlar: <b>"+esc(apiStat.closures)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
 function userLat(){return pos?pos.lat:DEF_POS.lat}
 function userLon(){return pos?pos.lon:DEF_POS.lon}
 
@@ -576,10 +576,59 @@ function renderEventsClosures(){
     const when=x.w?(fmtD(x.w.s)+" → "+fmtD(x.w.e)):"aniq vaqt yoʻq";
     return '<li><div class="r"><div><b>'+esc(ev.n)+'</b><div class="small">'+esc(ev.place)+" · "+esc(when)+'</div>'+(ev.note?'<div class="small">'+esc(ev.note)+'</div>':'')+'</div><div style="text-align:right">'+stTxt+(ev.surge?'<div class="med mono">×'+ev.surge+'</div>':'')+'</div></div></li>';
   }).join("")||'<li class="small">Yaqin tadbirlar yoʻq.</li>';
-  $("closeList").innerHTML=CLOSURES.map(c=>{const act=clActive(c);
-    const when=c.start?(fmtD(new Date(c.start))+" → "+fmtD(new Date(c.end))):"muddat aniqlanmagan — ballga taʼsir qilmaydi";
-    return '<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place)+" · "+esc(when)+'</div></div><span class="'+(c.sev==="Yuqori"?"hi":c.sev==="Oʻrtacha"?"med":"low")+'">'+(act?"FAOL · ":"")+esc(c.sev)+'</span></div></li>'}).join("")+
-   '<li class="small">Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a> va 511NY ilovasi.</li>';
+  renderClosures();
+}
+
+
+/* ================= Jonli yopilishlar — NYC DOT Open Data (Socrata) ================= */
+let clTs=0,clLive=false,clBusy=false,clTotal=0;
+const BORO={M:"Manhattan",BK:"Brooklyn",Q:"Queens",BX:"Bronx",S:"Staten Island"};
+function titleCase(s){return String(s||"").toLowerCase().replace(/\b\w/g,ch=>ch.toUpperCase())}
+function clMapRow(r,block){
+  const g=r.the_geom;if(!g||!g.coordinates)return null;
+  let lat=null,lon=null;
+  if(g.type==="Point"){lon=g.coordinates[0];lat=g.coordinates[1]}
+  else{const seg=g.coordinates[0];if(seg&&seg[0]){lon=seg[0][0];lat=seg[0][1]}}
+  if(lat==null||lon==null)return null;
+  const sd=String(r.work_start_date||"").slice(0,10),ed=String(r.work_end_date||"").slice(0,10);
+  if(!sd||!ed)return null;
+  const on=titleCase(r.onstreetname),fr=titleCase(r.fromstreetname),to=titleCase(r.tostreetname);
+  return {n:on+(fr?(" \u2229 "+fr):"")+(block&&to?(" \u2192 "+to):""),place:((BORO[String(r.borough_code||"").toUpperCase()]||"NYC"))+(r.purpose?(" \u00b7 "+titleCase(r.purpose)):""),lat:lat,lon:lon,radiusKm:0.8,sev:"O\u02bbrtacha",start:sd+"T00:00",end:ed+"T23:59",live:true};
+}
+function loadClosures(force){
+  if(clBusy)return;if(!force&&clTs&&Date.now()-clTs<300000)return;clBusy=true;
+  const la=userLat(),lo=userLon();
+  const end14=new Date(Date.now()+14*864e5).toISOString().slice(0,10),today=new Date().toISOString().slice(0,10);
+  const sel="the_geom,onstreetname,fromstreetname,tostreetname,borough_code,work_start_date,work_end_date,purpose";
+  const wh=encodeURIComponent("work_start_date<='"+end14+"T00:00:00' AND work_end_date>='"+today+"T00:00:00' AND within_circle(the_geom,"+la+","+lo+",20000)");
+  const q="?$select="+sel+"&$where="+wh+"&$limit=2000";
+  const one=id=>fetchT("https://data.cityofnewyork.us/resource/"+id+".json"+q,15000,{cache:"no-store"}).then(r=>r.json()).catch(()=>null);
+  Promise.all([one("478a-yykk"),one("i6b5-j7bu")]).then(res=>{
+    clBusy=false;const ra=res[0],rb=res[1];
+    if(!ra&&!rb){apiStat.closures="XATO \u2014 NYC DOT javob bermadi";renderApiStat();return}
+    let rows=[];
+    if(ra)rows=rows.concat(ra.map(r=>clMapRow(r,false)));
+    if(rb)rows=rows.concat(rb.map(r=>clMapRow(r,true)));
+    rows=rows.filter(Boolean);
+    const seen={},ded=[];
+    rows.forEach(c=>{const k=c.n+"|"+c.start;if(!seen[k]){seen[k]=1;ded.push(c)}});
+    ded.sort((x,y)=>hav(la,lo,x.lat,x.lon)-hav(la,lo,y.lat,y.lon));
+    clTotal=ded.length;CLOSURES=ded.slice(0,300);clLive=true;clTs=Date.now();
+    const bd=$("closeBadge");if(bd){bd.textContent="LIVE";bd.className="badge b-live"}
+    apiStat.closures="OK \u00b7 jonli ("+clTotal+" ta, 20 km) \u00b7 "+new Date(clTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+    renderApiStat();renderClosures();renderAlerts();renderHome();
+    try{if(typeof layerGroups!=="undefined"&&layerGroups.close){layerGroups.close.clearLayers();CLOSURES.slice(0,120).forEach(c=>{if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("\U0001f6a7 "+esc(c.n)+(clActive(c)?" (FAOL)":""))})}}catch(e){}
+  });
+}
+function renderClosures(){
+  const el=$("closeList");if(!el)return;
+  const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});
+  const upd=$("clUpd");if(upd)upd.textContent=clLive?("Oxirgi yangilanish: "+new Date(clTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})):"Jonli ma\u02bclumot kutilmoqda\u2026";
+  const head=clLive?'<li class="small">\U0001f534 <b>LIVE</b> \u2014 NYC DOT (Open Data), har 5 daqiqada yangilanadi \u00b7 20 km radiusda <b>'+clTotal+' ta</b> yozuv</li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar ko\u02bcrilmoqda.</li>';
+  const act=CLOSURES.filter(c=>clActive(c)),up=CLOSURES.filter(c=>!clActive(c));
+  const item=c=>{const act2=clActive(c);return '<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place||"")+" \u00b7 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+'</div></div><span class="'+(act2?"hi":"med")+'">'+(act2?"FAOL":"YAQINDA")+'</span></div></li>'};
+  const rest=Math.max(0,act.length-20)+Math.max(0,up.length-10);
+  el.innerHTML=head+act.slice(0,20).map(item).join("")+up.slice(0,10).map(item).join("")+(rest?'<li class="small">\u2026 va yana '+rest+' tasi \u2014 xaritadagi \U0001f6a7 qatlamida.</li>':"")+'<li class="small">Manba: NYC DOT qurilish yopilishlari (kesishma va bloklar). Ish soatlari kun ichida farq qilishi mumkin. Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a>, 511NY.</li>';
 }
 
 function renderParking(){
@@ -681,7 +730,7 @@ $("vListen").addEventListener("click",()=>{
 function renderAlerts(){
   const el=$("alertList");if(!el)return;
   const items=[];
-  CLOSURES.forEach(c=>{if(clActive(c))items.push({sev:c.sev||"Past",txt:"🚧 <b>"+esc(c.n)+"</b> — "+esc(c.place||"")})});
+  CLOSURES.filter(c=>clActive(c)&&c.lat!=null).map(c=>({c:c,d:hav(userLat(),userLon(),c.lat,c.lon)})).sort((x,y)=>x.d-y.d).slice(0,5).forEach(x=>items.push({sev:x.c.sev||"Past",txt:"🚧 <b>"+esc(x.c.n)+"</b> — "+esc(x.c.place||"")}));
   EVENTS.forEach(ev=>{if(evState(ev)==="active")items.push({sev:"Tadbir",txt:"📅 <b>"+esc(ev.n)+"</b> — "+esc(ev.place||"")+" (hozir faol davr)"})});
   el.innerHTML=items.length?items.map(i=>'<div class="alertItem"><b>'+esc(i.sev)+'</b> · '+i.txt+'</div>').join(""):"Faol ogohlantirishlar yoʻq ✔";
   const av=$("alertVal");if(av)av.textContent=items.length?(items.length+" faol"):"Xavf yoʻq";
@@ -702,7 +751,9 @@ function refreshHeat(){try{
 const hm=$("homeMore");if(hm)hm.addEventListener("toggle",()=>{if(hm.open&&mapHome)setTimeout(()=>{try{mapHome.invalidateSize()}catch(e){}},80)});
 let lastHour=null;
 setInterval(()=>{const h=nowNY().getHours();if(lastHour===null){lastHour=h;return}if(h!==lastHour){lastHour=h;renderHome();refreshHeat()}},60000);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderHome()});}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false)}});}
+
+{const cb=$("clRefresh");if(cb)cb.addEventListener("click",()=>{loadClosures(true);toast("\U0001f6a7 Yopilishlar yangilanmoqda\u2026")});}
 
 /* ================= Navigation & Geo ================= */
 function go(view,modId){
@@ -862,7 +913,7 @@ $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
 loadZones();loadZoneWx();
 loadWeather();armWx();
-setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
+setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);loadClosures(true);setInterval(()=>loadClosures(false),300000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 
