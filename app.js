@@ -680,24 +680,37 @@ function renderMapPanel(){
   if(layer==="wc")kickRoutesWc();else kickRoutes(layer);
   p.querySelectorAll(".location-option[data-lat]").forEach(b=>b.addEventListener("click",()=>(layer==="wc"?navGo:gmaps)(parseFloat(b.getAttribute("data-lat")),parseFloat(b.getAttribute("data-lon")))));
   const mb=p.querySelector(".more");
-  if(mb)mb.addEventListener("click",()=>{visCount[layer]+=5;drawMapLayer(layer);renderMapPanel();kickRoutes(layer)});
+  if(mb)mb.addEventListener("click",()=>{visCount[layer]+=5;drawMapLayer(layer);renderMapPanel();if(layer==="wc")kickRoutesWc();else kickRoutes(layer);if(FIT_LAYERS.indexOf(layer)>=0)fitLayerBounds()});
 }
 function zoomHalfMile(){
   if(!map)return;
   const la=userLat(),lo=userLon(),dLa=805/111320,dLo=805/(111320*Math.cos(la*Math.PI/180));
   try{map.fitBounds([[la-dLa,lo-dLo],[la+dLa,lo+dLo]],{paddingTopLeft:[24,24],paddingBottomRight:[276,24]})}catch(e){}
 }
+const FIT_LAYERS=["wc","ev","cruise","air"];
+function fitLayerBounds(){
+  if(!map)return;
+  const pts=[[userLat(),userLon()]];
+  FIT_LAYERS.forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(x=>pts.push([x.lat,x.lon]))});
+  if(pts.length<2)return;
+  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[24,24],paddingBottomRight:[290,24],maxZoom:16})}catch(e){}
+}
 function mapToggle(layer,btn){
   if(!map)initMaps();
-  const on=!mapOn[layer];mapOn[layer]=on;
+  const on=!mapOn[layer];const wasFitted=FIT_LAYERS.some(l=>mapOn[l]);mapOn[layer]=on;
   if(btn)btn.classList.toggle("on",on);
-  if(layer==="wc"){if(on){layerGroups.wc.addTo(map);drawMapLayer("wc");refreshWC(false);savedMapView={c:map.getCenter(),z:map.getZoom()};zoomHalfMile()}else{map.removeLayer(layerGroups.wc);if(savedMapView){map.setView(savedMapView.c,savedMapView.z);savedMapView=null}}}
+  if(layer==="wc"){if(on){layerGroups.wc.addTo(map);drawMapLayer("wc");refreshWC(false)}else map.removeLayer(layerGroups.wc)}
   if(layer==="ev"){if(on){layerGroups.ev.addTo(map);layerGroups.tesla.addTo(map);drawMapLayer("ev");refreshEV(false);refreshTesla()}else{map.removeLayer(layerGroups.ev);map.removeLayer(layerGroups.tesla)}}
   if(layer==="loc"){if(on){drawMapLayer("loc");layerGroups.loc.addTo(map)}else map.removeLayer(layerGroups.loc)}
   if(layer==="cruise"){if(on){drawMapLayer("cruise");layerGroups.cruise.addTo(map)}else map.removeLayer(layerGroups.cruise)}
   if(layer==="air"){if(on){drawMapLayer("air");layerGroups.air.addTo(map)}else map.removeLayer(layerGroups.air)}
   if(on){panelLayer=layer;renderMapPanel();if(layer==="wc")kickRoutesWc();else kickRoutes(layer)}
   else if(panelLayer===layer){const other=Object.keys(mapOn).find(k=>mapOn[k]);panelLayer=other||null;renderMapPanel();if(other){if(other==="wc")kickRoutesWc();else kickRoutes(other)}}
+  if(FIT_LAYERS.indexOf(layer)>=0){
+    if(on){if(!wasFitted)savedMapView={c:map.getCenter(),z:map.getZoom()};fitLayerBounds()}
+    else if(FIT_LAYERS.some(l=>mapOn[l]))fitLayerBounds();
+    else if(savedMapView){map.setView(savedMapView.c,savedMapView.z);savedMapView=null}
+  }
 }
 function distSort(a){return a.map(x=>Object.assign({},x,{d:hav(userLat(),userLon(),x.lat,x.lon)})).sort((x,y)=>x.d-y.d)}
 function listHTML(items,icon){
@@ -708,7 +721,7 @@ function overpass(q){
   return fetchT("https://overpass-api.de/api/interpreter",15000,opt).then(r=>r.json())
    .catch(()=>fetchT("https://overpass.kumi.systems/api/interpreter",15000,opt).then(r=>r.json()));
 }
-function drawMapWc(){drawMapLayer("wc");if(panelLayer==="wc"){renderMapPanel();kickRoutesWc()}}
+function drawMapWc(){drawMapLayer("wc");if(mapOn.wc)fitLayerBounds();if(panelLayer==="wc"){renderMapPanel();kickRoutesWc()}}
 function drawMapEv(items){if(typeof layerGroups==="undefined"||!layerGroups.ev)return;layerGroups.ev.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#30d158",fillOpacity:.9}).addTo(layerGroups.ev).bindPopup("<b>\u26A1 "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
 function refreshTesla(){
   const url="https://photon.komoot.io/api/?q="+encodeURIComponent("Tesla Supercharger")+"&lat="+userLat()+"&lon="+userLon()+"&limit=15";
@@ -717,6 +730,7 @@ function refreshTesla(){
     (j.features||[]).forEach(f=>{const c=f.geometry&&f.geometry.coordinates,p=f.properties||{};if(!c)return;const lat=c[1],lon=c[0],d=hav(userLat(),userLon(),lat,lon);if(d>31)return;const key=(p.name||"")+"@"+lat.toFixed(3)+","+lon.toFixed(3);if(seen[key])return;seen[key]=1;items.push({n:p.name||"Tesla Supercharger",addr:[p.street,p.city].filter(Boolean).join(", "),lat:lat,lon:lon})});
     TESLA_ITEMS=distSort(items);
     drawMapLayer("ev");
+    if(mapOn.ev)fitLayerBounds();
     if(panelLayer==="ev"){renderMapPanel();kickRoutes("ev")}
   }).catch(()=>{});
 }
