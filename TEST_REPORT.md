@@ -274,3 +274,61 @@ SW tlc-pro-v25, assetlar ?v=94.
 **Amalga oshirish:** modEvents ichiga umumiy xarita #erMap (320px) + #erMapNote legendasi; qatlam tugmalari #erTgEv/#erTgRd (erShowEv/erShowRd, standart ikkalasi on); tab tugmalari #erTabEv/#erTabRd (setErTab — evPanel/modClose almashadi, xarita tepada qoladi). drawErLayers(): Events qatlamida markerlar (evPopup: nom, 📅 kun/sana/soat, 📍 manzil), Road qatlamida qizil L.polyline (blok yozuvlarining the_geom chizig'i — clMapRow endi `line` saqlaydi) va qizil circleMarker (kesishma nuqtalari), clPopup bilan. Road qatlami Road panelining Faol/Kelgusi/Hammasi filtriga bo'ysunadi (clPts). modClose/modEvents dagi alohida xaritalar (#clMap, #evMap) olib tashlandi; openModule modEvents/modClose ni guruhga yo'naltiradi; Home "Road Alerts" plitasi va Tools "Events" tugmasi data-grp="events" + data-ertab bilan ochiladi. Events ro'yxati: saralash 🕐 Eng yaqinlar / 🔥 Eng kattalar (surge bo'yicha) + 5 talik sahifalash (evPrev/evNext). setEvView/evMap/refreshClMap o'chirildi. scrollWheelZoom:false saqlandi. SW tlc-pro-v27, assetlar ?v=100.
 
 **QA: PASS** (jonli, 09:25–09:29 EST, 9/9 qadam) — footer v10.0; BITTA xarita (80 ta tadbir markeri); legenda aynan: "Qatlamlar: 📅 Events yoniq · xaritada 80 ta · 🚧 Road yoniq · xaritada 120 ta, filtrda jami 292 ta..."; qizil chiziqlar va nuqtalar bor (zoom da o'nlab segment); Road off → qizillar yo'qoldi, on → qaytdi; Events off → 80 marker yo'qoldi, on → qaytdi; event popup (nom/📅 Juma, Nov 6 · 2:00 PM → 6:00 PM/📍 manzil) va road popup (🚧 West 55 Street ∩ 5 Avenue → 6 Avenue, 📅 Oct 19 → Nov 15, 🔴 FAOL) tekshirildi; Events ro'yxati "1–5 / 552 · Sahifa 1/111", Keyingi → 2-sahifa; 🔥 Eng kattalar — birinchi 5 ta hammasi ×1.8; Road tabi: panel almashdi, xarita qoldi, filtrlar (Faol 292→300 jonli, Kelgusi 8, Hammasi 300) va sahifalash ishladi; Home Road Alerts plitasi Road tabi bilan ochildi. Kichik kuzatuvlar: standart zoom da qizil chiziqlar xira (fitBounds butun shaharni qamraydi — kutilgan holat); qatlam almashtirilganda xarita qayta fit bo'ladi (dizayn bo'yicha).
+
+## v10.1–v10.3 — Stops umumiy xarita + izohsiz/ikonka interfeys + "Siz" markerlari (2026-11-06)
+
+**Buyruqlar (ovozli suhbat, «Ha, hammasini bajar»):** (1) 8-bo'lim (Stops & Charging) v10.0 uslubida: bitta umumiy xarita + 3 qatlam + pastda ro'yxatlar; (2) Events & Road xaritasidagi barcha izohlar olib tashlansin; (3) tugmalar faqat ikonka bo'lsin; (4) har bir xaritada foydalanuvchi lokatsiya belgisi ("Siz") yonib tursin.
+
+**Amalga oshirish:** v10.1 — #stMap (modRest ichida) + qatlam tugmalari + tab ro'yxatlar; erMap/stMap ostidagi izohlar o'chirildi. DIQQAT: ushbu chatning birinchi push urinishi stale base tufayli rad etildi («Reference cannot be updated» — kuch bilan yozmadi), tarkib asosiy chatning parallel oqimi orqali chiqdi; bu chatning «v10.1 chiqdi» xabari app.js bo'yicha noto'g'ri bo'lib, foydalanuvchiga tuzatildi. v10.2 (e5a1f36) — Road filtr chiplari ilovaning o'z belgilariga o'tdi (🔴 Faol / 🕐 Kelgusi / 📋 Hammasi; app.js hech bir Events & Road tugmasiga matn yozmaydi — grep bilan tekshirildi). v10.3 — erMe/stMe "Siz" markerlari (har xarita init ida yaratiladi, watchPosition da setLatLng bilan siljiydi, xaritani qayta markazlamaydi). SW tlc-pro-v30.
+
+## v10.4 — Asosiy Map qatlamlari tuzatish (2026-11-06, 90e741b)
+
+**Sabab:** asosiy Map dagi wc/ev qatlam guruhlari mavjud edi, lekin refreshWC/refreshEV faqat modul ro'yxatlari va Stops xaritasini to'ldirardi — asosiy xarita qatlamlari bo'sh qolardi. **Tuzatish:** layerGroups.tesla; drawMapWc/drawMapEv (ko'k/yashil circleMarker, popup nom+masofa); refreshTesla() — Photon (kalitsiz) "Tesla Supercharger", 15 ta, dedupe nom@3dp, >31 mi tashlanadi, default pin + popup (⚡ nom / 📍 manzil / masofa). ev tugmasi ikkala guruhni boshqaradi. SW tlc-pro-v31.
+
+**QA: PASS** — Map: 🚻 → ko'k nuqtalar + popup; ⚡ → yashil nuqtalar + ~15 Tesla pin (popup: «⚡ Tesla Supercharger / 📍 American Dream Way, East Rutherford / 5.6 mi uzoqlikda»); Events & Road va Stops to'liq tekshirildi. **5 nuqson topildi:** (1) Home mini-xaritasi buzilgan (init-while-hidden, invalidateSize yo'q); (2) erMap yopilish chiziq/nuqtalarida popup ochilmadi (hit tolerance); (3) Stops Parking ro'yxati bo'sh (renderParking chaqirilmagan); (4) modullar ustma-ust yig'ilishi (go() closeModule chaqirmaydi); (5) Events sarlavha soni (548) ro'yxat sonidan (552) farq qilardi. Eslatma: QA matnidagi «radiusda908» — HTML teg chegarasi artefakti, vizual nuqson emas.
+
+## v10.5 — QA nuqsonlari tuzatish (2026-11-06, 4955887)
+
+modClear() go() ichida ham chaqiriladi; mapHome invalidateSize+setView (go('home') + boot+700ms); setStTab("park") → renderParking(); yopilish chizig'i weight 4→7, nuqta radius 5→8; Events sarlavhasi evs.length dan. SW tlc-pro-v32. (Birinchi push urinishi approval_expired bo'ldi — 30 daqiqa; qayta yuborish tasdiqlandi.)
+
+**Re-QA: 4/5 tuzaldi** — yopilish popup lari ikkala turda ham ochildi (matnlari aynan tekshirildi); sonlar teng (554=554); ustma-ustlik yo'q; Parking 4 ta garaj chiqdi. Home mini-xaritasi ochildi, lekin "Siz" pinida popup yo'q edi → v10.6. Kosmetik: Home legendasi «Qizil» deydi, issiqlik doiralari kulrang chiqadi (foydalanuvchiga aytilgan, tuzatilmagan).
+
+## v10.6 — Home "Siz" popup (2026-11-06, c5d3bc8)
+
+userMkH ga .bindPopup("Siz") qo'shildi (asosiy xaritadagi userMk da bor edi). SW tlc-pro-v33. **Tasdiq:** v10.7 QA bosqichida Home pini bosildi → «Siz» popup ochildi; mini-xarita birinchi ochilishdayoq to'liq chizildi.
+
+## v10.7 — Map qayta dizayn (2026-11-06, 8307f75)
+
+**Kontekst:** qayta dizayn avval asosiy chatga topshirilgan, lekin repoga umuman tushmagan (grep: cruise=0). Foydalanuvchi telefon skrinshoti bilan «Mana shu yerda o'zgarish bo'lishi kerak edi lekin yo'q» dedi; 5 bandlik reja shu chatda qayta aytildi, foydalanuvchi «Ha, shu chatda bajar» deb tasdiqladi. SABOQ: ko'rinmas (quvur) tuzatishlar foydalanuvchiga «hech narsa o'zgarmagan» bo'lib tuyuladi — ko'rinadigan yuza o'zgarishi alohida aytilishi kerak.
+
+**Amalga oshirish:** view-map flex-ustun, balandlik calc(100dvh − 70px − safe-area), #map flex (QA: viewport ning ~89%); «Qatlamlar haqida» va «Tezlik chegarasi» kartalari o'chirildi; eski 6 chip o'rniga 5 tugma (wc/ev/loc/cruise/air); PLACES (Radar SAVED_LOCATIONS, HOME siz), TOCHKA5, CRUISE2 konstantalari; issiqlik qatlami standart yoniq. SW tlc-pro-v34.
+
+**QA: PASS** (qisman izoh bilan) — kartalar yo'q, baland xarita, 5 tugma, Location (5 pin + qizil Tochka doiralari, popup lar aynan), Cruise (2 pin), Airport (3 pin) ishladi. Qisman: Tesla pinlari bu safar chiqmadi, Restroom markerlari ~24 s da keldi (Overpass asosiy→oyna zanjiri).
+
+**Tesla tashxisi (VM dan):** Photon API sog'lom (200, 15 natija), lekin javob 17.0 s — refreshTesla fetchT(10000) dan uzun → abort → jim catch. Vaqt mos kelmasligi, logika xatosi emas.
+
+## v10.8 — Vaqt limitlari (2026-11-06, 257e082)
+
+refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v35.
+
+## v10.9 — Map: Radar uslubi (2026-11-06, de0b3cb)
+
+**Buyruq (foydalanuvchi, 11:43):** 5 ikona bir qatorda; Restroom tugmasi TLC Radar dagi kabi — bir xil ko'rinish, bir xil uslub, bir xil vazifa; Tesla/Cruise/Airport ham shu uslubda.
+
+**Amalga oshirish:** #mapPanel (suzuvchi, Radar .location-option qatorlari: nom + kichik qator + 2 dumaloq belgi — ko'k halqa mi, yashil halqa min; «⬇ More» +5); .mpill strip tugmalari (ikonka ustida, yorliq ostida; o'chiq — kulrang grayscale, yoniq — rangli; Tesla — qizil Tesla SVG); 28px dumaloq divIcon markerlar (mk-wc oq/ko'k halqa, mk-tesla oq/sariq halqa, mk-loc ko'k, mk-tochka qizil+mehmonxona soni); Restroom yonganda zoomHalfMile (~805 m); marker/qator click → gmaps(). Marshrut masofa/vaqt: OSRM (oshkor qilingan farq: Radar TomTom ishlatadi; OSRM bo'lmasa haversine masofa + «--» min). Panel bitta (oxirgi yongan qatlam), qatlamlar mustaqil. SW tlc-pro-v36, assetlar ?v=109.
+
+**QA: PASS (izohlar bilan)** — tugmalar bir qatorda, kulrang→rangli; Restroom paneli (Port Authority 0.3 mi/1 min …), More 5→9 qator va marker; Tesla paneli (East 47th St 1.2 mi/3 min) + sariq halqali markerlar; Location/Cruise/Airport panellari va markerlari to'liq; hammasi o'chganda toza. Izohlar: Restroom birinchi ochilishi ~25 s (Overpass); qatorlar marshrut masofasi ekranda ko'rinadigan tartib bilan to'g'ri chiziq tartibi farqi tufayli «saralanmagan» ko'rinadi; yashil EV nuqtalari bu safar kechikdi (ma'lumot vaqti). Qatlamlar ustma-ust ochilishi va zoom qaytmasligi — Radar da ham shunday (dizayn).
+
+## v10.10 — Panel silliqlash (2026-11-06, fc54fbe)
+
+(1) Restroom: layerItems("wc") = WC_ITEMS||distSort(WC_FB) — zaxira ro'yxat darhol, jonli kelganda almashadi (stWcPts uslubi). (2) sortedItems(): samarali masofa (routeInfo.dist ?? d) bo'yicha panel/marker/marshrut tartibi bir xil. SW tlc-pro-v37, assetlar ?v=110.
+
+**QA: PASS** — Restroom paneli <2 s da chiqdi («Yuklanmoqda...» ko'rinmadi); 40 s dan keyin tartib 0.3, 0.5, 0.8, 1.3, 2.4 (o'suvchi); yashil EV nuqtalari qaytdi (2 ta shaharda). Qoldiq: Tesla da 2 qator «-- mi» qoldi — sabab v10.11 da.
+
+## v10.11 — Panel marshrut chaqiruvi tuzatish (2026-11-06, c7d420f)
+
+**Sabab:** kickRoutes faqat qatlam ochilganda va ma'lumot kelganda chaqirilardi; qayta saralashda panelga YANGI chiqqan qatorlar (oldingi 5 talikdan pastda bo'lganlar) marshrut so'rovisiz qolardi — «-- mi» abadiy. **Tuzatish:** renderMapPanel() oxirida kickRoutes(layer) (idempotent — mavjud kalitlar o'tkazib yuboriladi). SW tlc-pro-v38, assetlar ?v=111. Push yo'lida: 2× approval_expired + 1× runtime restart uzilishi; to'rtinchi urinish tasdiqlandi.
+
+**QA: PASS** (14:07–14:09) — footer v10.11; Tesla paneli: 15/15 qator raqamli mi/min (1.2/3, 1.8/5, 3.3/12, 4.0/10, 4.2/13, 4.7/12, 5.1/15, 5.1/13, 5.4/17, 6.1/20, 6.4/13, 6.5/16, 8.1/15, 10.1/22, 25.7/36), tartib mi bo'yicha o'suvchi, «-- mi» hech qayerda yo'q (matn qidiruvi ham topmadi).
+
+**Sinovdan o'tmagan (qurilmada):** jismoniy iPhone, PWA Home Screen o'rnatish, offline qayta ishga tushish, IDB tiklash, AirLabs kvota tugashi holati.
