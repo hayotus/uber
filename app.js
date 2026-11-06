@@ -576,6 +576,7 @@ function renderEventsClosures(){
 
 /* ================= Jonli yopilishlar — NYC DOT Open Data (Socrata) ================= */
 let clTs=0,clLive=false,clBusy=false,clTotal=0;
+let clFilter="act",clPage=0,clMap=null,clMarkers=null;
 const BORO={M:"Manhattan",BK:"Brooklyn",Q:"Queens",BX:"Bronx",S:"Staten Island"};
 function titleCase(s){return String(s||"").toLowerCase().replace(/\b\w/g,ch=>ch.toUpperCase())}
 function clMapRow(r,block){
@@ -614,15 +615,46 @@ function loadClosures(force){
     try{if(typeof layerGroups!=="undefined"&&layerGroups.close){layerGroups.close.clearLayers();CLOSURES.slice(0,120).forEach(c=>{if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))})}}catch(e){}
   });
 }
+function clFiltered(){if(clFilter==="act")return CLOSURES.filter(c=>clActive(c));if(clFilter==="up")return CLOSURES.filter(c=>!clActive(c));return CLOSURES.slice()}
 function renderClosures(){
   const el=$("closeList");if(!el)return;
   const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});
   const upd=$("clUpd");if(upd)upd.textContent=clLive?("Oxirgi yangilanish: "+new Date(clTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})):"Jonli ma\u02bclumot kutilmoqda\u2026";
   const head=clLive?'<li class="small">🔴 <b>LIVE</b> \u2014 NYC DOT (Open Data), har 5 daqiqada yangilanadi \u00b7 20 km radiusda <b>'+clTotal+' ta</b> yozuv</li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar ko\u02bcrilmoqda.</li>';
-  const act=CLOSURES.filter(c=>clActive(c)),up=CLOSURES.filter(c=>!clActive(c));
+  const list=clFiltered();
+  const pages=Math.max(1,Math.ceil(list.length/5));
+  if(clPage>pages-1)clPage=pages-1;if(clPage<0)clPage=0;
   const item=c=>{const act2=clActive(c);return '<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place||"")+" \u00b7 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+'</div></div><span class="'+(act2?"hi":"med")+'">'+(act2?"FAOL":"YAQINDA")+'</span></div></li>'};
-  const rest=Math.max(0,act.length-20)+Math.max(0,up.length-10);
-  el.innerHTML=head+act.slice(0,20).map(item).join("")+up.slice(0,10).map(item).join("")+(rest?'<li class="small">\u2026 va yana '+rest+' tasi \u2014 xaritadagi 🚧 qatlamida.</li>':"")+'<li class="small">Manba: NYC DOT qurilish yopilishlari (kesishma va bloklar). Ish soatlari kun ichida farq qilishi mumkin. Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a>, 511NY.</li>';
+  const slice=list.slice(clPage*5,clPage*5+5);
+  el.innerHTML=head+(slice.map(item).join("")||'<li class="small">Bu filtrda yopilishlar yo\u02bbq.</li>')+'<li class="small">Manba: NYC DOT qurilish yopilishlari (kesishma va bloklar). Ish soatlari kun ichida farq qilishi mumkin. Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a>, 511NY.</li>';
+  const pi=$("clPageInfo");if(pi)pi.textContent=list.length?((clPage*5+1)+"\u2013"+Math.min(list.length,clPage*5+5)+" / "+list.length+" \u00b7 Sahifa "+(clPage+1)+"/"+pages):"0 ta";
+  const pv=$("clPrev");if(pv)pv.disabled=clPage<=0;
+  const nx=$("clNext");if(nx)nx.disabled=clPage>=pages-1;
+  const note=$("clMapNote");if(note)note.textContent="Xaritada: "+Math.min(120,list.filter(c=>c.lat!=null).length)+" ta yopilish (filtr: "+(clFilter==="act"?"Faol":clFilter==="up"?"Kelgusi":"Hammasi")+"). Markerni bosing \u2014 ko\u02bcha va muddati chiqadi.";
+  refreshClMap();
+}
+function clPopup(c){const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});return "<b>🚧 "+esc(c.n)+"</b>"+(c.place?"<br>📍 "+esc(c.place):"")+"<br>📅 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+"<br>"+(clActive(c)?"🔴 FAOL":"🕐 YAQINDA")+(c.sev?" \u00b7 "+esc(c.sev):"")}
+function drawClMarkers(){
+  if(!clMap||!clMarkers)return;
+  clMarkers.clearLayers();
+  clFiltered().filter(c=>c.lat!=null).slice(0,120).forEach(c=>{L.marker([c.lat,c.lon]).addTo(clMarkers).bindPopup(clPopup(c))});
+}
+function fitClMap(){
+  if(!clMap)return;
+  const pts=clFiltered().filter(c=>c.lat!=null).slice(0,120);
+  if(pts.length){try{clMap.fitBounds(L.latLngBounds(pts.map(c=>[c.lat,c.lon])),{padding:[24,24],maxZoom:13})}catch(e){}}
+}
+function refreshClMap(){
+  const el=$("clMap");if(!el||!el.clientWidth)return;
+  if(!clMap){clMap=L.map("clMap").setView([userLat(),userLon()],12);tiles().addTo(clMap);clMarkers=L.layerGroup().addTo(clMap);drawClMarkers();fitClMap();return}
+  try{clMap.invalidateSize()}catch(e){}
+  drawClMarkers();
+}
+function setClFilter(f){
+  clFilter=f;clPage=0;
+  const suf={act:"Act",up:"Up",all:"All"};
+  ["Act","Up","All"].forEach(k=>{const b=$("clF"+k);if(b)b.classList.toggle("on",k===suf[f])});
+  renderClosures();fitClMap();
 }
 
 
@@ -838,6 +870,11 @@ setInterval(()=>{const h=nowNY().getHours();if(lastHour===null){lastHour=h;retur
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false);loadEvents(false)}});}
 
 {const cb=$("clRefresh");if(cb)cb.addEventListener("click",()=>{loadClosures(true);toast("🚧 Yopilishlar yangilanmoqda\u2026")});}
+{const fa=$("clFAct");if(fa)fa.addEventListener("click",()=>setClFilter("act"));}
+{const fu=$("clFUp");if(fu)fu.addEventListener("click",()=>setClFilter("up"));}
+{const fl=$("clFAll");if(fl)fl.addEventListener("click",()=>setClFilter("all"));}
+{const pv=$("clPrev");if(pv)pv.addEventListener("click",()=>{if(clPage>0){clPage--;renderClosures()}});}
+{const nx=$("clNext");if(nx)nx.addEventListener("click",()=>{clPage++;renderClosures()});}
 {const eb=$("evRefresh2");if(eb)eb.addEventListener("click",()=>{loadEvents(true);toast("🎉 Tadbirlar yangilanmoqda\u2026")});}
 {const bl=$("evViewList");if(bl)bl.addEventListener("click",()=>setEvView("list"));}
 {const bm=$("evViewMap");if(bm)bm.addEventListener("click",()=>setEvView("map"));}
@@ -868,6 +905,7 @@ function openModule(id){
   const t=d.querySelector("summary span");$("modTitle").textContent=t?t.textContent.replace(/\s+/g," ").trim():"Modul";
   modMoveIn(d);showModView();
   if(id==="modEvents")setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
+  if(id==="modClose")setTimeout(refreshClMap,160);
 }
 const GRPS={smart:["Smart Assistant",["modSmart","modVoice"]],events:["Events & Road",["modEvents","modClose"]],wx:["Weather & Cameras",["modWx","modCam"]],stops:["Stops & Charging",["modRest","modPark","modEv"]]};
 function openGroup(key){
@@ -877,6 +915,7 @@ function openGroup(key){
   g[1].forEach(id=>{const d=$(id);if(d)modMoveIn(d)});
   showModView();
   setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
+  setTimeout(refreshClMap,160);
 }
 function closeModule(){
   const body=$("modBody");
