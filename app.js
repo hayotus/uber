@@ -630,18 +630,19 @@ function renderClosures(){
   const pi=$("clPageInfo");if(pi)pi.textContent=list.length?((clPage*5+1)+"\u2013"+Math.min(list.length,clPage*5+5)+" / "+list.length+" \u00b7 Sahifa "+(clPage+1)+"/"+pages):"0 ta";
   const pv=$("clPrev");if(pv)pv.disabled=clPage<=0;
   const nx=$("clNext");if(nx)nx.disabled=clPage>=pages-1;
-  const note=$("clMapNote");if(note)note.textContent="Xaritada: "+Math.min(120,list.filter(c=>c.lat!=null).length)+" ta yopilish (filtr: "+(clFilter==="act"?"Faol":clFilter==="up"?"Kelgusi":"Hammasi")+"). Markerni bosing \u2014 ko\u02bcha va muddati chiqadi.";
+  const note=$("clMapNote");if(note)note.textContent="Xaritada eng yaqin "+Math.min(120,list.filter(c=>c.lat!=null).length)+" ta yopilish \u00b7 filtrda jami "+list.length+" ta ("+(clFilter==="act"?"Faol":clFilter==="up"?"Kelgusi":"Hammasi")+"). Markerni bosing \u2014 ko\u02bccha va muddati chiqadi.";
   refreshClMap();
 }
 function clPopup(c){const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});return "<b>🚧 "+esc(c.n)+"</b>"+(c.place?"<br>📍 "+esc(c.place):"")+"<br>📅 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+"<br>"+(clActive(c)?"🔴 FAOL":"🕐 YAQINDA")+(c.sev?" \u00b7 "+esc(c.sev):"")}
+function clPts(){return clFiltered().filter(c=>c.lat!=null&&hav(userLat(),userLon(),c.lat,c.lon)<60).slice(0,120)}
 function drawClMarkers(){
   if(!clMap||!clMarkers)return;
   clMarkers.clearLayers();
-  clFiltered().filter(c=>c.lat!=null).slice(0,120).forEach(c=>{L.marker([c.lat,c.lon]).addTo(clMarkers).bindPopup(clPopup(c))});
+  clPts().forEach(c=>{L.marker([c.lat,c.lon]).addTo(clMarkers).bindPopup(clPopup(c))});
 }
 function fitClMap(){
   if(!clMap)return;
-  const pts=clFiltered().filter(c=>c.lat!=null).slice(0,120);
+  const pts=clPts();
   if(pts.length){try{clMap.fitBounds(L.latLngBounds(pts.map(c=>[c.lat,c.lon])),{padding:[24,24],maxZoom:13})}catch(e){}}
 }
 function refreshClMap(){
@@ -649,6 +650,7 @@ function refreshClMap(){
   if(!clMap){clMap=L.map("clMap").setView([userLat(),userLon()],12);tiles().addTo(clMap);clMarkers=L.layerGroup().addTo(clMap);drawClMarkers();fitClMap();return}
   try{clMap.invalidateSize()}catch(e){}
   drawClMarkers();
+  try{const ctr=clMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitClMap()}catch(e){}
 }
 function setClFilter(f){
   clFilter=f;clPage=0;
