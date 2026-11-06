@@ -198,3 +198,22 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 **Nuqson (v8.7 QA):** sarlavha va popup'da 🔴📅📍🎉 o'rniga "U0001f534" kabi literal kodlar. Sabab: Python patch-string ichidagi `\U000...` (8 xonali) JS da escape emas — JS faqat `\uXXXX` (4 xonali) ni tushunadi. v7.1 dagi saboqning boshqa ko'rinishi.
 **Tuzatish:** app.js dagi barcha 9 ta `\U000...` literal haqiqiy emoji belgilarga almashtirildi (🔴×2, 🎉×2, 📅, 📍, 🚧×3 — oxirgi 3 tasi v8.5 dan qolgan toast'lardagi yashirin nuqson ham edi). SW tlc-pro-v20, assetlar ?v=88.
 **QA: PASS** (05:01–05:02 EST) — footer v8.8; sarlavha «🔴 LIVE — NYC Permitted Events (Open Data) · kelgusi 7 kun: 567 ta tadbir, xaritada: 254 ta» (sonlar jonli yangilandi, geokod keshi o'smoqda); popup: «Porter-Dorr Wedding · 📅 Shanba, Nov 7 · 3:00 PM → 4:00 PM · 📍 Prospect Park: Grecian Shelter/Peristyle Lawn West, Brooklyn · 🎉 Special Event». Sahifada "U000" matni qolmadi.
+
+## v9.0 — 5 ta buyruq: Alerts olib tashlandi, Best Next Location yangi dizayn, modullar alohida oynada, zamonaviy ustki dizayn (2026-11-06)
+
+**Kirish (ovozli suhbat, 06:34–06:40 EST):** foydalanuvchi tartib belgiladi — vazifa aytiladi, Muse tushunganini aytadi, tasdiqdan keyingina bajariladi. 5 ta buyruq berildi va tasdiqlandi ("Ha tasdiqlayman shu beshta buyruqni bajar"):
+1. Alerts (jonli ogohlantirishlar) qismini olib tashlash.
+2. Best Next Location boshqacha ko'rinishda.
+3. Pastki menyu (Home, Map, Airports, Menu, Journal, TLC Radar) QOLADI — unga hech qachon tegilmaydi; o'zgarish faqat menyudan tepada.
+4. Menyudagi 16 modul har biri bosilganda alohida oynada ochilsin.
+5. Ustki dizayn: juda yaxshi, tushunarli, zamonaviy.
+
+**Yechim:**
+1. #alertCard (Home dagi "Ogohlantirishlar — Alerts LIVE" kartasi) index.html dan o'chirildi; renderAlerts() funksiyasi va 3 ta chaqiruvi olib tashlandi (maybeNotify qoldi — u CLOSURES dan to'g'ridan o'qiydi). Road Alerts plitasi (navigatsiya) qoldi, uning qiymatini endi renderHome yozadi (yopilishlar soni).
+2. #bestCard qayta tuzildi: chapda yashil ball qutisi (katta son + "BALL · /100" + "Ishonch NN%"), o'ngda hudud nomi, meta va gradient progress chizig'i (meter). renderHome endi bestScore/bestConf/bestMeter ni ham to'ldiradi. Barcha eski ID lar (bestName/bestMeta/bestReasons/bestGo/recOnly) saqlandi.
+3. Pastki menyu (<nav class="bot">) HTML/CSS iga UMUMAN tegilmadi — QA tartib+yozuvlarni aynan tasdiqladi.
+4. Yangi view-mod ekrani: modHead (← Orqaga + modul nomi) + modBody. openModule() modulning <details> elementini modBody ga KO'CHIRADI (klon emas — ID/listenerlar saqlanadi), placeholder saqlanadi; closeModule() joyiga qaytaradi va avvalgi ekranga o'tadi. go(view, modId) endi openModule ga yo'naltiradi; details.mod summary ochilishi ham toggle-interceptor orqali oynaga olib boradi. modEvents ko'chganda evMap.invalidateSize() chaqiriladi.
+5. style.css oxiriga v9.0 dizayn qatlami: body radial fon, hero gradient panel, kartalar gradient+soya+20px radius, GO tugmasi yashil gradient, #bestCard yashil ramka/gradient, badge pill. .bot selektorlari ataylab yo'q.
+SW tlc-pro-v21, assetlar ?v=90.
+
+**QA: PASS** (jonli, 06:43–06:44 EST) — footer v9.0; Alerts kartasi yo'q; Best Next Location: ball qutisi (52→50→49, jonli qayta hisob — ob-havo/GPS kelishi bilan), Ishonch %, meter chizig'i, hudud Harlem; pastki menyu aynan o'zgarishsiz; Events moduli alohida oynada ochildi (LIVE, 557 ta tadbir, 317 ta xaritada — geokod keshi o'sishda), xarita+popup ishladi, ← Orqaga Menu ga qaytardi; Road Closure Monitor ham alohida oynada (LIVE, 06:43 yangilangan). Izoh: yopilishlar sarlavhasidagi 908 (feed jami) vs ro'yxat 300 (cap) — v8.5 dan ma'lum holat, regressiya emas.
