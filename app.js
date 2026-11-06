@@ -681,7 +681,6 @@ function renderClosures(){
   const pi=$("clPageInfo");if(pi)pi.textContent=list.length?((clPage*5+1)+"\u2013"+Math.min(list.length,clPage*5+5)+" / "+list.length+" \u00b7 Sahifa "+(clPage+1)+"/"+pages):"0 ta";
   const pv=$("clPrev");if(pv)pv.disabled=clPage<=0;
   const nx=$("clNext");if(nx)nx.disabled=clPage>=pages-1;
-  updateErNote();
   refreshErMap();
 }
 function clPopup(c){const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});return "<b>🚧 "+esc(c.n)+"</b>"+(c.place?"<br>📍 "+esc(c.place):"")+"<br>📅 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+"<br>"+(clActive(c)?"🔴 FAOL":"🕐 YAQINDA")+(c.sev?" \u00b7 "+esc(c.sev):"")}
@@ -707,10 +706,6 @@ function refreshErMap(){
   try{erMap.invalidateSize()}catch(e){}
   drawErLayers();
   try{const ctr=erMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitErMap()}catch(e){}
-}
-function updateErNote(){
-  const n=$("erMapNote");if(!n)return;
-  n.textContent="Qatlamlar: \uD83D\uDCC5 Events "+(erShowEv?("yoniq \u00b7 xaritada "+erEvPts().length+" ta"):"o\u02bbchiq")+" \u00b7 \uD83D\uDEA7 Road "+(erShowRd?("yoniq \u00b7 xaritada "+clPts().length+" ta, filtrda jami "+clFiltered().length+" ta"):"o\u02bbchiq")+". Qizil chiziq \u2014 yopiq ko\u02bccha (blok), qizil nuqta \u2014 kesishma. Belgini bosing \u2014 nomi, manzili va vaqti chiqadi.";
 }
 function setErToggle(w){
   if(w==="ev")erShowEv=!erShowEv;else erShowRd=!erShowRd;
