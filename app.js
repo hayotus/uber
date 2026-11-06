@@ -619,6 +619,7 @@ function setStToggle(w){
 }
 function setStTab(t){
   stTab=t;
+  if(t==="park")renderParking();
   const wp=$("wcPanel"),mp=$("modPark"),me=$("modEv");
   if(wp)wp.style.display=t==="wc"?"":"none";
   if(mp)mp.style.display=t==="park"?"":"none";
@@ -702,7 +703,7 @@ function erEvPts(){return EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").sli
 function drawErLayers(){
   if(!erMap)return;
   if(erEvLayer){erEvLayer.clearLayers();if(erShowEv)erEvPts().forEach(e=>{L.marker([e.lat,e.lon]).addTo(erEvLayer).bindPopup(evPopup(e))})}
-  if(erRdLayer){erRdLayer.clearLayers();if(erShowRd)clPts().forEach(c=>{const pp=clPopup(c);if(c.line&&c.line.length>1){L.polyline(c.line,{color:"#ff3b30",weight:4,opacity:.85}).addTo(erRdLayer).bindPopup(pp)}else{L.circleMarker([c.lat,c.lon],{radius:5,color:"#ff3b30",weight:2,fillColor:"#ff3b30",fillOpacity:.7}).addTo(erRdLayer).bindPopup(pp)}})}
+  if(erRdLayer){erRdLayer.clearLayers();if(erShowRd)clPts().forEach(c=>{const pp=clPopup(c);if(c.line&&c.line.length>1){L.polyline(c.line,{color:"#ff3b30",weight:7,opacity:.85}).addTo(erRdLayer).bindPopup(pp)}else{L.circleMarker([c.lat,c.lon],{radius:8,color:"#ff3b30",weight:2,fillColor:"#ff3b30",fillOpacity:.7}).addTo(erRdLayer).bindPopup(pp)}})}
   updateErNote();
 }
 function fitErMap(){
@@ -807,8 +808,9 @@ function renderEvents(){
   const el=$("eventList");if(!el)return;
   const upd=$("evUpd");if(upd)upd.textContent=evLive?("Oxirgi yangilanish: "+new Date(evTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})):"Jonli ma\u02bclumot kutilmoqda\u2026";
   evCountMapped();
-  const head=evLive?'<li class="small">🔴 <b>LIVE</b> \u2014 NYC Permitted Events (Open Data) \u00b7 kelgusi 7 kun: <b>'+evTotal+' ta</b> tadbir, xaritada: <b>'+evMapped+' ta</b></li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar.</li>';
   const evs=EVENTS.map(ev=>({ev:ev,st:evState(ev),w:evWin(ev)})).filter(x=>x.st!=="past");
+  const head=evLive?'<li class="small">🔴 <b>LIVE</b> \u2014 NYC Permitted Events (Open Data) \u00b7 kelgusi 7 kun: <b>'+evs.length+' ta</b> tadbir, xaritada: <b>'+evMapped+' ta</b></li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar.</li>';
+
   if(evSort==="big")evs.sort((x,y)=>{const sd=(y.ev.surge||0)-(x.ev.surge||0);if(sd)return sd;const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});else evs.sort((x,y)=>{const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});
   const evPages=Math.max(1,Math.ceil(evs.length/5));if(evPage>evPages-1)evPage=evPages-1;if(evPage<0)evPage=0;
   const items=evs.slice(evPage*5,evPage*5+5).map(x=>{const ev=x.ev;
@@ -967,10 +969,12 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHom
 /* ================= Navigation & Geo ================= */
 function go(view,modId){
   if(modId){openModule(modId);return}
+  if($("modBody")&&$("modBody").querySelector("details.mod"))modClear();
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("act"));
   $("view-"+view).classList.add("act");
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
+  if(view==="home")setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)}},80);
   if(view==="airports"){loadLiveFlights(false);renderAirports()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
@@ -1001,11 +1005,11 @@ function openGroup(key){
   if(key==="stops")setTimeout(()=>setStTab("wc"),40);
   setTimeout(refreshErMap,160);setTimeout(refreshStMap,160);
 }
-function closeModule(){
-  const body=$("modBody");
-  if(body){body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;d.style.display="";const _ep=$("evPanel");if(_ep)_ep.style.display="";const _wp=$("wcPanel");if(_wp)_wp.style.display="";if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}})}
-  go(modPrev||"menu");
+function modClear(){
+  const body=$("modBody");if(!body)return;
+  body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;d.style.display="";const _ep=$("evPanel");if(_ep)_ep.style.display="";const _wp=$("wcPanel");if(_wp)_wp.style.display="";if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}});
 }
+function closeModule(){modClear();go(modPrev||"menu")}
 {const mb=$("modBack");if(mb)mb.addEventListener("click",closeModule);}
 document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",()=>{if(d.open&&d.parentElement!==$("modBody"))openModule(d.id)}));
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
@@ -1155,6 +1159,7 @@ renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
+setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){}}},700);
 loadZones();loadZoneWx();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
