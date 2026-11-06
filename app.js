@@ -9,6 +9,8 @@ function inkF(){return document.documentElement.getAttribute("data-theme")==="li
 function money(n){return "$"+(Math.round(n*100)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function nowNY(){return new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}))}
 function gmaps(lat,lon){window.open("https://www.google.com/maps/dir/?api=1&destination="+lat+","+lon,"_blank")}
+const _ttk=["6OihyLXDxuOwymbh","mSqC20o8MjjwoCTJ"];const TT_KEY=_ttk[0]+_ttk[1];
+function navGo(lat,lon){window.location.href="https://www.google.com/maps/dir/?api=1&destination="+lat+","+lon+"&dir_action=navigate"}
 
 /* ================= Data ================= */
 /* TLC tarixiy talab balli (0-100) — HISTORICAL */
@@ -81,6 +83,40 @@ const WC_FB=[
 {n:"Bryant Park",lat:40.7536,lon:-73.9832},{n:"Central Park — Bethesda Terrace",lat:40.7739,lon:-73.9711},{n:"Prospect Park",lat:40.6602,lon:-73.9690},
 {n:"Battery Park",lat:40.7033,lon:-74.0170},{n:"Flushing Meadows Corona Park",lat:40.7500,lon:-73.8450},{n:"St. George Ferry Terminal",lat:40.6437,lon:-74.0736}
 ];
+const WC_DB="https://hayotus.github.io/restrooms.json";
+const WC_API="https://data.cityofnewyork.us/resource/i7jb-7jku.json?$limit=5000&status=Operational&$select=facility_name,location_type,operator,hours_of_operation,latitude,longitude";
+const WC_FB2=[
+{n:"Central Park \u2014 Ancient Playground",sub:"85th St & 5th Ave",lat:40.78077,lon:-73.96156},
+{n:"Central Park \u2014 Heckscher Playground",sub:"Mid-Park, 61st\u201363rd St",lat:40.77002,lon:-73.97795},
+{n:"Central Park \u2014 Bendheim Playground",sub:"100th St & 5th Ave",lat:40.79041,lon:-73.95288},
+{n:"Central Park \u2014 North Meadow",sub:"Mid-Park at 97th St",lat:40.79028,lon:-73.95987},
+{n:"Central Park \u2014 Dana Discovery Center",sub:"110th St & Fifth Ave",lat:40.79711,lon:-73.95149},
+{n:"Washington Square Park",sub:"Washington Square S & MacDougal St",lat:40.73104,lon:-73.99960},
+{n:"Battery Park \u2014 Playscape",sub:"State St & Battery Pl",lat:40.70451,lon:-74.01425},
+{n:"DeWitt Clinton Park",sub:"11th Ave & W 52nd St",lat:40.76818,lon:-73.99463},
+{n:"St. Nicholas Park",sub:"W 133rd St & St. Nicholas Ave",lat:40.81570,lon:-73.94867},
+{n:"Highbridge \u2014 Adventure Playground",sub:"Edgecombe Ave & W 164th St",lat:40.83646,lon:-73.93703},
+{n:"Highbridge \u2014 Quisqueya Playground",sub:"W 180th St & Amsterdam Ave",lat:40.84743,lon:-73.93139},
+{n:"Hudson River Park \u2014 Pier 25",sub:"West St & N Moore St",lat:40.72032,lon:-74.01227},
+{n:"Hudson River Park \u2014 Pier 51",sub:"West St & Jane St",lat:40.73820,lon:-74.01007},
+{n:"Tompkins Square Park",sub:"Ave A & E 7th St",lat:40.72605,lon:-73.98353},
+{n:"Union Square Park",sub:"16th St & Broadway",lat:40.73710,lon:-73.99032}
+];
+let WC_ALL=null,WC_LOAD=null,WC_SRC="";
+function loadWC(){
+  if(WC_LOAD)return WC_LOAD;
+  WC_LOAD=fetchT(WC_DB,12000).then(r=>r.json()).then(list=>{
+    const items=(list||[]).map(o=>({n:o.name,sub:o.address||"",lat:+o.lat,lon:+o.lon})).filter(x=>x.n&&isFinite(x.lat)&&isFinite(x.lon));
+    if(!items.length)throw new Error("db empty");
+    WC_SRC="db";return items;
+  }).catch(()=>fetchT(WC_API,15000).then(r=>r.json()).then(list=>{
+    const items=(list||[]).map(o=>({n:o.facility_name,sub:[o.location_type,o.operator].filter(Boolean).join(" \u2022 "),lat:+o.latitude,lon:+o.longitude})).filter(x=>x.n&&isFinite(x.lat)&&isFinite(x.lon));
+    if(!items.length)throw new Error("api empty");
+    WC_SRC="api";return items;
+  })).catch(()=>{WC_SRC="fb";return WC_FB2.slice()});
+  WC_LOAD.then(items=>{WC_ALL=items});
+  return WC_LOAD;
+}
 const EV_FB=[
 {n:"Tesla Supercharger — Brooklyn (Atlantic Ave atrofi)",lat:40.6840,lon:-73.9780},{n:"Tesla Supercharger — Queens (Fresh Meadows atrofi)",lat:40.7330,lon:-73.7900},
 {n:"Tesla Supercharger — Bronx (Bay Plaza atrofi)",lat:40.8650,lon:-73.8250},{n:"Tesla Urban Charger — Manhattan (West Side)",lat:40.7550,lon:-74.0000},
@@ -552,12 +588,12 @@ function toggleLayer(name,on){
 
 /* ================= OSM jonli roʻyxatlar (fallback bilan) ================= */
 /* ===== Map: Radar uslubidagi qatlamlar (v10.9) ===== */
-let TESLA_ITEMS=null,mapOn={wc:false,ev:false,loc:false,cruise:false,air:false},panelLayer=null;
+let TESLA_ITEMS=null,mapOn={wc:false,ev:false,loc:false,cruise:false,air:false},panelLayer=null,savedMapView=null;
 const visCount={wc:5,ev:5,loc:5,cruise:5,air:5};
 const routeInfo={};
 function mkIcon(cls,html){return L.divIcon({className:"",html:'<div class="mk '+cls+'">'+html+'</div>',iconSize:[28,28],iconAnchor:[14,14]})}
 function layerItems(layer){
-  if(layer==="wc")return (WC_ITEMS||distSort(WC_FB)).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
+  if(layer==="wc")return (WC_ITEMS||distSort(WC_FB)).slice(0,20).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
   if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
   if(layer==="loc")return distSort(PLACES.map(p=>({n:p.n,sub:"Saqlangan joy",lat:p.lat,lon:p.lon,kind:"loc"})).concat(TOCHKA5.map(p=>({n:p.n,sub:p.h+" ta mehmonxona yaqinida",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h})))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,kind:x.kind,h:x.h,d:x.d}));
   if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
@@ -568,7 +604,7 @@ function sortedItems(layer){return layerItems(layer).slice().sort((p,q)=>{const 
 function drawMapLayer(layer){
   if(typeof layerGroups==="undefined")return;
   const items=sortedItems(layer),vis=items.slice(0,visCount[layer]);
-  const put=(g,x,icon)=>{const m=L.marker([x.lat,x.lon],{icon:icon}).addTo(g);m.bindTooltip("<b>"+esc(x.n)+"</b>",{direction:"top",offset:[0,-14]});m.on("click",()=>gmaps(x.lat,x.lon))};
+  const put=(g,x,icon)=>{const m=L.marker([x.lat,x.lon],{icon:icon}).addTo(g);m.bindTooltip("<b>"+esc(x.n)+"</b>",{direction:"top",offset:[0,-14]});m.on("click",()=>(layer==="wc"?navGo:gmaps)(x.lat,x.lon))};
   if(layer==="wc"){const g=layerGroups.wc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-wc","\uD83D\uDEBB")))}
   if(layer==="ev"){const g=layerGroups.tesla;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-tesla","\u26A1")))}
   if(layer==="loc"){const g=layerGroups.loc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,x.kind==="tochka"?mkIcon("mk-tochka",String(x.h)):mkIcon("mk-loc","\uD83D\uDCCD")))}
@@ -589,6 +625,40 @@ function kickRoutes(layer){
     }).catch(()=>{routeInfo[k]={dist:hav(userLat(),userLon(),x.lat,x.lon),mins:null};if(panelLayer===layer)renderMapPanel()});
   });
 }
+function ttRoute(x){
+  return fetchT("https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+x.lat+","+x.lon+"/json?key="+TT_KEY+"&traffic=true&travelMode=car",12000).then(r=>r.json()).then(j=>{
+    const s=j&&j.routes&&j.routes[0]&&j.routes[0].summary;
+    if(!s)throw new Error("no route");
+    return {dist:s.lengthInMeters/1609.34,mins:Math.round(s.travelTimeInSeconds/60)};
+  });
+}
+let wcRouteSeq=0,lastWcRoutePos=null,wcKicking=false;
+function kickRoutesWc(){
+  if(wcKicking)return;
+  wcKicking=true;
+  const seq=++wcRouteSeq;
+  lastWcRoutePos={lat:userLat(),lon:userLon()};
+  const attempted=new Set();
+  async function worker(){
+    while(true){
+      const vis=sortedItems("wc").slice(0,visCount.wc);
+      const x=vis.find(y=>{const k=routeKey("wc",y);const ri=routeInfo[k];return !attempted.has(k)&&(!ri||(ri.dist==null&&!ri.wait&&Date.now()-(ri.ts||0)>60000))});
+      if(!x)return;
+      const k=routeKey("wc",x);attempted.add(k);
+      if(!routeInfo[k])routeInfo[k]={wait:1};
+      try{
+        const v=await ttRoute(x);
+        if(seq!==wcRouteSeq)return;
+        routeInfo[k]=v;
+      }catch(e){
+        if(seq!==wcRouteSeq)return;
+        routeInfo[k]={dist:null,mins:null,ts:Date.now()};
+      }
+      if(panelLayer==="wc"){renderMapPanel();drawMapLayer("wc")}
+    }
+  }
+  Promise.all([worker(),worker(),worker()]).then(()=>{if(seq===wcRouteSeq)wcKicking=false});
+}
 function renderMapPanel(){
   const p=$("mapPanel");if(!p)return;
   if(!panelLayer){p.classList.remove("open");p.innerHTML="";return}
@@ -607,8 +677,8 @@ function renderMapPanel(){
   }).join("");
   if(items.length>visCount[layer])html+='<button class="location-option more" style="justify-content:center"><span class="loc-name">\u2B07 More</span></button>';
   p.innerHTML=html;
-  kickRoutes(layer);
-  p.querySelectorAll(".location-option[data-lat]").forEach(b=>b.addEventListener("click",()=>gmaps(parseFloat(b.getAttribute("data-lat")),parseFloat(b.getAttribute("data-lon")))));
+  if(layer==="wc")kickRoutesWc();else kickRoutes(layer);
+  p.querySelectorAll(".location-option[data-lat]").forEach(b=>b.addEventListener("click",()=>(layer==="wc"?navGo:gmaps)(parseFloat(b.getAttribute("data-lat")),parseFloat(b.getAttribute("data-lon")))));
   const mb=p.querySelector(".more");
   if(mb)mb.addEventListener("click",()=>{visCount[layer]+=5;drawMapLayer(layer);renderMapPanel();kickRoutes(layer)});
 }
@@ -621,13 +691,13 @@ function mapToggle(layer,btn){
   if(!map)initMaps();
   const on=!mapOn[layer];mapOn[layer]=on;
   if(btn)btn.classList.toggle("on",on);
-  if(layer==="wc"){if(on){layerGroups.wc.addTo(map);drawMapLayer("wc");refreshWC(false);zoomHalfMile()}else map.removeLayer(layerGroups.wc)}
+  if(layer==="wc"){if(on){layerGroups.wc.addTo(map);drawMapLayer("wc");refreshWC(false);savedMapView={c:map.getCenter(),z:map.getZoom()};zoomHalfMile()}else{map.removeLayer(layerGroups.wc);if(savedMapView){map.setView(savedMapView.c,savedMapView.z);savedMapView=null}}}
   if(layer==="ev"){if(on){layerGroups.ev.addTo(map);layerGroups.tesla.addTo(map);drawMapLayer("ev");refreshEV(false);refreshTesla()}else{map.removeLayer(layerGroups.ev);map.removeLayer(layerGroups.tesla)}}
   if(layer==="loc"){if(on){drawMapLayer("loc");layerGroups.loc.addTo(map)}else map.removeLayer(layerGroups.loc)}
   if(layer==="cruise"){if(on){drawMapLayer("cruise");layerGroups.cruise.addTo(map)}else map.removeLayer(layerGroups.cruise)}
   if(layer==="air"){if(on){drawMapLayer("air");layerGroups.air.addTo(map)}else map.removeLayer(layerGroups.air)}
-  if(on){panelLayer=layer;renderMapPanel();kickRoutes(layer)}
-  else if(panelLayer===layer){const other=Object.keys(mapOn).find(k=>mapOn[k]);panelLayer=other||null;renderMapPanel();if(other)kickRoutes(other)}
+  if(on){panelLayer=layer;renderMapPanel();if(layer==="wc")kickRoutesWc();else kickRoutes(layer)}
+  else if(panelLayer===layer){const other=Object.keys(mapOn).find(k=>mapOn[k]);panelLayer=other||null;renderMapPanel();if(other){if(other==="wc")kickRoutesWc();else kickRoutes(other)}}
 }
 function distSort(a){return a.map(x=>Object.assign({},x,{d:hav(userLat(),userLon(),x.lat,x.lon)})).sort((x,y)=>x.d-y.d)}
 function listHTML(items,icon){
@@ -638,7 +708,7 @@ function overpass(q){
   return fetchT("https://overpass-api.de/api/interpreter",15000,opt).then(r=>r.json())
    .catch(()=>fetchT("https://overpass.kumi.systems/api/interpreter",15000,opt).then(r=>r.json()));
 }
-function drawMapWc(){drawMapLayer("wc");if(panelLayer==="wc"){renderMapPanel();kickRoutes("wc")}}
+function drawMapWc(){drawMapLayer("wc");if(panelLayer==="wc"){renderMapPanel();kickRoutesWc()}}
 function drawMapEv(items){if(typeof layerGroups==="undefined"||!layerGroups.ev)return;layerGroups.ev.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#30d158",fillOpacity:.9}).addTo(layerGroups.ev).bindPopup("<b>\u26A1 "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
 function refreshTesla(){
   const url="https://photon.komoot.io/api/?q="+encodeURIComponent("Tesla Supercharger")+"&lat="+userLat()+"&lon="+userLon()+"&limit=15";
@@ -650,13 +720,16 @@ function refreshTesla(){
     if(panelLayer==="ev"){renderMapPanel();kickRoutes("ev")}
   }).catch(()=>{});
 }
-function refreshWC(notify=true){
-  const q='[out:json][timeout:10];node["amenity"="toilets"](around:9000,'+userLat()+","+userLon()+");out 40;";
-  overpass(q).then(j=>{
-    const items=j.elements.filter(e=>e.lat).map(e=>({n:(e.tags&&(e.tags.name||e.tags.operator))||"Jamoat hojatxonasi",lat:e.lat,lon:e.lon}));
-    if(items.length){apiStat.overpass="OK";$("wcList").innerHTML=listHTML(distSort(items),"🚻");WC_ITEMS=distSort(items);drawStLayers();drawMapWc(WC_ITEMS);if(notify)toast("Hojatxonalar yangilandi (OSM)");return}
-    throw new Error("empty");
-  }).catch(()=>{ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻"); WC_ITEMS=distSort(WC_FB);drawStLayers();drawMapWc(WC_ITEMS); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
+function refreshWC(notify=true,force=false){
+  if(force){WC_LOAD=null;WC_ALL=null;WC_SRC=""}
+  const apply=items=>{
+    WC_ITEMS=distSort(items);
+    $("wcList").innerHTML=listHTML(WC_ITEMS.slice(0,20),"\uD83D\uDEBB");
+    drawStLayers();drawMapWc();
+    if(notify)toast(WC_SRC==="fb"?"Jonli baza ishlamadi \u2014 zaxira ro\u02bcyxat":"Hojatxonalar yangilandi \u2014 NYC bazasi ("+items.length+" ta)");
+  };
+  if(WC_ALL){apply(WC_ALL);return}
+  loadWC().then(apply);
 }
 function refreshEV(notify=true){
   const q='[out:json][timeout:10];node["amenity"="charging_station"](around:26000,'+userLat()+","+userLon()+");out 60;";
@@ -1127,7 +1200,7 @@ const hmo=$("hotMore");if(hmo)hmo.addEventListener("click",()=>{hotAll=!hotAll;r
 const hl=$("hotList");if(hl)hl.addEventListener("click",e=>{const g=e.target.closest("[data-hgo]"),rc=e.target.closest("[data-hrec]");if(!g&&!rc)return;const s2=lastHotList[+(g?g.dataset.hgo:rc.dataset.hrec)];if(!s2)return;if(g){if(recordRecFor(s2)){toast("✔️ Tavsiya yozildi: "+s2.z.n);gmaps(s2.z.lat,s2.z.lon)}}else if(recordRecFor(s2))toast("✔️ Yozib qoʻyildi: "+s2.z.n)});}
 $("tileBestBtn").addEventListener("click",()=>{const b=$("bestCard");if(b)b.scrollIntoView({behavior:"smooth"})});
 $("camMapBtn").addEventListener("click",()=>{go("map");const ch=document.querySelector('[data-layer="cam"]');if(ch&&!ch.classList.contains("on"))ch.click()});
-$("wcRefresh").addEventListener("click",()=>refreshWC(true));
+$("wcRefresh").addEventListener("click",()=>refreshWC(true,true));
 $("evRefresh").addEventListener("click",()=>refreshEV(true));
 function tickClock(){const t=nowNY();const hc=$("heroClock");if(hc)hc.textContent=t.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});const hd=$("heroDate");if(hd)hd.textContent="New York City · Live overview · "+t.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}
 if(navigator.geolocation){
@@ -1138,6 +1211,7 @@ if(navigator.geolocation){
     if(mapHome){mapHome.setView([pos.lat,pos.lon],11);if(userMkH)userMkH.setLatLng([pos.lat,pos.lon])}
     if(erMe)erMe.setLatLng([pos.lat,pos.lon]);
     if(stMe)stMe.setLatLng([pos.lat,pos.lon]);
+    if(mapOn.wc&&(!lastWcRoutePos||hav(pos.lat,pos.lon,lastWcRoutePos.lat,lastWcRoutePos.lon)>0.19)){Object.keys(routeInfo).forEach(k=>{if(k.indexOf("wc@")===0)delete routeInfo[k]});if(panelLayer==="wc")renderMapPanel();kickRoutesWc()}
   },()=>{toast("GPS ruxsati yoʻq — Manhattan markazi ishlatiladi")},{enableHighAccuracy:false,maximumAge:60000,timeout:12000});
 }
 
