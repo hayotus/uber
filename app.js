@@ -570,6 +570,18 @@ function initMaps(){
   trafficLayer.on("tileerror",()=>{tileErrCount++;if(tileErrCount>=3&&!tileDegraded){tileDegraded=true;updateTrafficUI()}});
   trafficLayer.on("tileload",()=>{if(tileErrCount>0){tileErrCount=0;if(tileDegraded){tileDegraded=false;updateTrafficUI()}}});
   if(settings.traffic)trafficLayer.addTo(map);
+  const mc=L.control({position:"topleft"});
+  mc.onAdd=function(){
+    const d=L.DomUtil.create("div","mapctl");
+    d.innerHTML='<a href="#" id="btnTraffic" class="mc-btn" title="Traffic"><span class="mc-ic">\uD83D\uDEA6</span><span class="mc-warn">\u26A0</span></a><a href="#" id="btnEzpass" class="mc-btn" title="EZPass"><span class="mc-ic">\uD83D\uDEE3\uFE0F</span><span class="mc-state">ON</span></a><a href="#" id="btnRecenter" class="mc-btn" title="Recenter"><span class="mc-ic">\uD83C\uDFAF</span></a>';
+    L.DomEvent.disableClickPropagation(d);
+    return d;
+  };
+  mc.addTo(map);
+  $("btnTraffic").addEventListener("click",e=>{e.preventDefault();toggleTraffic()});
+  $("btnEzpass").addEventListener("click",e=>{e.preventDefault();toggleEzpass()});
+  $("btnRecenter").addEventListener("click",e=>{e.preventDefault();recenterMap()});
+  updateTrafficUI();updateEzpassUI();
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
   mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);
   heatHome=heatCircles(mapHome);heatHome.addTo(mapHome);
@@ -696,14 +708,18 @@ function refreshAllRoutes(){
 function updateTrafficUI(){
   const b=$("btnTraffic");if(!b)return;
   b.classList.toggle("on",!!settings.traffic);
-  const lb=b.querySelector(".tab-lb");
-  if(lb)lb.textContent="Traffic"+((settings.traffic&&(routeDegraded||tileDegraded))?" \u26A0":"");
+  b.classList.toggle("warn",!!(settings.traffic&&(routeDegraded||tileDegraded)));
 }
 function updateEzpassUI(){
   const b=$("btnEzpass");if(!b)return;
   b.classList.toggle("on",!!settings.ezpass);
-  const lb=b.querySelector(".tab-lb");
-  if(lb)lb.textContent=settings.ezpass?"EZPass ON":"EZPass OFF";
+  const st=b.querySelector(".mc-state");
+  if(st)st.textContent=settings.ezpass?"ON":"OFF";
+}
+function recenterMap(){
+  if(!map)return;
+  savedMapView=null;
+  map.setView([userLat(),userLon()],Math.max(map.getZoom(),14));
 }
 function toggleTraffic(){
   settings.traffic=!settings.traffic;saveSettings();
@@ -1260,9 +1276,7 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
 document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60);const sb=b.getAttribute("data-sttab");if(sb)setTimeout(()=>setStTab(sb),60)}));
 document.querySelectorAll("#layerChips .mpill[data-layer]").forEach(b=>b.addEventListener("click",()=>mapToggle(b.getAttribute("data-layer"),b)));
-$("btnTraffic").addEventListener("click",toggleTraffic);
-$("btnEzpass").addEventListener("click",toggleEzpass);
-updateTrafficUI();updateEzpassUI();
+
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
 function recordRecFor(s){if(!s)return false;recs.unshift({t:new Date().toISOString(),zone:s.z.n,score:s.score,conf:s.conf||null,c:{D:s.D,F:s.F,E:s.E,W:s.W,T:s.T,P:s.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs));idbMirror()}catch(e){}renderCal();return true}

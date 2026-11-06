@@ -184,9 +184,16 @@ body{background:radial-gradient(1200px 620px at 50% -10%,rgba(34,197,94,.14) 0%,
 .mk-loc{background:#0A84FF;border:2px solid #fff;color:#fff;font-size:13px}
 .mk-tochka{background:#FF3B30;border:2px solid #fff;color:#fff;font-size:13px;font-weight:800}
 
-/* v10.14: Traffic/EZPass yorliqlari */
-#btnEzpass .tab-lb{font-size:9.5px}
-#btnTraffic .tab-lb{font-size:10px}
+/* v10.18: xarita boshqaruv ustuni (+/- tagida: Traffic, EZPass, Recenter) */
+.mapctl{background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:8px;overflow:hidden;background-clip:padding-box}
+.mc-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:34px;height:37px;background:#fff;border-bottom:1px solid #ddd;text-decoration:none;position:relative;cursor:pointer}
+.mc-btn:last-child{border-bottom:none}
+.mc-btn .mc-ic{font-size:17px;line-height:1.1;filter:grayscale(1);opacity:.4}
+.mc-btn.on .mc-ic{filter:none;opacity:1}
+.mc-state{font-size:8px;font-weight:800;line-height:1.2;color:#555}
+.mc-btn.on .mc-state{color:#0a7d33}
+.mc-warn{display:none;position:absolute;top:0;right:1px;font-size:9px}
+.mc-btn.warn .mc-warn{display:block}
 
 /* v10.17: marshrut rangi nuqtasi */
 .loc-dot{flex:none;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
