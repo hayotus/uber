@@ -611,18 +611,18 @@ function loadClosures(force){
     const bd=$("closeBadge");if(bd){bd.textContent="LIVE";bd.className="badge b-live"}
     apiStat.closures="OK \u00b7 jonli ("+clTotal+" ta, 20 km) \u00b7 "+new Date(clTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
     renderApiStat();renderClosures();renderAlerts();renderHome();
-    try{if(typeof layerGroups!=="undefined"&&layerGroups.close){layerGroups.close.clearLayers();CLOSURES.slice(0,120).forEach(c=>{if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("\U0001f6a7 "+esc(c.n)+(clActive(c)?" (FAOL)":""))})}}catch(e){}
+    try{if(typeof layerGroups!=="undefined"&&layerGroups.close){layerGroups.close.clearLayers();CLOSURES.slice(0,120).forEach(c=>{if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))})}}catch(e){}
   });
 }
 function renderClosures(){
   const el=$("closeList");if(!el)return;
   const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});
   const upd=$("clUpd");if(upd)upd.textContent=clLive?("Oxirgi yangilanish: "+new Date(clTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})):"Jonli ma\u02bclumot kutilmoqda\u2026";
-  const head=clLive?'<li class="small">\U0001f534 <b>LIVE</b> \u2014 NYC DOT (Open Data), har 5 daqiqada yangilanadi \u00b7 20 km radiusda <b>'+clTotal+' ta</b> yozuv</li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar ko\u02bcrilmoqda.</li>';
+  const head=clLive?'<li class="small">🔴 <b>LIVE</b> \u2014 NYC DOT (Open Data), har 5 daqiqada yangilanadi \u00b7 20 km radiusda <b>'+clTotal+' ta</b> yozuv</li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar ko\u02bcrilmoqda.</li>';
   const act=CLOSURES.filter(c=>clActive(c)),up=CLOSURES.filter(c=>!clActive(c));
   const item=c=>{const act2=clActive(c);return '<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place||"")+" \u00b7 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+'</div></div><span class="'+(act2?"hi":"med")+'">'+(act2?"FAOL":"YAQINDA")+'</span></div></li>'};
   const rest=Math.max(0,act.length-20)+Math.max(0,up.length-10);
-  el.innerHTML=head+act.slice(0,20).map(item).join("")+up.slice(0,10).map(item).join("")+(rest?'<li class="small">\u2026 va yana '+rest+' tasi \u2014 xaritadagi \U0001f6a7 qatlamida.</li>':"")+'<li class="small">Manba: NYC DOT qurilish yopilishlari (kesishma va bloklar). Ish soatlari kun ichida farq qilishi mumkin. Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a>, 511NY.</li>';
+  el.innerHTML=head+act.slice(0,20).map(item).join("")+up.slice(0,10).map(item).join("")+(rest?'<li class="small">\u2026 va yana '+rest+' tasi \u2014 xaritadagi 🚧 qatlamida.</li>':"")+'<li class="small">Manba: NYC DOT qurilish yopilishlari (kesishma va bloklar). Ish soatlari kun ichida farq qilishi mumkin. Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a>, 511NY.</li>';
 }
 
 
@@ -692,7 +692,7 @@ function renderEvents(){
   const el=$("eventList");if(!el)return;
   const upd=$("evUpd");if(upd)upd.textContent=evLive?("Oxirgi yangilanish: "+new Date(evTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})):"Jonli ma\u02bclumot kutilmoqda\u2026";
   evCountMapped();
-  const head=evLive?'<li class="small">\U0001f534 <b>LIVE</b> \u2014 NYC Permitted Events (Open Data) \u00b7 kelgusi 7 kun: <b>'+evTotal+' ta</b> tadbir, xaritada: <b>'+evMapped+' ta</b></li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar.</li>';
+  const head=evLive?'<li class="small">🔴 <b>LIVE</b> \u2014 NYC Permitted Events (Open Data) \u00b7 kelgusi 7 kun: <b>'+evTotal+' ta</b> tadbir, xaritada: <b>'+evMapped+' ta</b></li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar.</li>';
   const evs=EVENTS.map(ev=>({ev:ev,st:evState(ev),w:evWin(ev)})).filter(x=>x.st!=="past");
   evs.sort((x,y)=>{const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});
   const items=evs.slice(0,25).map(x=>{const ev=x.ev;
@@ -703,7 +703,7 @@ function renderEvents(){
   el.innerHTML=head+(items||'<li class="small">Yaqin tadbirlar yo\u02bbq.</li>')+(evs.length>25?'<li class="small">\u2026 va yana '+(evs.length-25)+' ta tadbir.</li>':"");
   const note=$("evMapNote");if(note)note.textContent="Xaritada koordinatasi aniqlangan "+evMapped+" ta tadbir. Markerni bosing \u2014 nomi, kuni, sanasi, soati va manzili chiqadi.";
 }
-function evPopup(e){return "<b>"+esc(e.n)+"</b><br>\U0001f4c5 "+esc(fmtEvWhen(e))+"<br>\U0001f4cd "+esc(e.place||"")+(e.type?"<br>\U0001f389 "+esc(e.type):"")+(e.surge?"<br>\u26a1 Surge (taxminiy): \u00d7"+e.surge:"")}
+function evPopup(e){return "<b>"+esc(e.n)+"</b><br>📅 "+esc(fmtEvWhen(e))+"<br>📍 "+esc(e.place||"")+(e.type?"<br>🎉 "+esc(e.type):"")+(e.surge?"<br>\u26a1 Surge (taxminiy): \u00d7"+e.surge:"")}
 function drawEvMarkers(){
   if(!evMap||!evMarkers)return;
   evMarkers.clearLayers();
@@ -845,8 +845,8 @@ let lastHour=null;
 setInterval(()=>{const h=nowNY().getHours();if(lastHour===null){lastHour=h;return}if(h!==lastHour){lastHour=h;renderHome();refreshHeat()}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false);loadEvents(false)}});}
 
-{const cb=$("clRefresh");if(cb)cb.addEventListener("click",()=>{loadClosures(true);toast("\U0001f6a7 Yopilishlar yangilanmoqda\u2026")});}
-{const eb=$("evRefresh2");if(eb)eb.addEventListener("click",()=>{loadEvents(true);toast("\U0001f389 Tadbirlar yangilanmoqda\u2026")});}
+{const cb=$("clRefresh");if(cb)cb.addEventListener("click",()=>{loadClosures(true);toast("🚧 Yopilishlar yangilanmoqda\u2026")});}
+{const eb=$("evRefresh2");if(eb)eb.addEventListener("click",()=>{loadEvents(true);toast("🎉 Tadbirlar yangilanmoqda\u2026")});}
 {const bl=$("evViewList");if(bl)bl.addEventListener("click",()=>setEvView("list"));}
 {const bm=$("evViewMap");if(bm)bm.addEventListener("click",()=>setEvView("map"));}
 {const me2=$("modEvents");if(me2)me2.addEventListener("toggle",()=>{if(me2.open)loadEvents(false)});}
