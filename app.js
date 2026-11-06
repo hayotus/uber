@@ -607,6 +607,7 @@ function renderMapPanel(){
   }).join("");
   if(items.length>visCount[layer])html+='<button class="location-option more" style="justify-content:center"><span class="loc-name">\u2B07 More</span></button>';
   p.innerHTML=html;
+  kickRoutes(layer);
   p.querySelectorAll(".location-option[data-lat]").forEach(b=>b.addEventListener("click",()=>gmaps(parseFloat(b.getAttribute("data-lat")),parseFloat(b.getAttribute("data-lon")))));
   const mb=p.querySelector(".more");
   if(mb)mb.addEventListener("click",()=>{visCount[layer]+=5;drawMapLayer(layer);renderMapPanel();kickRoutes(layer)});
