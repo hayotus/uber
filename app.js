@@ -561,14 +561,14 @@ function listHTML(items,icon){
 }
 function overpass(q){
   const opt={method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)};
-  return fetchT("https://overpass-api.de/api/interpreter",12000,opt).then(r=>r.json())
-   .catch(()=>fetchT("https://overpass.kumi.systems/api/interpreter",12000,opt).then(r=>r.json()));
+  return fetchT("https://overpass-api.de/api/interpreter",15000,opt).then(r=>r.json())
+   .catch(()=>fetchT("https://overpass.kumi.systems/api/interpreter",15000,opt).then(r=>r.json()));
 }
 function drawMapWc(items){if(typeof layerGroups==="undefined"||!layerGroups.wc)return;layerGroups.wc.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#2f7cf6",fillOpacity:.9}).addTo(layerGroups.wc).bindPopup("<b>\uD83D\uDEBB "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
 function drawMapEv(items){if(typeof layerGroups==="undefined"||!layerGroups.ev)return;layerGroups.ev.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#30d158",fillOpacity:.9}).addTo(layerGroups.ev).bindPopup("<b>\u26A1 "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
 function refreshTesla(){
   const url="https://photon.komoot.io/api/?q="+encodeURIComponent("Tesla Supercharger")+"&lat="+userLat()+"&lon="+userLon()+"&limit=15";
-  fetchT(url,10000).then(r=>r.json()).then(j=>{
+  fetchT(url,25000).then(r=>r.json()).then(j=>{
     if(typeof layerGroups==="undefined"||!layerGroups.tesla)return;
     layerGroups.tesla.clearLayers();const seen={};
     (j.features||[]).forEach(f=>{const c=f.geometry&&f.geometry.coordinates,p=f.properties||{};if(!c)return;const lat=c[1],lon=c[0],d=hav(userLat(),userLon(),lat,lon);if(d>31)return;const key=(p.name||"")+"@"+lat.toFixed(3)+","+lon.toFixed(3);if(seen[key])return;seen[key]=1;
