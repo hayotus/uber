@@ -557,16 +557,17 @@ const visCount={wc:5,ev:5,loc:5,cruise:5,air:5};
 const routeInfo={};
 function mkIcon(cls,html){return L.divIcon({className:"",html:'<div class="mk '+cls+'">'+html+'</div>',iconSize:[28,28],iconAnchor:[14,14]})}
 function layerItems(layer){
-  if(layer==="wc")return (WC_ITEMS||[]).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon}));
-  if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon}));
-  if(layer==="loc")return distSort(PLACES.map(p=>({n:p.n,sub:"Saqlangan joy",lat:p.lat,lon:p.lon,kind:"loc"})).concat(TOCHKA5.map(p=>({n:p.n,sub:p.h+" ta mehmonxona yaqinida",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h}))));
-  if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon})));
-  if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon})));
+  if(layer==="wc")return (WC_ITEMS||distSort(WC_FB)).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
+  if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
+  if(layer==="loc")return distSort(PLACES.map(p=>({n:p.n,sub:"Saqlangan joy",lat:p.lat,lon:p.lon,kind:"loc"})).concat(TOCHKA5.map(p=>({n:p.n,sub:p.h+" ta mehmonxona yaqinida",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h})))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,kind:x.kind,h:x.h,d:x.d}));
+  if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
+  if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
   return [];
 }
+function sortedItems(layer){return layerItems(layer).slice().sort((p,q)=>{const rp=routeInfo[routeKey(layer,p)],rq=routeInfo[routeKey(layer,q)];const ep=rp&&rp.dist!=null?rp.dist:(p.d!=null?p.d:1e9),eq=rq&&rq.dist!=null?rq.dist:(q.d!=null?q.d:1e9);return ep-eq})}
 function drawMapLayer(layer){
   if(typeof layerGroups==="undefined")return;
-  const items=layerItems(layer),vis=items.slice(0,visCount[layer]);
+  const items=sortedItems(layer),vis=items.slice(0,visCount[layer]);
   const put=(g,x,icon)=>{const m=L.marker([x.lat,x.lon],{icon:icon}).addTo(g);m.bindTooltip("<b>"+esc(x.n)+"</b>",{direction:"top",offset:[0,-14]});m.on("click",()=>gmaps(x.lat,x.lon))};
   if(layer==="wc"){const g=layerGroups.wc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-wc","\uD83D\uDEBB")))}
   if(layer==="ev"){const g=layerGroups.tesla;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-tesla","\u26A1")))}
@@ -576,7 +577,7 @@ function drawMapLayer(layer){
 }
 function routeKey(layer,x){return layer+"@"+x.lat.toFixed(4)+","+x.lon.toFixed(4)}
 function kickRoutes(layer){
-  layerItems(layer).slice(0,visCount[layer]).forEach(x=>{
+  sortedItems(layer).slice(0,visCount[layer]).forEach(x=>{
     const k=routeKey(layer,x);
     if(routeInfo[k])return;
     routeInfo[k]={wait:1};
@@ -591,7 +592,7 @@ function kickRoutes(layer){
 function renderMapPanel(){
   const p=$("mapPanel");if(!p)return;
   if(!panelLayer){p.classList.remove("open");p.innerHTML="";return}
-  const layer=panelLayer,items=layerItems(layer),vis=items.slice(0,visCount[layer]);
+  const layer=panelLayer,items=sortedItems(layer),vis=items.slice(0,visCount[layer]);
   p.classList.add("open");
   if(!items.length){
     const loading=(layer==="wc"&&WC_ITEMS===null)||(layer==="ev"&&TESLA_ITEMS===null);
