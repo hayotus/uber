@@ -602,10 +602,10 @@ function loadClosures(force){
   const sel="the_geom,onstreetname,fromstreetname,tostreetname,borough_code,work_start_date,work_end_date,purpose";
   const wh=encodeURIComponent("work_start_date<='"+end14+"T00:00:00' AND work_end_date>='"+today+"T00:00:00' AND within_circle(the_geom,"+la+","+lo+",20000)");
   const q="?$select="+sel+"&$where="+wh+"&$limit=2000";
-  const one=id=>fetchT("https://data.cityofnewyork.us/resource/"+id+".json"+q,15000,{cache:"no-store"}).then(r=>r.json()).catch(()=>null);
+  const one=id=>fetchT("https://data.cityofnewyork.us/resource/"+id+".json"+q,30000,{cache:"no-store"}).then(r=>r.json()).catch(()=>null);
   Promise.all([one("478a-yykk"),one("i6b5-j7bu")]).then(res=>{
     clBusy=false;const ra=res[0],rb=res[1];
-    if(!ra&&!rb){apiStat.closures="XATO \u2014 NYC DOT javob bermadi";renderApiStat();return}
+    if(!ra&&!rb){apiStat.closures="XATO \u2014 NYC DOT javob bermadi";renderApiStat();if(!clLive&&!loadClosures._rt){loadClosures._rt=1;setTimeout(()=>{loadClosures._rt=0;loadClosures(true)},20000)}return}
     let rows=[];
     if(ra)rows=rows.concat(ra.map(r=>clMapRow(r,false)));
     if(rb)rows=rows.concat(rb.map(r=>clMapRow(r,true)));
@@ -754,6 +754,7 @@ setInterval(()=>{const h=nowNY().getHours();if(lastHour===null){lastHour=h;retur
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false)}});}
 
 {const cb=$("clRefresh");if(cb)cb.addEventListener("click",()=>{loadClosures(true);toast("\U0001f6a7 Yopilishlar yangilanmoqda\u2026")});}
+{const md=$("modClose");if(md)md.addEventListener("toggle",()=>{if(md.open)loadClosures(false)});}
 
 /* ================= Navigation & Geo ================= */
 function go(view,modId){
@@ -913,7 +914,8 @@ $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
 loadZones();loadZoneWx();
 loadWeather();armWx();
-setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);loadClosures(true);setInterval(()=>loadClosures(false),300000);
+loadClosures(true);setInterval(()=>loadClosures(false),300000);
+setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 
