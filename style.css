@@ -219,3 +219,8 @@ body.drive #view-home{overflow-y:auto}
 
 /* v10.20: Batafsil ochilganda Home ichki scroll bo'ladi (yopiq holatda scroll yo'q) */
 #view-home:has(details.more[open]){overflow-y:auto}
+
+/* v10.21: birinchi yuklanishda ham hamma blok (footer ham) sig'adi */
+#view-home details.more>summary{padding:9px 2px;min-height:42px}
+#view-home .hero .clock{font-size:min(33px,4.3dvh)}
+#view-home .card{padding:12px}

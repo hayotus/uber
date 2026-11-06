@@ -1,8 +1,8 @@
 /* TLC Pro — Service Worker
    Asosiy interfeys va jurnal offline ishlashi uchun kesh.
    API javoblari keshlenmaydi (jonli ma'lumot eskirib qolmasligi uchun). */
-const CACHE = "tlc-pro-v47";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json", "./style.css?v=120", "./app.js?v=120",
+const CACHE = "tlc-pro-v48";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg", "./zones.json", "./style.css?v=121", "./app.js?v=121",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
 self.addEventListener("install", e => {

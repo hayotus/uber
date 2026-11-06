@@ -1276,6 +1276,8 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
 document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60);const sb=b.getAttribute("data-sttab");if(sb)setTimeout(()=>setStTab(sb),60)}));
 document.querySelectorAll("#layerChips .mpill[data-layer]").forEach(b=>b.addEventListener("click",()=>mapToggle(b.getAttribute("data-layer"),b)));
+const hm=$("homeMore");
+if(hm)hm.addEventListener("toggle",()=>{if(hm.open){if(!map)initMaps();if(mapHome)setTimeout(()=>{try{mapHome.invalidateSize();mapHome.setView([userLat(),userLon()],11)}catch(e){}},60)}});
 
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
