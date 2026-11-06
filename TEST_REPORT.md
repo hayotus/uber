@@ -176,3 +176,19 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 - v8.5: NYC DOT Open Data (Socrata 478a-yykk kesishmalar + i6b5-j7bu bloklar), within_circle 20 km, 5 daqiqada yangilanish, "Oxirgi yangilanish" belgisi, 🔄 tugma, badge LIVE; SW: data.cityofnewyork.us network-only.
 - v8.6 (hotfix): boot chaqiruvi alohida qatorga olindi, timeout 30 s, birinchi xatoda 20 s dan keyin qayta urinish, modul ochilganda so'rov.
 - QA: 🔄 bosilmasdan o'zi LIVE bo'ldi — 908 yozuv (20 km), haqiqiy ko'chalar (W 46 St ∩ 8 Ave ...), Home Alerts da 5 ta 🚧 bandi. Eski statik uchlik yo'qolgan.
+
+## v8.7 — Events & Surge Forecast JONLI (2026-11-06)
+
+**Muammo (foydalanuvchi, 2026-11-06 04:17 EST):** "Events & Surge Forecast ham live bolsin. Tugma qoshilsin yangilash va ozgaruvchi tugma royhat va map. Map bosilsa joylar metka bilan qoyilsin, metkani ustiga bosganda oyna ochilsin: nomi, qachonligi, kuni, soati, manzili."
+
+**Manba tekshiruvi:** NYC Permitted Event Information (tvpp-9vvx) — 14 kunda 9,128 yozuv, lekin 8,843 tasi "N/A" kichik ruxsatnomalar (park yopilishlari va h.k.). Koordinata UMUMAN yo'q (manzil faqat matn). Haydovchiga kerakli turlar bilan filtr: Parade, Athletic Race/Tour, Street Festival, Festival, Concert, Sporting Event, Farmers Market, Special Event, March, Rally, Block Party + street_closure_type='Full Street Closure'.
+
+**Yechim:**
+- loadEvents(): Socrata so'rovi (hozir-3s → +7 kun, $limit=800), dedupe name+start; EVENTS endi `let` — jonli ro'yxat + seed'dagi daily/vaqtsiz yozuvlar (Broadway, MSG, Barclays, Radio City) saqlanadi, o'tgan sanali seed'lar tushib qoladi.
+- Surge tur bo'yicha: Parade ×1.8, Athletic ×1.7, Festival/Fair ×1.5, Concert/Sport ×1.5, Farmers Market ×1.2, Full Street Closure ×1.3, qolganlari null (E komponentga faqat koordinatali+surge'li tadbirlar ta'sir qiladi).
+- Joylashuv: 32 yozuvli gazetteer (Central Park, Madison Square Park, Times Square, MSG, Barclays, Yankee Stadium, Citi Field...) + NYC GeoSearch (geosearch.planninglabs.nyc, Pelias) — "between X and Y" → "Y & X" kesishma so'rovi; natijalar localStorage drv_geo da keshlanadi; har yuklashda eng ko'pi 6 ta yangi geokod.
+- UI: badge evBadge (LIVE bo'lganda yashil), 🔄 Yangilash (evRefresh2 — EV Charging tugmasi bilan id to'qnashmasligi uchun), "Oxirgi yangilanish" (evUpd), 📋 Ro'yxat / 🗺️ Xarita almashuvchi tugmalar (hchip uslubi), modul ichida alohida Leaflet xarita (evMap, 320px) + markerlar; popup: **nom, 📅 hafta kuni + sana + soat, 📍 manzil, turi, surge**. Ro'yxat sarlavhasi: "🔴 LIVE — NYC Permitted Events (Open Data) · kelgusi 7 kun: N ta tadbir, xaritada: M ta".
+- Yangilanish: boot + har 10 daqiqa + modul ochilganda + visibilitychange; xato bo'lsa 20 soniyadan keyin bitta avtomatik qayta urinish. Home Alerts'da faol tadbirlar endi eng ko'pi 4 ta. SW: geosearch keshlanishi mumkin (barqaror natija) — o'zgartirilmadi; cache tlc-pro-v19, assetlar ?v=87.
+
+**Testlar:** mapping unit-test real Socrata namunalari bilan PASS (Greenmarket ×1.2, koordinatasiz → GeoSearch navbati; Madison Square Park Festival ×1.5, gazetteer 40.7411/-73.9897). GeoSearch jonli tekshirildi (kesishma va joy so'rovlari koordinata qaytardi).
+**Jonli QA:** KUTILMOQDA — push (a4e6aac) repoda tasdiqlandi (raw = v8.7), lekin GitHub Pages build'i 09:38Z commit uchun 09:57Z gacha ham chiqmagan (sayt Last-Modified 09:08Z, v8.6 build'i). Ushbu TEST_REPORT push'i build'ni qayta ishga tushirish uchun ham xizmat qiladi.
