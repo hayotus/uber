@@ -647,7 +647,7 @@ function fitClMap(){
 }
 function refreshClMap(){
   const el=$("clMap");if(!el||!el.clientWidth)return;
-  if(!clMap){clMap=L.map("clMap").setView([userLat(),userLon()],12);tiles().addTo(clMap);clMarkers=L.layerGroup().addTo(clMap);drawClMarkers();fitClMap();return}
+  if(!clMap){clMap=L.map("clMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(clMap);clMarkers=L.layerGroup().addTo(clMap);drawClMarkers();fitClMap();return}
   try{clMap.invalidateSize()}catch(e){}
   drawClMarkers();
   try{const ctr=clMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitClMap()}catch(e){}
@@ -749,7 +749,7 @@ function setEvView(v){
   if(bl)bl.classList.toggle("on",v==="list");if(bm)bm.classList.toggle("on",v==="map");
   if(ul)ul.style.display=v==="list"?"":"none";if(mw)mw.style.display=v==="map"?"":"none";
   if(v==="map"){setTimeout(()=>{
-    if(!evMap){evMap=L.map("evMap").setView([userLat(),userLon()],11);tiles().addTo(evMap);evMarkers=L.layerGroup().addTo(evMap)}
+    if(!evMap){evMap=L.map("evMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(evMap);evMarkers=L.layerGroup().addTo(evMap)}
     try{evMap.invalidateSize()}catch(e){}
     drawEvMarkers();
     const pts=EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80);
