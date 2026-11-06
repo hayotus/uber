@@ -568,7 +568,7 @@ function refreshCam(notify=true){
   }).catch(()=>{ $("camList").innerHTML=listHTML(distSort(CAMS_FB),"📷"); if(notify)toast("Jonli OSM ishlamadi — zaxira (taxminiy) roʻyxat"); });
 }
 /* ===== Umumiy xarita: Stops & Charging (v10.1) ===== */
-let stMap=null,stWcLayer=null,stParkLayer=null,stEvLayer=null,stShowWc=true,stShowPark=true,stShowEv=true,stTab="wc";
+let stMap=null,stWcLayer=null,stParkLayer=null,stEvLayer=null,stShowWc=true,stShowPark=true,stShowEv=true,stTab="wc",stMe=null;
 let WC_ITEMS=null,EV_ITEMS=null;
 function stWcPts(){return (WC_ITEMS||distSort(WC_FB)).slice(0,20)}
 function stEvPts(){return (EV_ITEMS||distSort(EV_FB)).slice(0,20)}
@@ -590,7 +590,7 @@ function fitStMap(){
 }
 function refreshStMap(){
   const el=$("stMap");if(!el||!el.clientWidth)return;
-  if(!stMap){stMap=L.map("stMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(stMap);stWcLayer=L.layerGroup().addTo(stMap);stParkLayer=L.layerGroup().addTo(stMap);stEvLayer=L.layerGroup().addTo(stMap);drawStLayers();fitStMap();return}
+  if(!stMap){stMap=L.map("stMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(stMap);stWcLayer=L.layerGroup().addTo(stMap);stParkLayer=L.layerGroup().addTo(stMap);stEvLayer=L.layerGroup().addTo(stMap);stMe=L.marker([userLat(),userLon()]).addTo(stMap).bindPopup("Siz");drawStLayers();fitStMap();return}
   try{stMap.invalidateSize()}catch(e){}
   drawStLayers();
   try{const ctr=stMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitStMap()}catch(e){}
@@ -686,7 +686,7 @@ function renderClosures(){
 function clPopup(c){const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});return "<b>🚧 "+esc(c.n)+"</b>"+(c.place?"<br>📍 "+esc(c.place):"")+"<br>📅 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+"<br>"+(clActive(c)?"🔴 FAOL":"🕐 YAQINDA")+(c.sev?" \u00b7 "+esc(c.sev):"")}
 function clPts(){return clFiltered().filter(c=>c.lat!=null&&hav(userLat(),userLon(),c.lat,c.lon)<60).slice(0,120)}
 /* ===== Umumiy xarita: Events & Road (v10.0) ===== */
-let erMap=null,erEvLayer=null,erRdLayer=null,erShowEv=true,erShowRd=true,erTab="ev";
+let erMap=null,erEvLayer=null,erRdLayer=null,erShowEv=true,erShowRd=true,erTab="ev",erMe=null;
 function erEvPts(){return EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80)}
 function drawErLayers(){
   if(!erMap)return;
@@ -702,7 +702,7 @@ function fitErMap(){
 }
 function refreshErMap(){
   const el=$("erMap");if(!el||!el.clientWidth)return;
-  if(!erMap){erMap=L.map("erMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(erMap);erEvLayer=L.layerGroup().addTo(erMap);erRdLayer=L.layerGroup().addTo(erMap);drawErLayers();fitErMap();return}
+  if(!erMap){erMap=L.map("erMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(erMap);erEvLayer=L.layerGroup().addTo(erMap);erRdLayer=L.layerGroup().addTo(erMap);erMe=L.marker([userLat(),userLon()]).addTo(erMap).bindPopup("Siz");drawErLayers();fitErMap();return}
   try{erMap.invalidateSize()}catch(e){}
   drawErLayers();
   try{const ctr=erMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitErMap()}catch(e){}
@@ -1023,6 +1023,8 @@ if(navigator.geolocation){
     renderHome();
     if(map){map.setView([pos.lat,pos.lon],12);if(userMk)userMk.setLatLng([pos.lat,pos.lon])}
     if(mapHome){mapHome.setView([pos.lat,pos.lon],11);if(userMkH)userMkH.setLatLng([pos.lat,pos.lon])}
+    if(erMe)erMe.setLatLng([pos.lat,pos.lon]);
+    if(stMe)stMe.setLatLng([pos.lat,pos.lon]);
   },()=>{toast("GPS ruxsati yoʻq — Manhattan markazi ishlatiladi")},{enableHighAccuracy:false,maximumAge:60000,timeout:12000});
 }
 
