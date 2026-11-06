@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=86">
+<link rel="stylesheet" href="./style.css?v=87">
 </head>
 <body>
 <main>
@@ -118,7 +118,7 @@
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v8.6 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v8.7 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -180,7 +180,7 @@
     <button class="mtile" data-go="airports"><span class="ic">✈️</span><div class="n">2. Airport Monitor</div><div class="s">JFK · LGA · EWR (LIVE + HISTORICAL)</div></button>
     <button class="mtile" data-go="home"><span class="ic">◎</span><div class="n">3. Best Next Location</div><div class="s">Smart tavsiya — Home ekrani</div></button>
     <button class="mtile" data-go="tools" data-mod="modEarn"><span class="ic">💵</span><div class="n">4. Earnings Calculator</div><div class="s">Sof foyda hisoblagichi</div></button>
-    <button class="mtile" data-go="tools" data-mod="modEvents"><span class="ic">🎉</span><div class="n">5. Events &amp; Surge Forecast</div><div class="s">Tadbirlar (ESTIMATED)</div></button>
+    <button class="mtile" data-go="tools" data-mod="modEvents"><span class="ic">🎉</span><div class="n">5. Events &amp; Surge Forecast</div><div class="s">Tadbirlar — jonli (NYC Permitted)</div></button>
     <button class="mtile" data-go="tools" data-mod="modClose"><span class="ic">🚧</span><div class="n">6. Road Closure Monitor</div><div class="s">Yopilishlar — NYC DOT (jonli)</div></button>
     <button class="mtile" data-go="journal"><span class="ic">📓</span><div class="n">7. Driver Journal</div><div class="s">Smena jurnali (LOCAL)</div></button>
     <button class="mtile" data-go="tools" data-mod="modVoice"><span class="ic">🎙️</span><div class="n">8. Voice Assistant</div><div class="s">Ovozli buyruqlar</div></button>
@@ -203,7 +203,7 @@
     <div class="small" style="line-height:2">
     1. Demand Heatmap (Xarita) · 2. Airport Monitor (Airports) · 3. Best Next Location (Home) · 4. Earnings Calculator · 5. Events &amp; Surge Forecast · 6. Road Closure Monitor · 7. Driver Journal · 8. Voice Assistant · 9. Smart Driver Intelligence · 10. Hotspot Ranking · 11. Weather &amp; Rain Radar · 12. Speed &amp; Traffic Camera · 13. Restroom &amp; Rest Stop · 14. Parking Assistant · 15. EV Charging Assistant · 16. Aeroport oqimi (Airports)
     </div></div>
-  <details class="mod" id="modEvents"><summary><span>🎉 Events &amp; Surge Forecast</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><ul class="list" id="eventList"></ul><div class="src">Uber ichki surge maʼlumoti ochiq emas — koʻpaytiruvchi faqat taxmin. Tadbir jadvalini rasmiy manbadan tekshiring.</div></div></details>
+  <details class="mod" id="modEvents"><summary><span>🎉 Events &amp; Surge Forecast</span><span class="badge b-est" id="evBadge">ESTIMATED</span></summary><div class="in"><div class="frow"><button class="ghost" id="evRefresh2">🔄 Yangilash</button><span class="small" id="evUpd"></span></div><div class="hctlrow" style="margin:6px 0"><button class="hchip on" id="evViewList">📋 Roʻyxat</button><button class="hchip" id="evViewMap">🗺️ Xarita</button></div><ul class="list" id="eventList"></ul><div id="evMapWrap" style="display:none"><div id="evMap" style="height:320px;border-radius:14px;overflow:hidden;border:1px solid var(--line)"></div><div class="small" id="evMapNote" style="margin-top:6px"></div></div><div class="src">Manba: NYC Permitted Events (Open Data) — rasmiy ruxsat berilgan tadbirlar, har 10 daqiqada yangilanadi. Joylashuv: maʼlum joylar lugʻati + NYC GeoSearch. Uber ichki surge ochiq emas — koʻpaytiruvchi taxminiy.</div></div></details>
 
   <details class="mod" id="modClose"><summary><span>🚧 Road Closure Monitor</span><span class="badge b-est" id="closeBadge">ESTIMATED</span></summary><div class="in"><div class="frow"><button class="ghost" id="clRefresh">🔄 Yangilash</button><span class="small" id="clUpd"></span></div><ul class="list" id="closeList"></ul><div class="src">Rasmiy manba: NYC DOT va 511NY. Favqulodda yopilishlar kechikib eʼlon qilinishi mumkin — chiqishdan oldin tekshiring.</div></div></details>
 
@@ -347,6 +347,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=86"></script>
+<script type="module" src="./app.js?v=87"></script>
 </body>
 </html>

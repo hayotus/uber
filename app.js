@@ -39,7 +39,7 @@ const AIRPORTS=[
 {code:"LGA",name:"LaGuardia",lat:40.7769,lon:-73.8740,term:"Terminal B asosiy oqim"},
 {code:"EWR",name:"Newark Liberty Intl",lat:40.6895,lon:-74.1745,term:"Terminal A va C"}
 ];
-const EVENTS=[
+let EVENTS=[
 {n:"Village Halloween Parade",place:"6th Ave, Greenwich Village",lat:40.7312,lon:-74.0000,start:"2026-10-31T19:00",end:"2026-10-31T23:30",surge:2.2},
 {n:"NYC Marathon 2026",place:"5 borough boʻylab",lat:40.7720,lon:-73.9300,start:"2026-11-01T08:00",end:"2026-11-01T18:00",surge:1.8,note:"Koʻplab koʻchalar yopiladi — marshrutni oldindan rejalang"},
 {n:"Broadway shoulari tugashi",place:"Times Square",lat:40.7590,lon:-73.9845,daily:[21.5,23.5],surge:1.5},
@@ -98,9 +98,9 @@ function applyTheme(){document.documentElement.setAttribute("data-theme",setting
 function distTxt(mi){return settings.units==="km"?(mi*1.60934).toFixed(1)+" km":mi.toFixed(1)+" mi"}
 function spdTxt(mph){return settings.speed==="kmh"?Math.round(mph*1.60934)+" km/h":mph+" mph"}
 const AIRLABS_KEY="e47a4224-471e-4631-8e57-67aea417485e";
-const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",closures:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
+const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",closures:"tekshirilmagan",events:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
 let lastCalcAt=null;
-function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>NYC DOT yopilishlar: <b>"+esc(apiStat.closures)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
+function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>NYC DOT yopilishlar: <b>"+esc(apiStat.closures)+"</b><br>NYC Events (tadbirlar): <b>"+esc(apiStat.events)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
 function userLat(){return pos?pos.lat:DEF_POS.lat}
 function userLon(){return pos?pos.lon:DEF_POS.lon}
 
@@ -569,13 +569,7 @@ function refreshCam(notify=true){
 }
 function renderCams(){ refreshCam(false); }
 function renderEventsClosures(){
-  const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
-  const evs=EVENTS.map(ev=>({ev:ev,st:evState(ev),w:evWin(ev)})).filter(x=>x.st!=="past");
-  $("eventList").innerHTML=evs.map(x=>{const ev=x.ev;
-    const stTxt=x.st==="active"?'<span class="hi">FAOL</span>':x.st==="later"?'<span class="med">KEYINROQ</span>':'<span class="med">INFO</span>';
-    const when=x.w?(fmtD(x.w.s)+" → "+fmtD(x.w.e)):"aniq vaqt yoʻq";
-    return '<li><div class="r"><div><b>'+esc(ev.n)+'</b><div class="small">'+esc(ev.place)+" · "+esc(when)+'</div>'+(ev.note?'<div class="small">'+esc(ev.note)+'</div>':'')+'</div><div style="text-align:right">'+stTxt+(ev.surge?'<div class="med mono">×'+ev.surge+'</div>':'')+'</div></div></li>';
-  }).join("")||'<li class="small">Yaqin tadbirlar yoʻq.</li>';
+  renderEvents();
   renderClosures();
 }
 
@@ -629,6 +623,104 @@ function renderClosures(){
   const item=c=>{const act2=clActive(c);return '<li><div class="r"><div><b>'+esc(c.n)+'</b><div class="small">'+esc(c.place||"")+" \u00b7 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+'</div></div><span class="'+(act2?"hi":"med")+'">'+(act2?"FAOL":"YAQINDA")+'</span></div></li>'};
   const rest=Math.max(0,act.length-20)+Math.max(0,up.length-10);
   el.innerHTML=head+act.slice(0,20).map(item).join("")+up.slice(0,10).map(item).join("")+(rest?'<li class="small">\u2026 va yana '+rest+' tasi \u2014 xaritadagi \U0001f6a7 qatlamida.</li>':"")+'<li class="small">Manba: NYC DOT qurilish yopilishlari (kesishma va bloklar). Ish soatlari kun ichida farq qilishi mumkin. Rasmiy tekshiruv: <a href="https://www.nyc.gov/dot" style="color:var(--blu)">nyc.gov/dot</a>, 511NY.</li>';
+}
+
+
+/* ================= Jonli tadbirlar — NYC Permitted Events (Open Data) ================= */
+let evTs=0,evLive=false,evBusy=false,evTotal=0,evMapped=0,evView="list",evMap=null,evMarkers=null;
+const GAZ=[["central park",40.7829,-73.9654],["madison square park",40.7411,-73.9897],["bryant park",40.7536,-73.9832],["union square",40.7359,-73.9911],["washington square",40.7308,-73.9973],["times square",40.7580,-73.9855],["herald square",40.7494,-73.9878],["columbus circle",40.7681,-73.9819],["lincoln center",40.7725,-73.9835],["radio city",40.7599,-73.9809],["rockefeller",40.7587,-73.9787],["madison square garden",40.7505,-73.9934],["barclays",40.6826,-73.9754],["yankee stadium",40.8296,-73.9262],["citi field",40.7571,-73.8458],["prospect park",40.6602,-73.9690],["grand army plaza",40.6734,-73.9701],["mccarren",40.7213,-73.9522],["astoria park",40.7788,-73.9215],["flushing meadows",40.7497,-73.8448],["van cortlandt",40.8976,-73.8857],["pelham bay",40.8648,-73.8097],["riverside park",40.8010,-73.9720],["tompkins square",40.7264,-73.9817],["battery park",40.7033,-74.0170],["city hall park",40.7126,-74.0066],["foley square",40.7144,-74.0024],["coney island",40.5749,-73.9857],["fort greene",40.6913,-73.9743],["inwood hill",40.8725,-73.9254],["crotona park",40.8387,-73.8950],["fifth avenue",40.7742,-73.9656],["5th avenue",40.7742,-73.9656]];
+const WD=["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
+function gazMatch(text){const t=" "+String(text||"").toLowerCase().replace(/\s+/g," ")+" ";for(let i=0;i<GAZ.length;i++){if(t.indexOf(" "+GAZ[i][0])>=0||t.indexOf(GAZ[i][0]+" ")>=0)return [GAZ[i][1],GAZ[i][2]]}return null}
+function evSurge(type,closure){const t=String(type||"");if(t==="Parade")return 1.8;if(t.indexOf("Athletic")>=0)return 1.7;if(t.indexOf("Festival")>=0||t.indexOf("Fair")>=0)return 1.5;if(t==="Concert"||t.indexOf("Sport")>=0)return 1.5;if(t==="Farmers Market")return 1.2;if(String(closure||"")==="Full Street Closure")return 1.3;return null}
+function geoCache(){try{return JSON.parse(localStorage.getItem("drv_geo")||"{}")}catch(e){return {}}}
+function geoSave(c){try{localStorage.setItem("drv_geo",JSON.stringify(c))}catch(e){}}
+function evMapRow(r){
+  const nm=String(r.event_name||"").replace(/\s+/g," ").trim();if(!nm)return null;
+  const st=String(r.start_date_time||""),en=String(r.end_date_time||"");
+  if(st.length<16||en.length<16)return null;
+  const locRaw=String(r.event_location||"").replace(/\s+/g," ").trim();
+  const loc=titleCase(locRaw);
+  const place=(loc||"")+(r.event_borough?((loc?", ":"")+r.event_borough):"");
+  const g=gazMatch(locRaw+" "+nm);
+  return {n:titleCase(nm),place:place,lat:g?g[0]:null,lon:g?g[1]:null,start:st.slice(0,16),end:en.slice(0,16),surge:evSurge(r.event_type,r.street_closure_type),type:r.event_type||"",locKey:locRaw.toLowerCase(),live:true};
+}
+function loadEvents(force){
+  if(evBusy)return;if(!force&&evTs&&Date.now()-evTs<600000)return;evBusy=true;
+  const now=new Date();const from=new Date(now.getTime()-3*3600e3),to=new Date(now.getTime()+7*864e5);
+  const iso=d=>d.toISOString().slice(0,19);
+  const types="('Parade','Athletic Race / Tour','Street Festival','Festival','Concert','Sporting Event','Farmers Market','Special Event','March','Rally','Block Party')";
+  const wh=encodeURIComponent("start_date_time between '"+iso(from)+"' and '"+iso(to)+"' AND (event_type in"+types+" OR street_closure_type='Full Street Closure')");
+  const u="https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$select=event_name,start_date_time,end_date_time,event_type,event_borough,event_location,street_closure_type&$where="+wh+"&$order=start_date_time&$limit=800";
+  fetchT(u,30000,{cache:"no-store"}).then(r=>r.json()).then(rows=>{
+    evBusy=false;
+    const seen={},list=[];
+    (rows||[]).forEach(r=>{const e=evMapRow(r);if(!e)return;const k=e.n+"|"+e.start;if(seen[k])return;seen[k]=1;list.push(e)});
+    if(!list.length){apiStat.events="OK \u2014 tadbir topilmadi";renderApiStat();return}
+    const keep=EVENTS.filter(e=>!e.live&&(e.daily||!e.start));
+    EVENTS=list.concat(keep);
+    evTotal=list.length;evLive=true;evTs=Date.now();
+    const bd=$("evBadge");if(bd){bd.textContent="LIVE";bd.className="badge b-live"}
+    apiStat.events="OK \u00b7 jonli ("+evTotal+" ta) \u00b7 "+new Date(evTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+    renderApiStat();renderEvents();renderAlerts();renderHome();geocodeMissing();drawEvMarkers();
+  }).catch(()=>{evBusy=false;apiStat.events="XATO \u2014 NYC Events javob bermadi";renderApiStat();if(!evLive&&!loadEvents._rt){loadEvents._rt=1;setTimeout(()=>{loadEvents._rt=0;loadEvents(true)},20000)}});
+}
+function evCountMapped(){evMapped=EVENTS.filter(e=>e.live&&e.lat!=null).length}
+function geocodeMissing(){
+  const cache=geoCache();let changed=false;
+  EVENTS.forEach(e=>{if(e.live&&e.lat==null&&e.locKey&&cache[e.locKey]){e.lat=cache[e.locKey][0];e.lon=cache[e.locKey][1];changed=true}});
+  if(changed){renderEvents();drawEvMarkers()}
+  const todo=EVENTS.filter(e=>e.live&&e.lat==null&&e.locKey).slice(0,6);let delay=0;
+  todo.forEach(e=>{
+    setTimeout(()=>{
+      const m=e.locKey.match(/between\s+(.+?)\s+and\s+/);
+      const q=m?(m[1]+" & "+e.locKey.split(" between ")[0]):e.locKey;
+      fetchT("https://geosearch.planninglabs.nyc/v2/search?text="+encodeURIComponent(q+", New York, NY")+"&size=1",9000).then(r=>r.json()).then(j=>{
+        const f=j&&j.features&&j.features[0];if(!f||!f.geometry||!f.geometry.coordinates)return;
+        e.lat=f.geometry.coordinates[1];e.lon=f.geometry.coordinates[0];cache[e.locKey]=[e.lat,e.lon];geoSave(cache);
+        renderEvents();drawEvMarkers();
+      }).catch(()=>{});
+    },delay);delay+=700;
+  });
+}
+function fmtEvWhen(e){
+  const s=new Date(e.start),en=new Date(e.end);
+  const f=d=>d.toLocaleString("en-US",{hour:"numeric",minute:"2-digit"});
+  const dm=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});
+  return WD[s.getDay()]+", "+dm(s)+" \u00b7 "+f(s)+" \u2192 "+(s.toDateString()===en.toDateString()?f(en):dm(en)+" "+f(en));
+}
+function renderEvents(){
+  const el=$("eventList");if(!el)return;
+  const upd=$("evUpd");if(upd)upd.textContent=evLive?("Oxirgi yangilanish: "+new Date(evTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})):"Jonli ma\u02bclumot kutilmoqda\u2026";
+  evCountMapped();
+  const head=evLive?'<li class="small">\U0001f534 <b>LIVE</b> \u2014 NYC Permitted Events (Open Data) \u00b7 kelgusi 7 kun: <b>'+evTotal+' ta</b> tadbir, xaritada: <b>'+evMapped+' ta</b></li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar.</li>';
+  const evs=EVENTS.map(ev=>({ev:ev,st:evState(ev),w:evWin(ev)})).filter(x=>x.st!=="past");
+  evs.sort((x,y)=>{const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});
+  const items=evs.slice(0,25).map(x=>{const ev=x.ev;
+    const stTxt=x.st==="active"?'<span class="hi">FAOL</span>':x.st==="later"?'<span class="med">KEYINROQ</span>':'<span class="med">INFO</span>';
+    const when=ev.live?fmtEvWhen(ev):(x.w?(x.w.s.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})+" \u2192 "+x.w.e.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})):"aniq vaqt yo\u02bbq");
+    return '<li><div class="r"><div><b>'+esc(ev.n)+'</b><div class="small">'+esc(ev.place||"")+'</div><div class="small">'+esc(when)+'</div>'+(ev.type?'<div class="small">'+esc(ev.type)+'</div>':'')+(ev.note?'<div class="small">'+esc(ev.note)+'</div>':'')+'</div><div style="text-align:right">'+stTxt+(ev.surge?'<div class="med mono">\u00d7'+ev.surge+'</div>':'')+'</div></div></li>';
+  }).join("");
+  el.innerHTML=head+(items||'<li class="small">Yaqin tadbirlar yo\u02bbq.</li>')+(evs.length>25?'<li class="small">\u2026 va yana '+(evs.length-25)+' ta tadbir.</li>':"");
+  const note=$("evMapNote");if(note)note.textContent="Xaritada koordinatasi aniqlangan "+evMapped+" ta tadbir. Markerni bosing \u2014 nomi, kuni, sanasi, soati va manzili chiqadi.";
+}
+function evPopup(e){return "<b>"+esc(e.n)+"</b><br>\U0001f4c5 "+esc(fmtEvWhen(e))+"<br>\U0001f4cd "+esc(e.place||"")+(e.type?"<br>\U0001f389 "+esc(e.type):"")+(e.surge?"<br>\u26a1 Surge (taxminiy): \u00d7"+e.surge:"")}
+function drawEvMarkers(){
+  if(!evMap||!evMarkers)return;
+  evMarkers.clearLayers();
+  EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80).forEach(e=>{L.marker([e.lat,e.lon]).addTo(evMarkers).bindPopup(evPopup(e))});
+}
+function setEvView(v){
+  evView=v;
+  const bl=$("evViewList"),bm=$("evViewMap"),ul=$("eventList"),mw=$("evMapWrap");
+  if(bl)bl.classList.toggle("on",v==="list");if(bm)bm.classList.toggle("on",v==="map");
+  if(ul)ul.style.display=v==="list"?"":"none";if(mw)mw.style.display=v==="map"?"":"none";
+  if(v==="map"){setTimeout(()=>{
+    if(!evMap){evMap=L.map("evMap").setView([userLat(),userLon()],11);tiles().addTo(evMap);evMarkers=L.layerGroup().addTo(evMap)}
+    try{evMap.invalidateSize()}catch(e){}
+    drawEvMarkers();
+    const pts=EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80);
+    if(pts.length){try{evMap.fitBounds(L.latLngBounds(pts.map(e=>[e.lat,e.lon])),{padding:[24,24],maxZoom:13})}catch(err){}}
+  },60)}
 }
 
 function renderParking(){
@@ -731,7 +823,7 @@ function renderAlerts(){
   const el=$("alertList");if(!el)return;
   const items=[];
   CLOSURES.filter(c=>clActive(c)&&c.lat!=null).map(c=>({c:c,d:hav(userLat(),userLon(),c.lat,c.lon)})).sort((x,y)=>x.d-y.d).slice(0,5).forEach(x=>items.push({sev:x.c.sev||"Past",txt:"🚧 <b>"+esc(x.c.n)+"</b> — "+esc(x.c.place||"")}));
-  EVENTS.forEach(ev=>{if(evState(ev)==="active")items.push({sev:"Tadbir",txt:"📅 <b>"+esc(ev.n)+"</b> — "+esc(ev.place||"")+" (hozir faol davr)"})});
+  EVENTS.filter(ev=>evState(ev)==="active").slice(0,4).forEach(ev=>items.push({sev:"Tadbir",txt:"📅 <b>"+esc(ev.n)+"</b> — "+esc(ev.place||"")+" (hozir faol davr)"}));
   el.innerHTML=items.length?items.map(i=>'<div class="alertItem"><b>'+esc(i.sev)+'</b> · '+i.txt+'</div>').join(""):"Faol ogohlantirishlar yoʻq ✔";
   const av=$("alertVal");if(av)av.textContent=items.length?(items.length+" faol"):"Xavf yoʻq";
 }
@@ -751,9 +843,13 @@ function refreshHeat(){try{
 const hm=$("homeMore");if(hm)hm.addEventListener("toggle",()=>{if(hm.open&&mapHome)setTimeout(()=>{try{mapHome.invalidateSize()}catch(e){}},80)});
 let lastHour=null;
 setInterval(()=>{const h=nowNY().getHours();if(lastHour===null){lastHour=h;return}if(h!==lastHour){lastHour=h;renderHome();refreshHeat()}},60000);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false)}});}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false);loadEvents(false)}});}
 
 {const cb=$("clRefresh");if(cb)cb.addEventListener("click",()=>{loadClosures(true);toast("\U0001f6a7 Yopilishlar yangilanmoqda\u2026")});}
+{const eb=$("evRefresh2");if(eb)eb.addEventListener("click",()=>{loadEvents(true);toast("\U0001f389 Tadbirlar yangilanmoqda\u2026")});}
+{const bl=$("evViewList");if(bl)bl.addEventListener("click",()=>setEvView("list"));}
+{const bm=$("evViewMap");if(bm)bm.addEventListener("click",()=>setEvView("map"));}
+{const me2=$("modEvents");if(me2)me2.addEventListener("toggle",()=>{if(me2.open)loadEvents(false)});}
 {const md=$("modClose");if(md)md.addEventListener("toggle",()=>{if(md.open)loadClosures(false)});}
 
 /* ================= Navigation & Geo ================= */
@@ -915,6 +1011,7 @@ renderJournal();renderHome();renderAirports();initMaps();
 loadZones();loadZoneWx();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
+loadEvents(true);setInterval(()=>loadEvents(false),600000);
 setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
