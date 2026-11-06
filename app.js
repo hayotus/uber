@@ -512,7 +512,7 @@ function initMaps(){
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
   mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);
   heatHome=heatCircles(mapHome);heatHome.addTo(mapHome);
-  userMkH=L.marker([userLat(),userLon()]).addTo(mapHome);
+  userMkH=L.marker([userLat(),userLon()]).addTo(mapHome).bindPopup("Siz");
 }
 let rainLayer=null;
 function toggleLayer(name,on){
