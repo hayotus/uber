@@ -506,7 +506,7 @@ function initMaps(){
   if(map)return;
   map=L.map("map").setView([userLat(),userLon()],12);tiles().addTo(map);
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
-  layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();
+  layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
   CAMS_FB.forEach(c=>L.marker([c.lat,c.lon]).addTo(layerGroups.cam).bindPopup("📷 Kamera — "+esc(c.n)+"<br><span>Taxminiy nuqta — OSM tekshiruvi 3-bosqichda</span>"));
   CLOSURES.forEach(c=>{ if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))});
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
@@ -527,7 +527,7 @@ function toggleLayer(name,on){
   }
   const g=layerGroups[name];if(!g)return;
   if(on)g.addTo(map);else map.removeLayer(g);
-  if(name==="ev"&&on)refreshEV(false);
+  if(name==="ev"){if(layerGroups.tesla){if(on)layerGroups.tesla.addTo(map);else map.removeLayer(layerGroups.tesla)}if(on){refreshEV(false);refreshTesla()}}
   if(name==="wc"&&on)refreshWC(false);
 }
 
@@ -541,21 +541,32 @@ function overpass(q){
   return fetchT("https://overpass-api.de/api/interpreter",12000,opt).then(r=>r.json())
    .catch(()=>fetchT("https://overpass.kumi.systems/api/interpreter",12000,opt).then(r=>r.json()));
 }
+function drawMapWc(items){if(typeof layerGroups==="undefined"||!layerGroups.wc)return;layerGroups.wc.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#2f7cf6",fillOpacity:.9}).addTo(layerGroups.wc).bindPopup("<b>\uD83D\uDEBB "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
+function drawMapEv(items){if(typeof layerGroups==="undefined"||!layerGroups.ev)return;layerGroups.ev.clearLayers();items.slice(0,40).forEach(x=>L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#30d158",fillOpacity:.9}).addTo(layerGroups.ev).bindPopup("<b>\u26A1 "+esc(x.n)+"</b><br>"+distTxt(x.d)+" uzoqlikda"))}
+function refreshTesla(){
+  const url="https://photon.komoot.io/api/?q="+encodeURIComponent("Tesla Supercharger")+"&lat="+userLat()+"&lon="+userLon()+"&limit=15";
+  fetchT(url,10000).then(r=>r.json()).then(j=>{
+    if(typeof layerGroups==="undefined"||!layerGroups.tesla)return;
+    layerGroups.tesla.clearLayers();const seen={};
+    (j.features||[]).forEach(f=>{const c=f.geometry&&f.geometry.coordinates,p=f.properties||{};if(!c)return;const lat=c[1],lon=c[0],d=hav(userLat(),userLon(),lat,lon);if(d>31)return;const key=(p.name||"")+"@"+lat.toFixed(3)+","+lon.toFixed(3);if(seen[key])return;seen[key]=1;
+      L.marker([lat,lon]).addTo(layerGroups.tesla).bindPopup("<b>\u26A1 "+esc(p.name||"Tesla Supercharger")+"</b>"+((p.street||p.city)?"<br>\uD83D\uDCCD "+esc([p.street,p.city].filter(Boolean).join(", ")):"")+"<br>"+distTxt(d)+" uzoqlikda")});
+  }).catch(()=>{});
+}
 function refreshWC(notify=true){
   const q='[out:json][timeout:10];node["amenity"="toilets"](around:9000,'+userLat()+","+userLon()+");out 40;";
   overpass(q).then(j=>{
     const items=j.elements.filter(e=>e.lat).map(e=>({n:(e.tags&&(e.tags.name||e.tags.operator))||"Jamoat hojatxonasi",lat:e.lat,lon:e.lon}));
-    if(items.length){apiStat.overpass="OK";$("wcList").innerHTML=listHTML(distSort(items),"🚻");WC_ITEMS=distSort(items);drawStLayers();if(notify)toast("Hojatxonalar yangilandi (OSM)");return}
+    if(items.length){apiStat.overpass="OK";$("wcList").innerHTML=listHTML(distSort(items),"🚻");WC_ITEMS=distSort(items);drawStLayers();drawMapWc(WC_ITEMS);if(notify)toast("Hojatxonalar yangilandi (OSM)");return}
     throw new Error("empty");
-  }).catch(()=>{ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻"); WC_ITEMS=distSort(WC_FB);drawStLayers(); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
+  }).catch(()=>{ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻"); WC_ITEMS=distSort(WC_FB);drawStLayers();drawMapWc(WC_ITEMS); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
 }
 function refreshEV(notify=true){
   const q='[out:json][timeout:10];node["amenity"="charging_station"](around:26000,'+userLat()+","+userLon()+");out 60;";
   overpass(q).then(j=>{
     const items=j.elements.filter(e=>e.lat).map(e=>{const t=e.tags||{};const tesla=/tesla/i.test((t.brand||"")+" "+(t.operator||"")+" "+(t.name||""));return {n:(t.name||t.operator||t.brand||"Zaryadlash stansiyasi")+(tesla?" ⚡Tesla":""),lat:e.lat,lon:e.lon}});
-    if(items.length){apiStat.overpass="OK";$("evList").innerHTML=listHTML(distSort(items),"⚡");EV_ITEMS=distSort(items);drawStLayers();if(notify)toast("Zaryadlash stansiyalari yangilandi (OSM)");return}
+    if(items.length){apiStat.overpass="OK";$("evList").innerHTML=listHTML(distSort(items),"⚡");EV_ITEMS=distSort(items);drawStLayers();drawMapEv(EV_ITEMS);if(notify)toast("Zaryadlash stansiyalari yangilandi (OSM)");return}
     throw new Error("empty");
-  }).catch(()=>{ $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡")+'<div class="small">Zaxira roʻyxat — aniq manzil/quvvatni Tesla ilovasida tekshiring.</div>'; EV_ITEMS=distSort(EV_FB);drawStLayers(); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
+  }).catch(()=>{ $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡")+'<div class="small">Zaxira roʻyxat — aniq manzil/quvvatni Tesla ilovasida tekshiring.</div>'; EV_ITEMS=distSort(EV_FB);drawStLayers();drawMapEv(EV_ITEMS); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
 }
 function refreshCam(notify=true){
   const q='[out:json][timeout:10];node["highway"="speed_camera"](around:15000,'+userLat()+","+userLon()+");out 80;";
