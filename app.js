@@ -135,7 +135,7 @@ const DEF_POS={lat:40.7580,lon:-73.9855}; /* Times Square — GPS kelguncha */
 let pos=null, wxData=null, rainProb3h=0;
 let ZD=null, zoneWx={}, zoneWxH={}, adsb={}, lastRPH=null;
 let hotOff=0, hotSort="score", hotMax=0, hotAll=false, lastHotList=[];
-let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,drive:0,weights:null,airports:["JFK","LGA","EWR"],zone:""};
+let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,drive:0,weights:null,airports:["JFK","LGA","EWR"],zone:"",traffic:true,ezpass:true};
 try{const s=JSON.parse(localStorage.getItem("drv_settings")||"null");if(s)settings=Object.assign(settings,s)}catch(e){}
 /* ================= IndexedDB (3-bosqich) ================= */
 function idbOpen(){return new Promise((res,rej)=>{try{const rq=indexedDB.open("drvdb",1);rq.onupgradeneeded=()=>{rq.result.createObjectStore("kv")};rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error)}catch(e){rej(e)}})}
@@ -564,6 +564,12 @@ function initMaps(){
   layerGroups.loc=L.layerGroup();layerGroups.cruise=L.layerGroup();layerGroups.air=L.layerGroup();
   CAMS_FB.forEach(c=>L.marker([c.lat,c.lon]).addTo(layerGroups.cam).bindPopup("📷 Kamera — "+esc(c.n)+"<br><span>Taxminiy nuqta — OSM tekshiruvi 3-bosqichda</span>"));
   CLOSURES.forEach(c=>{ if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))});
+  routeGroup=L.layerGroup().addTo(map);
+  trafficLayer=L.tileLayer("https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key="+TT_KEY,{maxZoom:22,opacity:0.95,attribution:"\u00A9 TomTom"});
+  let tileErrCount=0;
+  trafficLayer.on("tileerror",()=>{tileErrCount++;if(tileErrCount>=3&&!tileDegraded){tileDegraded=true;updateTrafficUI()}});
+  trafficLayer.on("tileload",()=>{if(tileErrCount>0){tileErrCount=0;if(tileDegraded){tileDegraded=false;updateTrafficUI()}}});
+  if(settings.traffic)trafficLayer.addTo(map);
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
   mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);
   heatHome=heatCircles(mapHome);heatHome.addTo(mapHome);
@@ -610,54 +616,96 @@ function drawMapLayer(layer){
   if(layer==="loc"){const g=layerGroups.loc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,x.kind==="tochka"?mkIcon("mk-tochka",String(x.h)):mkIcon("mk-loc","\uD83D\uDCCD")))}
   if(layer==="cruise"){const g=layerGroups.cruise;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-loc","\uD83D\uDEA2")))}
   if(layer==="air"){const g=layerGroups.air;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-loc","\u2708\uFE0F")))}
+  syncRouteLines();
 }
 function routeKey(layer,x){return layer+"@"+x.lat.toFixed(4)+","+x.lon.toFixed(4)}
-function kickRoutes(layer){
-  sortedItems(layer).slice(0,visCount[layer]).forEach(x=>{
-    const k=routeKey(layer,x);
-    if(routeInfo[k])return;
-    routeInfo[k]={wait:1};
-    const url="https://router.project-osrm.org/route/v1/driving/"+userLon()+","+userLat()+";"+x.lon+","+x.lat+"?overview=false";
-    fetchT(url,9000).then(r=>r.json()).then(j=>{
-      const rt=j&&j.routes&&j.routes[0];
-      routeInfo[k]=rt?{dist:rt.distance/1609.34,mins:Math.round(rt.duration/60)}:{dist:hav(userLat(),userLon(),x.lat,x.lon),mins:null};
-      if(panelLayer===layer)renderMapPanel();
-    }).catch(()=>{routeInfo[k]={dist:hav(userLat(),userLon(),x.lat,x.lon),mins:null};if(panelLayer===layer)renderMapPanel()});
-  });
-}
+
+let trafficLayer=null,routeDegraded=false,tileDegraded=false,routeEpoch=0,lastWcRoutePos=null;
+const kickSeq={},kickBusy={};
 function ttRoute(x){
-  return fetchT("https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+x.lat+","+x.lon+"/json?key="+TT_KEY+"&traffic=true&travelMode=car",12000).then(r=>r.json()).then(j=>{
-    const s=j&&j.routes&&j.routes[0]&&j.routes[0].summary;
-    if(!s)throw new Error("no route");
-    return {dist:s.lengthInMeters/1609.34,mins:Math.round(s.travelTimeInSeconds/60)};
+  const url="https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+x.lat+","+x.lon+"/json?key="+TT_KEY+"&traffic="+settings.traffic+"&routeRepresentation=polyline&travelMode=car"+(settings.ezpass?"":"&avoid=tollRoads");
+  return fetchT(url,12000).then(r=>r.json()).then(j=>{
+    const rt=j&&j.routes&&j.routes[0];
+    if(!rt||!rt.summary)throw new Error("no route");
+    if(routeDegraded){routeDegraded=false;updateTrafficUI()}
+    let pts=[];
+    try{(rt.legs||[]).forEach(leg=>{(leg.points||[]).forEach(p=>pts.push([p.latitude,p.longitude]))})}catch(e){pts=[]}
+    return {dist:rt.summary.lengthInMeters/1609.34,mins:Math.round(rt.summary.travelTimeInSeconds/60),pts:pts};
   });
 }
-let wcRouteSeq=0,lastWcRoutePos=null,wcKicking=false;
-function kickRoutesWc(){
-  if(wcKicking)return;
-  wcKicking=true;
-  const seq=++wcRouteSeq;
-  lastWcRoutePos={lat:userLat(),lon:userLon()};
+const ROUTE_COLORS={wc:"#0A84FF",ev:"#CC0000",loc:"#34C759",cruise:"#BF5AF2",air:"#FF9500"};
+let routeGroup=null;
+function syncRouteLines(){
+  if(!routeGroup)return;
+  routeGroup.clearLayers();
+  Object.keys(mapOn).forEach(l=>{
+    if(!mapOn[l])return;
+    sortedItems(l).slice(0,visCount[l]).forEach(x=>{
+      const ri=routeInfo[routeKey(l,x)];
+      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:ROUTE_COLORS[l]||"#0A84FF",weight:4,opacity:.85}).addTo(routeGroup);
+    });
+  });
+}
+function kickRoutes(layer){
+  if(kickBusy[layer])return;
+  kickBusy[layer]=true;
+  const kid=(kickSeq[layer]=(kickSeq[layer]||0)+1),ep=routeEpoch;
+  if(layer==="wc")lastWcRoutePos={lat:userLat(),lon:userLon()};
   const attempted=new Set();
   async function worker(){
     while(true){
-      const vis=sortedItems("wc").slice(0,visCount.wc);
-      const x=vis.find(y=>{const k=routeKey("wc",y);const ri=routeInfo[k];return !attempted.has(k)&&(!ri||(ri.dist==null&&!ri.wait&&Date.now()-(ri.ts||0)>60000))});
+      const vis=sortedItems(layer).slice(0,visCount[layer]);
+      const x=vis.find(y=>{const k=routeKey(layer,y);const ri=routeInfo[k];return !attempted.has(k)&&(!ri||(ri.dist==null&&!ri.wait&&Date.now()-(ri.ts||0)>60000))});
       if(!x)return;
-      const k=routeKey("wc",x);attempted.add(k);
+      const k=routeKey(layer,x);attempted.add(k);
       if(!routeInfo[k])routeInfo[k]={wait:1};
       try{
         const v=await ttRoute(x);
-        if(seq!==wcRouteSeq)return;
+        if(ep!==routeEpoch)return;
         routeInfo[k]=v;
       }catch(e){
-        if(seq!==wcRouteSeq)return;
+        if(ep!==routeEpoch)return;
         routeInfo[k]={dist:null,mins:null,ts:Date.now()};
+        if(!routeDegraded){routeDegraded=true;updateTrafficUI()}
       }
-      if(panelLayer==="wc"){renderMapPanel();drawMapLayer("wc")}
+      if(panelLayer===layer){renderMapPanel();drawMapLayer(layer)}
+      syncRouteLines();
     }
   }
-  Promise.all([worker(),worker(),worker()]).then(()=>{if(seq===wcRouteSeq)wcKicking=false});
+  Promise.all([worker(),worker(),worker()]).then(()=>{if(kickSeq[layer]===kid)kickBusy[layer]=false});
+}
+function kickRoutesWc(){kickRoutes("wc")}
+function refreshAllRoutes(){
+  routeEpoch++;
+  Object.keys(kickBusy).forEach(k=>kickBusy[k]=false);
+  Object.keys(routeInfo).forEach(k=>delete routeInfo[k]);
+  lastWcRoutePos=null;
+  syncRouteLines();
+  if(panelLayer)renderMapPanel();
+  Object.keys(mapOn).forEach(l=>{if(mapOn[l])kickRoutes(l)});
+}
+function updateTrafficUI(){
+  const b=$("btnTraffic");if(!b)return;
+  b.classList.toggle("on",!!settings.traffic);
+  const lb=b.querySelector(".tab-lb");
+  if(lb)lb.textContent="Traffic"+((settings.traffic&&(routeDegraded||tileDegraded))?" \u26A0":"");
+}
+function updateEzpassUI(){
+  const b=$("btnEzpass");if(!b)return;
+  b.classList.toggle("on",!!settings.ezpass);
+  const lb=b.querySelector(".tab-lb");
+  if(lb)lb.textContent=settings.ezpass?"EZPass ON":"EZPass OFF";
+}
+function toggleTraffic(){
+  settings.traffic=!settings.traffic;saveSettings();
+  if(map&&trafficLayer){if(settings.traffic)trafficLayer.addTo(map);else map.removeLayer(trafficLayer)}
+  updateTrafficUI();refreshAllRoutes();
+}
+function toggleEzpass(){
+  settings.ezpass=!settings.ezpass;saveSettings();
+  updateEzpassUI();
+  toast(settings.ezpass?"EZPass ON \u2014 pullik yo\u02bbllar bilan":"EZPass OFF \u2014 faqat tollsiz yo\u02bbllar");
+  refreshAllRoutes();
 }
 function renderMapPanel(){
   const p=$("mapPanel");if(!p)return;
@@ -711,6 +759,7 @@ function mapToggle(layer,btn){
     else if(FIT_LAYERS.some(l=>mapOn[l]))fitLayerBounds();
     else if(savedMapView){map.setView(savedMapView.c,savedMapView.z);savedMapView=null}
   }
+  syncRouteLines();
 }
 function distSort(a){return a.map(x=>Object.assign({},x,{d:hav(userLat(),userLon(),x.lat,x.lon)})).sort((x,y)=>x.d-y.d)}
 function listHTML(items,icon){
@@ -1200,7 +1249,10 @@ document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
 document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60);const sb=b.getAttribute("data-sttab");if(sb)setTimeout(()=>setStTab(sb),60)}));
-document.querySelectorAll("#layerChips .mpill").forEach(b=>b.addEventListener("click",()=>mapToggle(b.getAttribute("data-layer"),b)));
+document.querySelectorAll("#layerChips .mpill[data-layer]").forEach(b=>b.addEventListener("click",()=>mapToggle(b.getAttribute("data-layer"),b)));
+$("btnTraffic").addEventListener("click",toggleTraffic);
+$("btnEzpass").addEventListener("click",toggleEzpass);
+updateTrafficUI();updateEzpassUI();
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
 function recordRecFor(s){if(!s)return false;recs.unshift({t:new Date().toISOString(),zone:s.z.n,score:s.score,conf:s.conf||null,c:{D:s.D,F:s.F,E:s.E,W:s.W,T:s.T,P:s.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs));idbMirror()}catch(e){}renderCal();return true}
@@ -1309,6 +1361,7 @@ function fillSettings(){
   $("sLang").value=settings.lang;$("sTheme").value=settings.theme;$("sUnits").value=settings.units;$("sSpeed").value=settings.speed;
   $("sRefresh").value=String(settings.refresh);$("sNotif").value=String(settings.notif);
   document.querySelectorAll(".apref").forEach(c=>{c.checked=settings.airports.indexOf(c.value)>=0});
+  $("sTraffic").checked=!!settings.traffic;$("sEzpass").checked=!!settings.ezpass;
   const zs=$("sZone");zs.innerHTML='<option value="">— tanlanmagan —</option>'+ZONES.map(z=>'<option value="'+esc(z.n)+'">'+esc(z.n)+'</option>').join("");zs.value=settings.zone||"";
   renderCal();
 }
@@ -1319,7 +1372,8 @@ $("sSave").addEventListener("click",()=>{
   settings.refresh=parseInt($("sRefresh").value,10)||10;settings.notif=parseInt($("sNotif").value,10)||0;
   settings.airports=Array.from(document.querySelectorAll(".apref")).filter(c=>c.checked).map(c=>c.value);
   settings.zone=$("sZone").value;
-  saveSettings();applyTheme();armWx();renderHome();renderAirports();renderJournal();renderApiStat();
+  const trCh=$("sTraffic").checked!==!!settings.traffic,ezCh=$("sEzpass").checked!==!!settings.ezpass;settings.traffic=$("sTraffic").checked;settings.ezpass=$("sEzpass").checked;
+  saveSettings();applyTheme();if(map&&trafficLayer){if(settings.traffic)trafficLayer.addTo(map);else map.removeLayer(trafficLayer)}updateTrafficUI();updateEzpassUI();if(trCh||ezCh)refreshAllRoutes();armWx();renderHome();renderAirports();renderJournal();renderApiStat();
   toast("Sozlamalar saqlandi ✔");
 });
 $("sExport").addEventListener("click",()=>{
