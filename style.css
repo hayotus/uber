@@ -216,3 +216,6 @@ body.drive #view-home{overflow-y:auto}
   #view-home .hero .clock{font-size:30px}
   #view-home #bestCard .src,#view-home .card .src{font-size:10.5px;line-height:1.3}
 }
+
+/* v10.20: Batafsil ochilganda Home ichki scroll bo'ladi (yopiq holatda scroll yo'q) */
+#view-home:has(details.more[open]){overflow-y:auto}
