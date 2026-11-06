@@ -236,3 +236,9 @@ Analytics/Settings plitalari va **pastki menyu o'zgarmadi**.
 **Texnik:** openModule/closeModule qayta yozildi — modHomes xaritasi (har bir details o'z uyiga qaytadi), openGroup(title, ids) bir nechta modulni bitta oynada ochadi; data-grp bog'lovi qo'shildi. Hech qanday funksiya o'chmadi — faqat menyu plitalari 18→10.
 
 **QA: PASS** (07:15–07:17 EST) — footer v9.1; Menu roppa-rosa 10 plita; Events & Road oynasi: Events LIVE (555 ta tadbir, 343 xaritada) + Closures LIVE (908 yozuv); Smart Assistant: ball kartasi + ovoz tugmalari; Stops: uchala modul; Earnings & Journal: kalkulyator + forma; Demand sahifasida Smart moduli endi yo'q (to'g'ri); pastki menyu o'zgarmagan. Izoh: Demand view'da alohida xarita hech qachon bo'lmagan — heatmap Map ekrani va Home mini-xaritasida; demand sahifasidagi birinchi karta — izoh matni (regressiya emas).
+
+## v9.2 — Tepa safe-area tuzatish (2026-11-06)
+
+**Muammo (foydalanuvchi skrinshoti, 2026-11-06 07:48 EST):** o'rnatilgan ilovada eng tepadagi «TLC PRO» sarlavha qatori ko'rinmaydi — telefon status paneli / Dynamic Island ostida qolgan (skrinshotda yozuv xira, yarim kesilgan). Sabab: viewport-fit=cover rejimida sahifa eng tepadan boshlanadi, lekin kodda tepa xavfsiz bo'shliq (env(safe-area-inset-top)) umuman yo'q edi — faqat pastki (bottom) inset hisobga olingan.
+**Tuzatish (faqat style.css):** `main` padding-top: 12px → calc(12px + env(safe-area-inset-top)); `.modHead` (modul oynasi sarlavhasi, sticky) padding-top: 10px → calc(10px + env(safe-area-inset-top)) + pastki 10px. Pastki menyu va boshqa hech narsaga tegilmadi. SW cache tlc-pro-v23, assetlar ?v=92.
+**Tekshiruv:** push bc261f7; jonli serverda footer v9.2 va style.css da ikkala qoida ham borligi curl bilan tasdiqlandi. Yakuniy vizual tasdiq faqat foydalanuvchi telefonida bo'ladi (brauzer QA kesimni emulyatsiya qila olmaydi) — foydalanuvchidan telefonda tekshirish so'raldi.
