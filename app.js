@@ -582,13 +582,14 @@ function titleCase(s){return String(s||"").toLowerCase().replace(/\b\w/g,ch=>ch.
 function clMapRow(r,block){
   const g=r.the_geom;if(!g||!g.coordinates)return null;
   let lat=null,lon=null;
+  let line=null;
   if(g.type==="Point"){lon=g.coordinates[0];lat=g.coordinates[1]}
-  else{const seg=g.coordinates[0];if(seg&&seg[0]){lon=seg[0][0];lat=seg[0][1]}}
+  else{const seg=g.coordinates[0];if(seg&&seg[0]){lon=seg[0][0];lat=seg[0][1];if(seg.length>1)line=seg.slice(0,60).map(p=>[p[1],p[0]])}}
   if(lat==null||lon==null)return null;
   const sd=String(r.work_start_date||"").slice(0,10),ed=String(r.work_end_date||"").slice(0,10);
   if(!sd||!ed)return null;
   const on=titleCase(r.onstreetname),fr=titleCase(r.fromstreetname),to=titleCase(r.tostreetname);
-  return {n:on+(fr?(" \u2229 "+fr):"")+(block&&to?(" \u2192 "+to):""),place:((BORO[String(r.borough_code||"").toUpperCase()]||"NYC"))+(r.purpose?(" \u00b7 "+titleCase(r.purpose)):""),lat:lat,lon:lon,radiusKm:0.8,sev:"O\u02bbrtacha",start:sd+"T00:00",end:ed+"T23:59",live:true};
+  return {n:on+(fr?(" \u2229 "+fr):"")+(block&&to?(" \u2192 "+to):""),place:((BORO[String(r.borough_code||"").toUpperCase()]||"NYC"))+(r.purpose?(" \u00b7 "+titleCase(r.purpose)):""),lat:lat,lon:lon,radiusKm:0.8,sev:"O\u02bbrtacha",start:sd+"T00:00",end:ed+"T23:59",live:true,line:line};
 }
 function loadClosures(force){
   if(clBusy)return;if(!force&&clTs&&Date.now()-clTs<300000)return;clBusy=true;
@@ -630,38 +631,62 @@ function renderClosures(){
   const pi=$("clPageInfo");if(pi)pi.textContent=list.length?((clPage*5+1)+"\u2013"+Math.min(list.length,clPage*5+5)+" / "+list.length+" \u00b7 Sahifa "+(clPage+1)+"/"+pages):"0 ta";
   const pv=$("clPrev");if(pv)pv.disabled=clPage<=0;
   const nx=$("clNext");if(nx)nx.disabled=clPage>=pages-1;
-  const note=$("clMapNote");if(note)note.textContent="Xaritada eng yaqin "+Math.min(120,list.filter(c=>c.lat!=null).length)+" ta yopilish \u00b7 filtrda jami "+list.length+" ta ("+(clFilter==="act"?"Faol":clFilter==="up"?"Kelgusi":"Hammasi")+"). Markerni bosing \u2014 ko\u02bccha va muddati chiqadi.";
-  refreshClMap();
+  updateErNote();
+  refreshErMap();
 }
 function clPopup(c){const fmtD=d=>d.toLocaleString("en-US",{month:"short",day:"numeric"});return "<b>🚧 "+esc(c.n)+"</b>"+(c.place?"<br>📍 "+esc(c.place):"")+"<br>📅 "+fmtD(new Date(c.start))+" \u2192 "+fmtD(new Date(c.end))+"<br>"+(clActive(c)?"🔴 FAOL":"🕐 YAQINDA")+(c.sev?" \u00b7 "+esc(c.sev):"")}
 function clPts(){return clFiltered().filter(c=>c.lat!=null&&hav(userLat(),userLon(),c.lat,c.lon)<60).slice(0,120)}
-function drawClMarkers(){
-  if(!clMap||!clMarkers)return;
-  clMarkers.clearLayers();
-  clPts().forEach(c=>{L.marker([c.lat,c.lon]).addTo(clMarkers).bindPopup(clPopup(c))});
+/* ===== Umumiy xarita: Events & Road (v10.0) ===== */
+let erMap=null,erEvLayer=null,erRdLayer=null,erShowEv=true,erShowRd=true,erTab="ev";
+function erEvPts(){return EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80)}
+function drawErLayers(){
+  if(!erMap)return;
+  if(erEvLayer){erEvLayer.clearLayers();if(erShowEv)erEvPts().forEach(e=>{L.marker([e.lat,e.lon]).addTo(erEvLayer).bindPopup(evPopup(e))})}
+  if(erRdLayer){erRdLayer.clearLayers();if(erShowRd)clPts().forEach(c=>{const pp=clPopup(c);if(c.line&&c.line.length>1){L.polyline(c.line,{color:"#ff3b30",weight:4,opacity:.85}).addTo(erRdLayer).bindPopup(pp)}else{L.circleMarker([c.lat,c.lon],{radius:5,color:"#ff3b30",weight:2,fillColor:"#ff3b30",fillOpacity:.7}).addTo(erRdLayer).bindPopup(pp)}})}
+  updateErNote();
 }
-function fitClMap(){
-  if(!clMap)return;
-  const pts=clPts();
-  if(pts.length){try{clMap.fitBounds(L.latLngBounds(pts.map(c=>[c.lat,c.lon])),{padding:[24,24],maxZoom:13})}catch(e){}}
+function fitErMap(){
+  if(!erMap)return;const pts=[];
+  if(erShowEv)erEvPts().forEach(e=>pts.push([e.lat,e.lon]));
+  if(erShowRd)clPts().forEach(c=>pts.push([c.lat,c.lon]));
+  if(pts.length){try{erMap.fitBounds(L.latLngBounds(pts),{padding:[24,24],maxZoom:13})}catch(e){}}
 }
-function refreshClMap(){
-  const el=$("clMap");if(!el||!el.clientWidth)return;
-  if(!clMap){clMap=L.map("clMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(clMap);clMarkers=L.layerGroup().addTo(clMap);drawClMarkers();fitClMap();return}
-  try{clMap.invalidateSize()}catch(e){}
-  drawClMarkers();
-  try{const ctr=clMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitClMap()}catch(e){}
+function refreshErMap(){
+  const el=$("erMap");if(!el||!el.clientWidth)return;
+  if(!erMap){erMap=L.map("erMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(erMap);erEvLayer=L.layerGroup().addTo(erMap);erRdLayer=L.layerGroup().addTo(erMap);drawErLayers();fitErMap();return}
+  try{erMap.invalidateSize()}catch(e){}
+  drawErLayers();
+  try{const ctr=erMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitErMap()}catch(e){}
+}
+function updateErNote(){
+  const n=$("erMapNote");if(!n)return;
+  n.textContent="Qatlamlar: \uD83D\uDCC5 Events "+(erShowEv?("yoniq \u00b7 xaritada "+erEvPts().length+" ta"):"o\u02bbchiq")+" \u00b7 \uD83D\uDEA7 Road "+(erShowRd?("yoniq \u00b7 xaritada "+clPts().length+" ta, filtrda jami "+clFiltered().length+" ta"):"o\u02bbchiq")+". Qizil chiziq \u2014 yopiq ko\u02bccha (blok), qizil nuqta \u2014 kesishma. Belgini bosing \u2014 nomi, manzili va vaqti chiqadi.";
+}
+function setErToggle(w){
+  if(w==="ev")erShowEv=!erShowEv;else erShowRd=!erShowRd;
+  const te=$("erTgEv");if(te)te.classList.toggle("on",erShowEv);
+  const tr=$("erTgRd");if(tr)tr.classList.toggle("on",erShowRd);
+  drawErLayers();fitErMap();
+}
+function setErTab(t){
+  erTab=t;
+  const p=$("evPanel"),mc=$("modClose");
+  if(p)p.style.display=t==="ev"?"":"none";
+  if(mc)mc.style.display=t==="rd"?"":"none";
+  const te=$("erTabEv");if(te)te.classList.toggle("on",t==="ev");
+  const tr=$("erTabRd");if(tr)tr.classList.toggle("on",t==="rd");
+  setTimeout(refreshErMap,60);
 }
 function setClFilter(f){
   clFilter=f;clPage=0;
   const suf={act:"Act",up:"Up",all:"All"};
   ["Act","Up","All"].forEach(k=>{const b=$("clF"+k);if(b)b.classList.toggle("on",k===suf[f])});
-  renderClosures();fitClMap();
+  renderClosures();fitErMap();
 }
 
 
 /* ================= Jonli tadbirlar — NYC Permitted Events (Open Data) ================= */
-let evTs=0,evLive=false,evBusy=false,evTotal=0,evMapped=0,evView="list",evMap=null,evMarkers=null;
+let evTs=0,evLive=false,evBusy=false,evTotal=0,evMapped=0,evSort="soon",evPage=0;
 const GAZ=[["central park",40.7829,-73.9654],["madison square park",40.7411,-73.9897],["bryant park",40.7536,-73.9832],["union square",40.7359,-73.9911],["washington square",40.7308,-73.9973],["times square",40.7580,-73.9855],["herald square",40.7494,-73.9878],["columbus circle",40.7681,-73.9819],["lincoln center",40.7725,-73.9835],["radio city",40.7599,-73.9809],["rockefeller",40.7587,-73.9787],["madison square garden",40.7505,-73.9934],["barclays",40.6826,-73.9754],["yankee stadium",40.8296,-73.9262],["citi field",40.7571,-73.8458],["prospect park",40.6602,-73.9690],["grand army plaza",40.6734,-73.9701],["mccarren",40.7213,-73.9522],["astoria park",40.7788,-73.9215],["flushing meadows",40.7497,-73.8448],["van cortlandt",40.8976,-73.8857],["pelham bay",40.8648,-73.8097],["riverside park",40.8010,-73.9720],["tompkins square",40.7264,-73.9817],["battery park",40.7033,-74.0170],["city hall park",40.7126,-74.0066],["foley square",40.7144,-74.0024],["coney island",40.5749,-73.9857],["fort greene",40.6913,-73.9743],["inwood hill",40.8725,-73.9254],["crotona park",40.8387,-73.8950],["fifth avenue",40.7742,-73.9656],["5th avenue",40.7742,-73.9656]];
 const WD=["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
 function gazMatch(text){const t=" "+String(text||"").toLowerCase().replace(/\s+/g," ")+" ";for(let i=0;i<GAZ.length;i++){if(t.indexOf(" "+GAZ[i][0])>=0||t.indexOf(GAZ[i][0]+" ")>=0)return [GAZ[i][1],GAZ[i][2]]}return null}
@@ -728,34 +753,22 @@ function renderEvents(){
   evCountMapped();
   const head=evLive?'<li class="small">🔴 <b>LIVE</b> \u2014 NYC Permitted Events (Open Data) \u00b7 kelgusi 7 kun: <b>'+evTotal+' ta</b> tadbir, xaritada: <b>'+evMapped+' ta</b></li>':'<li class="small">\u26a0\ufe0f Jonli ma\u02bclumot yuklanmadi \u2014 zaxira yozuvlar.</li>';
   const evs=EVENTS.map(ev=>({ev:ev,st:evState(ev),w:evWin(ev)})).filter(x=>x.st!=="past");
-  evs.sort((x,y)=>{const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});
-  const items=evs.slice(0,25).map(x=>{const ev=x.ev;
+  if(evSort==="big")evs.sort((x,y)=>{const sd=(y.ev.surge||0)-(x.ev.surge||0);if(sd)return sd;const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});else evs.sort((x,y)=>{const ax=x.w?x.w.s.getTime():9e15,bx=y.w?y.w.s.getTime():9e15;return ax-bx});
+  const evPages=Math.max(1,Math.ceil(evs.length/5));if(evPage>evPages-1)evPage=evPages-1;if(evPage<0)evPage=0;
+  const items=evs.slice(evPage*5,evPage*5+5).map(x=>{const ev=x.ev;
     const stTxt=x.st==="active"?'<span class="hi">FAOL</span>':x.st==="later"?'<span class="med">KEYINROQ</span>':'<span class="med">INFO</span>';
     const when=ev.live?fmtEvWhen(ev):(x.w?(x.w.s.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})+" \u2192 "+x.w.e.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})):"aniq vaqt yo\u02bbq");
     return '<li><div class="r"><div><b>'+esc(ev.n)+'</b><div class="small">'+esc(ev.place||"")+'</div><div class="small">'+esc(when)+'</div>'+(ev.type?'<div class="small">'+esc(ev.type)+'</div>':'')+(ev.note?'<div class="small">'+esc(ev.note)+'</div>':'')+'</div><div style="text-align:right">'+stTxt+(ev.surge?'<div class="med mono">\u00d7'+ev.surge+'</div>':'')+'</div></div></li>';
   }).join("");
-  el.innerHTML=head+(items||'<li class="small">Yaqin tadbirlar yo\u02bbq.</li>')+(evs.length>25?'<li class="small">\u2026 va yana '+(evs.length-25)+' ta tadbir.</li>':"");
-  const note=$("evMapNote");if(note)note.textContent="Xaritada koordinatasi aniqlangan "+evMapped+" ta tadbir. Markerni bosing \u2014 nomi, kuni, sanasi, soati va manzili chiqadi.";
+  el.innerHTML=head+(items||'<li class="small">Yaqin tadbirlar yo\u02bbq.</li>');
+  const epi=$("evPageInfo");if(epi)epi.textContent=evs.length?((evPage*5+1)+"\u2013"+Math.min(evs.length,evPage*5+5)+" / "+evs.length+" \u00b7 Sahifa "+(evPage+1)+"/"+evPages):"0 ta";
+  const epv=$("evPrev");if(epv)epv.disabled=evPage<=0;
+  const enx=$("evNext");if(enx)enx.disabled=evPage>=evPages-1;
+  updateErNote();
 }
 function evPopup(e){return "<b>"+esc(e.n)+"</b><br>📅 "+esc(fmtEvWhen(e))+"<br>📍 "+esc(e.place||"")+(e.type?"<br>🎉 "+esc(e.type):"")+(e.surge?"<br>\u26a1 Surge (taxminiy): \u00d7"+e.surge:"")}
-function drawEvMarkers(){
-  if(!evMap||!evMarkers)return;
-  evMarkers.clearLayers();
-  EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80).forEach(e=>{L.marker([e.lat,e.lon]).addTo(evMarkers).bindPopup(evPopup(e))});
-}
-function setEvView(v){
-  evView=v;
-  const bl=$("evViewList"),bm=$("evViewMap"),ul=$("eventList"),mw=$("evMapWrap");
-  if(bl)bl.classList.toggle("on",v==="list");if(bm)bm.classList.toggle("on",v==="map");
-  if(ul)ul.style.display=v==="list"?"":"none";if(mw)mw.style.display=v==="map"?"":"none";
-  if(v==="map"){setTimeout(()=>{
-    if(!evMap){evMap=L.map("evMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(evMap);evMarkers=L.layerGroup().addTo(evMap)}
-    try{evMap.invalidateSize()}catch(e){}
-    drawEvMarkers();
-    const pts=EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80);
-    if(pts.length){try{evMap.fitBounds(L.latLngBounds(pts.map(e=>[e.lat,e.lon])),{padding:[24,24],maxZoom:13})}catch(err){}}
-  },60)}
-}
+function drawEvMarkers(){drawErLayers()}
+function setEvSort(s){evSort=s;evPage=0;const b1=$("evSortSoon"),b2=$("evSortBig");if(b1)b1.classList.toggle("on",s==="soon");if(b2)b2.classList.toggle("on",s==="big");renderEvents()}
 
 function renderParking(){
   const t=nowNY();const ds=t.toISOString().slice(0,10);const dow=t.getDay();
@@ -878,8 +891,14 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHom
 {const pv=$("clPrev");if(pv)pv.addEventListener("click",()=>{if(clPage>0){clPage--;renderClosures()}});}
 {const nx=$("clNext");if(nx)nx.addEventListener("click",()=>{clPage++;renderClosures()});}
 {const eb=$("evRefresh2");if(eb)eb.addEventListener("click",()=>{loadEvents(true);toast("🎉 Tadbirlar yangilanmoqda\u2026")});}
-{const bl=$("evViewList");if(bl)bl.addEventListener("click",()=>setEvView("list"));}
-{const bm=$("evViewMap");if(bm)bm.addEventListener("click",()=>setEvView("map"));}
+{const tg1=$("erTgEv");if(tg1)tg1.addEventListener("click",()=>setErToggle("ev"));}
+{const tg2=$("erTgRd");if(tg2)tg2.addEventListener("click",()=>setErToggle("rd"));}
+{const tb1=$("erTabEv");if(tb1)tb1.addEventListener("click",()=>setErTab("ev"));}
+{const tb2=$("erTabRd");if(tb2)tb2.addEventListener("click",()=>setErTab("rd"));}
+{const s1=$("evSortSoon");if(s1)s1.addEventListener("click",()=>setEvSort("soon"));}
+{const s2=$("evSortBig");if(s2)s2.addEventListener("click",()=>setEvSort("big"));}
+{const ep=$("evPrev");if(ep)ep.addEventListener("click",()=>{if(evPage>0){evPage--;renderEvents()}});}
+{const en=$("evNext");if(en)en.addEventListener("click",()=>{evPage++;renderEvents()});}
 {const me2=$("modEvents");if(me2)me2.addEventListener("toggle",()=>{if(me2.open)loadEvents(false)});}
 {const md=$("modClose");if(md)md.addEventListener("toggle",()=>{if(md.open)loadClosures(false)});}
 
@@ -903,11 +922,10 @@ function showModView(){document.querySelectorAll(".view").forEach(v=>v.classList
 function modMoveIn(d){const body=$("modBody");if(!body)return;if(d.parentElement!==body){modHomes[d.id]={p:d.parentNode,n:d.nextSibling};body.appendChild(d)}d.open=true}
 function openModule(id){
   const d=$(id);if(!d)return;
+  if(id==="modEvents"||id==="modClose"){openGroup("events");setTimeout(()=>setErTab(id==="modClose"?"rd":"ev"),40);return}
   const cur=document.querySelector(".view.act");if(cur)modPrev=cur.id.replace("view-","");
   const t=d.querySelector("summary span");$("modTitle").textContent=t?t.textContent.replace(/\s+/g," ").trim():"Modul";
   modMoveIn(d);showModView();
-  if(id==="modEvents")setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
-  if(id==="modClose")setTimeout(refreshClMap,160);
 }
 const GRPS={smart:["Smart Assistant",["modSmart","modVoice"]],events:["Events & Road",["modEvents","modClose"]],wx:["Weather & Cameras",["modWx","modCam"]],stops:["Stops & Charging",["modRest","modPark","modEv"]]};
 function openGroup(key){
@@ -916,19 +934,19 @@ function openGroup(key){
   $("modTitle").textContent=g[0];
   g[1].forEach(id=>{const d=$(id);if(d)modMoveIn(d)});
   showModView();
-  setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
-  setTimeout(refreshClMap,160);
+  if(key==="events")setTimeout(()=>setErTab("ev"),40);
+  setTimeout(refreshErMap,160);
 }
 function closeModule(){
   const body=$("modBody");
-  if(body){body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}})}
+  if(body){body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;d.style.display="";const _ep=$("evPanel");if(_ep)_ep.style.display="";if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}})}
   go(modPrev||"menu");
 }
 {const mb=$("modBack");if(mb)mb.addEventListener("click",closeModule);}
 document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",()=>{if(d.open&&d.parentElement!==$("modBody"))openModule(d.id)}));
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
-document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>openGroup(b.getAttribute("data-grp"))));
+document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60)}));
 document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
