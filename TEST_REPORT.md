@@ -363,3 +363,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.17 (2026-11-06, d57cbda) — har marshrutga alohida rang
 - ROUTE_PALETTE (12 rang): chiziq rangi panel tartibi bo'yicha; panel qatorida .loc-dot mos rangda.
 - Birlashtirilgan QA (2026-11-06 15:04–15:07 EST, desktop 1919px): footer v10.17 ✓; Restroom retry PASS (30s→2/5, 60s→5/5, hech narsa bosilmasdan; ⚠ to'lgach yo'qoldi); Airport 3 chiziq 3 rang (LGA ko'k 9.5mi/51min, EWR qizil 16.4/45, JFK yashil 17.4/86), nuqtalar mos, fit z≈10 (desktopda); Cruise 2 rang ✓; Tesla 3 chiziq rangli ✓, yana 2 qator 30s kuzatuvda to'lmadi (retry davom etardi, qatlam o'chirildi). Tor ekran (telefon) fit QA brauzerida tekshirilmadi — oyna toraytirish imkoni bo'lmadi.
+
+## v10.18 (2026-11-06, 80c408f) — Traffic/EZPass xarita ustuniga + Recenter
+- Foydalanuvchi tartibi: +, − (Leaflet zoom), Traffic, EZPass, Recenter — yuqori chap burchakdagi vertikal ustun (Leaflet control); strip yana 5 tugma.
+- EZPass holati tugma ostidagi ON/OFF mikromatnda; ⚠ Traffic tugmasidagi burchak belgisiga ko'chdi; Recenter: "Siz" ga markazlash, zoom >= 14, savedMapView bekor qilinadi.
+- QA PASS 6/6 (2026-11-06 15:18–15:20 EST): footer v10.18; ustun tartibi aniq; Traffic/EZPass almashinishi (ikonka kulrang, overlay/toast); Recenter z11 dan ~z14 ga markaz bilan qaytdi.
