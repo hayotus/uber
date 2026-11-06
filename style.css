@@ -127,3 +127,28 @@ body.drive #voiceCmds{display:block}
 /* TLC Radar havola tugmasi (v8.1) */
 nav.bot a.botlink{flex:1;color:var(--mut);text-decoration:none;text-align:center;padding:8px 0 7px;font-size:10.5px;font-weight:600;white-space:nowrap}
 nav.bot a.botlink span{display:block;font-size:20px;margin-bottom:2px}
+
+/* ===== v9.0 dizayn qatlami — zamonaviy ustki ko'rinish (pastki menyuga tegilmaydi) ===== */
+body{background:radial-gradient(1200px 620px at 50% -10%,rgba(34,197,94,.14) 0%,var(--bg) 55%) fixed,var(--bg)}
+.hero{background:linear-gradient(160deg,rgba(34,197,94,.16),rgba(14,165,233,.07) 55%,rgba(255,255,255,.02));border:1px solid rgba(34,197,94,.35);border-radius:22px;padding:16px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+.hero .clock{font-size:44px}
+.card{border-radius:20px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.card h3{font-size:15.5px;letter-spacing:.2px}
+.tile,.mtile{border-radius:20px;background:linear-gradient(180deg,var(--card2),var(--card))}
+.tile:active,.mtile:active{transform:scale(.985)}
+.go{background:linear-gradient(135deg,#22c55e,#16a34a);color:#04150a;font-weight:800;border:none;box-shadow:0 8px 20px rgba(34,197,94,.35);border-radius:16px}
+.badge{border-radius:999px;padding:2px 8px}
+#bestCard{border:1.5px solid rgba(34,197,94,.55);background:linear-gradient(165deg,rgba(34,197,94,.14),var(--card) 60%);box-shadow:0 14px 34px rgba(34,197,94,.14)}
+.bestRow{display:flex;gap:14px;align-items:flex-start}
+.bestScore{min-width:92px;text-align:center;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);border-radius:18px;padding:10px 6px}
+.bsNum{font-size:34px;font-weight:900;line-height:1;color:var(--grn)}
+.bsLab{font-size:10.5px;color:var(--mut);font-weight:700;margin-top:4px;letter-spacing:.6px}
+.bsConf{font-size:11.5px;color:var(--mut);margin-top:6px}
+.bsConf b{color:var(--txt)}
+.bestMain{flex:1;min-width:0}
+.meter{height:8px;background:rgba(255,255,255,.08);border-radius:99px;margin-top:10px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#0ea5e9);border-radius:99px;transition:width .5s}
+.modHead{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:10px 2px;background:linear-gradient(180deg,var(--bg) 78%,transparent)}
+.modTitle{font-size:16.5px;font-weight:800}
+#modBody details.mod{display:block;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:20px;padding:6px 14px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+#modBody details.mod>summary{display:none}

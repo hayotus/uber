@@ -184,11 +184,11 @@ function renderHome(){
   lastCalcAt=nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
   let conf=58;if(pos)conf+=20;if(wxData)conf+=12;if(!ZD)conf-=18;if(!Object.keys(zoneWx).length)conf-=6;if(bestPick.D==null)conf-=10;if(sc.length>1&&(sc[0].score-sc[1].score)<5)conf-=10;if(rainProb3h>0)conf+=3;
   bestPick.conf=Math.max(30,Math.min(95,conf));
-  const hs=$("homeScore");if(hs)hs.textContent=bestPick.score;
+  const hs=$("homeScore");if(hs)hs.textContent=bestPick.score;const bsx=$("bestScore");if(bsx)bsx.textContent=bestPick.score;const bcf=$("bestConf");if(bcf)bcf.textContent=bestPick.conf+"%";const bmt=$("bestMeter");if(bmt)bmt.style.width=bestPick.score+"%";
   const hc2=$("homeConf");if(hc2)hc2.textContent=bestPick.conf+"%";
   const hsec=$("homeSecond");if(hsec&&sc[1])hsec.textContent=sc[1].z.n.replace(" Airport","");
   const hf=$("homeFresh");if(hf)hf.textContent="Yangilandi: "+lastCalcAt+" · Confidence "+bestPick.conf+"% ("+(pos?"GPS bor":"GPS yoʻq")+", "+(wxData?"ob-havo jonli":"ob-havo kutilmoqda")+", "+(ZD?"TLC tarixiy yuklangan":"TLC yuklanmagan")+")";
-  renderAlerts();maybeNotify();applyDrive();
+  maybeNotify();applyDrive();
   const rs=[];
   if(bestPick.D>=70)rs.push("Tarixiy talab koʻrsatkichi yuqori ("+bestPick.D+")");
   if(bestPick.F>=60)rs.push("Reyslar oqimi kuchli — aeroport faktori "+bestPick.F);
@@ -610,7 +610,7 @@ function loadClosures(force){
     clTotal=ded.length;CLOSURES=ded.slice(0,300);clLive=true;clTs=Date.now();
     const bd=$("closeBadge");if(bd){bd.textContent="LIVE";bd.className="badge b-live"}
     apiStat.closures="OK \u00b7 jonli ("+clTotal+" ta, 20 km) \u00b7 "+new Date(clTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-    renderApiStat();renderClosures();renderAlerts();renderHome();
+    renderApiStat();renderClosures();renderHome();
     try{if(typeof layerGroups!=="undefined"&&layerGroups.close){layerGroups.close.clearLayers();CLOSURES.slice(0,120).forEach(c=>{if(c.lat)L.marker([c.lat,c.lon]).addTo(layerGroups.close).bindPopup("🚧 "+esc(c.n)+(clActive(c)?" (FAOL)":""))})}}catch(e){}
   });
 }
@@ -661,7 +661,7 @@ function loadEvents(force){
     evTotal=list.length;evLive=true;evTs=Date.now();
     const bd=$("evBadge");if(bd){bd.textContent="LIVE";bd.className="badge b-live"}
     apiStat.events="OK \u00b7 jonli ("+evTotal+" ta) \u00b7 "+new Date(evTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-    renderApiStat();renderEvents();renderAlerts();renderHome();geocodeMissing();drawEvMarkers();
+    renderApiStat();renderEvents();renderHome();geocodeMissing();drawEvMarkers();
   }).catch(()=>{evBusy=false;apiStat.events="XATO \u2014 NYC Events javob bermadi";renderApiStat();if(!evLive&&!loadEvents._rt){loadEvents._rt=1;setTimeout(()=>{loadEvents._rt=0;loadEvents(true)},20000)}});
 }
 function evCountMapped(){evMapped=EVENTS.filter(e=>e.live&&e.lat!=null).length}
@@ -819,14 +819,6 @@ $("vListen").addEventListener("click",()=>{
 });
 
 /* ================= 3-bosqich: alerts, notif, drive, refresh ================= */
-function renderAlerts(){
-  const el=$("alertList");if(!el)return;
-  const items=[];
-  CLOSURES.filter(c=>clActive(c)&&c.lat!=null).map(c=>({c:c,d:hav(userLat(),userLon(),c.lat,c.lon)})).sort((x,y)=>x.d-y.d).slice(0,5).forEach(x=>items.push({sev:x.c.sev||"Past",txt:"🚧 <b>"+esc(x.c.n)+"</b> — "+esc(x.c.place||"")}));
-  EVENTS.filter(ev=>evState(ev)==="active").slice(0,4).forEach(ev=>items.push({sev:"Tadbir",txt:"📅 <b>"+esc(ev.n)+"</b> — "+esc(ev.place||"")+" (hozir faol davr)"}));
-  el.innerHTML=items.length?items.map(i=>'<div class="alertItem"><b>'+esc(i.sev)+'</b> · '+i.txt+'</div>').join(""):"Faol ogohlantirishlar yoʻq ✔";
-  const av=$("alertVal");if(av)av.textContent=items.length?(items.length+" faol"):"Xavf yoʻq";
-}
 let notifSeen={};
 function maybeNotify(){
   if(!settings.notif)return;
@@ -854,6 +846,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHom
 
 /* ================= Navigation & Geo ================= */
 function go(view,modId){
+  if(modId){openModule(modId);return}
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("act"));
   $("view-"+view).classList.add("act");
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
@@ -861,9 +854,34 @@ function go(view,modId){
   if(view==="airports"){loadLiveFlights(false);renderAirports()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
-  if(modId){const d=$(modId);if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:"smooth"}),60)}}
+
   window.scrollTo(0,0);
 }
+
+/* ================= Modul oynasi (har bir modul alohida ekran) ================= */
+let modHome=null,modPrev="menu";
+function openModule(id){
+  const d=$(id);if(!d)return;
+  const body=$("modBody");if(!body)return;
+  if(d.parentElement!==body){
+    modHome={p:d.parentNode,n:d.nextSibling};
+    const cur=document.querySelector(".view.act");if(cur)modPrev=cur.id.replace("view-","");
+    const t=d.querySelector("summary span");$("modTitle").textContent=t?t.textContent.replace(/\s+/g," ").trim():"Modul";
+    body.appendChild(d);
+  }
+  d.open=true;
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("act"));
+  $("view-mod").classList.add("act");
+  window.scrollTo(0,0);
+  if(id==="modEvents")setTimeout(()=>{if(typeof evMap!=="undefined"&&evMap){try{evMap.invalidateSize()}catch(e){}}},140);
+}
+function closeModule(){
+  const body=$("modBody");const d=body?body.querySelector("details.mod"):null;
+  if(d&&modHome){d.open=false;if(modHome.n)modHome.p.insertBefore(d,modHome.n);else modHome.p.appendChild(d)}
+  go(modPrev||"menu");
+}
+{const mb=$("modBack");if(mb)mb.addEventListener("click",closeModule);}
+document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",()=>{if(d.open&&d.parentElement!==$("modBody"))openModule(d.id)}));
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
 document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));

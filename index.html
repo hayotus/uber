@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=88">
+<link rel="stylesheet" href="./style.css?v=90">
 </head>
 <body>
 <main>
@@ -57,9 +57,15 @@
 
   <div class="card" id="bestCard">
     <h3>Eng yaxshi keyingi joy — Best Next Location <span class="badge b-est">ESTIMATED</span></h3>
-    <div class="big" id="bestName">Hisoblanmoqda…</div>
-    <div class="small" id="bestMeta">—</div>
-    <div id="bestReasons" class="small" style="margin-top:6px"></div>
+    <div class="bestRow">
+      <div class="bestScore"><div class="bsNum" id="bestScore">—</div><div class="bsLab">BALL · /100</div><div class="bsConf">Ishonch <b id="bestConf">—</b></div></div>
+      <div class="bestMain">
+        <div class="big" id="bestName">Hisoblanmoqda…</div>
+        <div class="small" id="bestMeta">—</div>
+        <div class="meter"><i id="bestMeter"></i></div>
+        <div id="bestReasons" class="small" style="margin-top:6px"></div>
+      </div>
+    </div>
     <button class="go" id="bestGo">📍 GO — Google Maps ga yoʻl olish</button>
     <button class="ghost" id="recOnly" style="margin-top:8px">✔️ Faqat tavsiyani yozib qoʻyish (navigatsiyasiz)</button>
     <div class="src">Smart Driver Intelligence: talab + reyslar + tadbirlar + ob-havo + yoʻl + masofa. Taxminiy tavsiya, jonli Uber talabi emas.</div>
@@ -75,11 +81,6 @@
     <div class="src">Jurnal yozuvlari asosida. Batafsil: Journal va Analytics ekranlari.</div>
   </div>
 
-  <div class="card" id="alertCard">
-    <h3>Ogohlantirishlar — Alerts <span class="badge b-live">LIVE</span></h3>
-    <div id="alertList" class="small">Tekshirilmoqda…</div>
-    <div class="src">Faqat hozir faol yopilishlar va tadbirlar. Toʻliq roʻyxat: Tools → Road Closures / Events.</div>
-  </div>
 
   <details class="more" id="homeMore"><summary>Batafsil — Smart tahlil, aeroportlar, xarita, navigatsiya, TOP 5</summary>
   <div class="card">
@@ -118,7 +119,7 @@
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v8.8 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v9.0 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -310,6 +311,11 @@
 </section>
 
 <!-- ============ JOURNAL ============ -->
+<section id="view-mod" class="view">
+  <div class="modHead"><button class="ghost" id="modBack">← Orqaga</button><div class="modTitle" id="modTitle">Modul</div></div>
+  <div id="modBody"></div>
+</section>
+
 <section id="view-journal" class="view">
   <div class="card"><h3>Smena qoʻshish</h3>
     <label>Sana</label><input id="jDate" type="date">
@@ -347,6 +353,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=88"></script>
+<script type="module" src="./app.js?v=90"></script>
 </body>
 </html>
