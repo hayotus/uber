@@ -217,3 +217,22 @@ Qoida: NOT TESTED hech qachon PASS deb belgilanmaydi.
 SW tlc-pro-v21, assetlar ?v=90.
 
 **QA: PASS** (jonli, 06:43–06:44 EST) — footer v9.0; Alerts kartasi yo'q; Best Next Location: ball qutisi (52→50→49, jonli qayta hisob — ob-havo/GPS kelishi bilan), Ishonch %, meter chizig'i, hudud Harlem; pastki menyu aynan o'zgarishsiz; Events moduli alohida oynada ochildi (LIVE, 557 ta tadbir, 317 ta xaritada — geokod keshi o'sishda), xarita+popup ishladi, ← Orqaga Menu ga qaytardi; Road Closure Monitor ham alohida oynada (LIVE, 06:43 yangilangan). Izoh: yopilishlar sarlavhasidagi 908 (feed jami) vs ro'yxat 300 (cap) — v8.5 dan ma'lum holat, regressiya emas.
+
+## v9.1 — Menyu: 16 modul → 8 bo'lim (2026-11-06)
+
+**Buyruq (ovozli suhbat, foydalanuvchi rejani tasdiqladi):** Menyuda 16 modul + Analytics + Settings bor. Analytics va Settings qolsin, qolgan 16 tasi moslarini birlashtirib 8 bo'limga tushirilsin; Muse tavsiya bersin — qaysilari birlashadi.
+
+**Tasdiqlangan reja va amalga oshirish:**
+1. **Demand & Hotspots** (data-go=demand): Heatmap kartasi + modHot — demand view dan modSmart chiqarildi, karta sarlavhasi "🔥 Demand Heatmap & Hotspots".
+2. **Airports** (data-go=airports): Monitor + Intelligence — airports view allaqachon birlashgan edi.
+3. **Best Next Location** (data-go=home): yolg'iz.
+4. **Smart Assistant** (data-grp=smart): guruh oynasi [modSmart, modVoice]. modSmart tools shelf'iga ko'chirildi.
+5. **Events & Road** (data-grp=events): guruh oynasi [modEvents, modClose].
+6. **Earnings & Journal** (data-go=journal): modEarn journal view boshiga ko'chirildi (kollaps holda) + smena formasi.
+7. **Weather & Cameras** (data-grp=wx): [modWx, modCam].
+8. **Stops & Charging** (data-grp=stops): [modRest, modPark, modEv].
+Analytics/Settings plitalari va **pastki menyu o'zgarmadi**.
+
+**Texnik:** openModule/closeModule qayta yozildi — modHomes xaritasi (har bir details o'z uyiga qaytadi), openGroup(title, ids) bir nechta modulni bitta oynada ochadi; data-grp bog'lovi qo'shildi. Hech qanday funksiya o'chmadi — faqat menyu plitalari 18→10.
+
+**QA: PASS** (07:15–07:17 EST) — footer v9.1; Menu roppa-rosa 10 plita; Events & Road oynasi: Events LIVE (555 ta tadbir, 343 xaritada) + Closures LIVE (908 yozuv); Smart Assistant: ball kartasi + ovoz tugmalari; Stops: uchala modul; Earnings & Journal: kalkulyator + forma; Demand sahifasida Smart moduli endi yo'q (to'g'ri); pastki menyu o'zgarmagan. Izoh: Demand view'da alohida xarita hech qachon bo'lmagan — heatmap Map ekrani va Home mini-xaritasida; demand sahifasidagi birinchi karta — izoh matni (regressiya emas).
