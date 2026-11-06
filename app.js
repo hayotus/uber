@@ -627,7 +627,6 @@ function ttRoute(x){
   return fetchT(url,12000).then(r=>r.json()).then(j=>{
     const rt=j&&j.routes&&j.routes[0];
     if(!rt||!rt.summary)throw new Error("no route");
-    if(routeDegraded){routeDegraded=false;updateTrafficUI()}
     let pts=[];
     try{(rt.legs||[]).forEach(leg=>{(leg.points||[]).forEach(p=>pts.push([p.latitude,p.longitude]))})}catch(e){pts=[]}
     return {dist:rt.summary.lengthInMeters/1609.34,mins:Math.round(rt.summary.travelTimeInSeconds/60),pts:pts};
@@ -649,23 +648,32 @@ function syncRouteLines(){
 function kickRoutes(layer){
   if(kickBusy[layer])return;
   kickBusy[layer]=true;
-  const kid=(kickSeq[layer]=(kickSeq[layer]||0)+1),ep=routeEpoch;
+  const kid=(kickSeq[layer]=(kickSeq[layer]||0)+1),ep=routeEpoch,deadline=Date.now()+150000;
   if(layer==="wc")lastWcRoutePos={lat:userLat(),lon:userLon()};
-  const attempted=new Set();
   async function worker(){
-    while(true){
+    while(Date.now()<deadline){
       const vis=sortedItems(layer).slice(0,visCount[layer]);
-      const x=vis.find(y=>{const k=routeKey(layer,y);const ri=routeInfo[k];return !attempted.has(k)&&(!ri||(ri.dist==null&&!ri.wait&&Date.now()-(ri.ts||0)>60000))});
-      if(!x)return;
-      const k=routeKey(layer,x);attempted.add(k);
+      const x=vis.find(y=>{const k=routeKey(layer,y);const ri=routeInfo[k];if(!ri)return true;return ri.dist==null&&!ri.wait&&(ri.try||0)<3&&Date.now()-(ri.ts||0)>((ri.try||0)>=1?20000:8000)});
+      if(!x){
+        const pending=vis.some(y=>{const ri=routeInfo[routeKey(layer,y)];return ri&&ri.dist==null&&!ri.wait&&(ri.try||0)<3});
+        if(!pending)return;
+        await new Promise(r=>setTimeout(r,3000));
+        if(ep!==routeEpoch)return;
+        continue;
+      }
+      const k=routeKey(layer,x);
       if(!routeInfo[k])routeInfo[k]={wait:1};
       try{
         const v=await ttRoute(x);
         if(ep!==routeEpoch)return;
         routeInfo[k]=v;
+        let anyFail=false;
+        Object.keys(mapOn).forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(y=>{const ri=routeInfo[routeKey(l,y)];if(ri&&ri.dist==null)anyFail=true})});
+        if(!anyFail&&routeDegraded){routeDegraded=false;updateTrafficUI()}
       }catch(e){
         if(ep!==routeEpoch)return;
-        routeInfo[k]={dist:null,mins:null,ts:Date.now()};
+        const prev=routeInfo[k]||{};
+        routeInfo[k]={dist:null,mins:null,ts:Date.now(),try:(prev.try||0)+1};
         if(!routeDegraded){routeDegraded=true;updateTrafficUI()}
       }
       if(panelLayer===layer){renderMapPanel();drawMapLayer(layer)}
