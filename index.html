@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=100">
+<link rel="stylesheet" href="./style.css?v=101">
 </head>
 <body>
 <main>
@@ -113,13 +113,13 @@
     <button data-go="map"><span>🔥</span>Demand</button>
     <button data-grp="events" data-ertab="ev"><span>📅</span>Events</button>
     <button data-go="tools" data-mod="modEarn"><span>💳</span>Earnings</button>
-    <button data-go="tools" data-mod="modEv"><span>⚡</span>Charging</button>
+    <button data-grp="stops" data-sttab="ev"><span>⚡</span>Charging</button>
     <button data-go="settings"><span>⚙️</span>Settings</button>
   </div>
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
-  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v10.0 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v10.1 · Case12 uber dashboard</div>
 </section>
 
 <!-- ============ MAP ============ -->
@@ -207,7 +207,7 @@
 
   <details class="mod" id="modCam"><summary><span>📷 Speed &amp; Traffic Camera</span><span class="badge b-live">LIVE</span></summary><div class="in"><div class="mid">NYC umumiy tezlik limiti: 25 mph</div><div class="small" style="margin:6px 0">Eng yaqin kameralar (OSM jonli; topilmasa zaxira roʻyxat — taxminiy nuqtalar):</div><ul class="list" id="camList"></ul><button class="ghost" id="camMapBtn">Xaritada koʻrish</button><div class="src">Kamera joylashuvi koʻrsatiladi; ayni paytda ishlash holati kafolatlanmaydi.</div></div></details>
 
-  <details class="mod" id="modRest"><summary><span>🚻 Restroom &amp; Rest Stop</span><span class="badge b-live">OSM</span></summary><div class="in"><ul class="list" id="wcList"></ul><button class="ghost" id="wcRefresh">Yangilash (jonli OSM)</button><div class="src">Manba: OpenStreetMap / NYC Open Data. Ish vaqtlari oʻzgarishi mumkin.</div></div></details>
+  <details class="mod" id="modRest"><summary><span>🚻 Restroom &amp; Rest Stop</span><span class="badge b-live">OSM</span></summary><div class="in"><div id="stMap" style="height:300px;border-radius:14px;overflow:hidden;border:1px solid var(--line)"></div><div class="small" id="stMapNote" style="margin:6px 0">Xarita yuklanmoqda…</div><div class="hctlrow" style="margin:6px 0"><button class="hchip on" id="stTgWc">🚻 Restroom</button><button class="hchip on" id="stTgPark">🅿️ Parking</button><button class="hchip on" id="stTgEv">⚡ EV</button><span class="small">— xarita qatlamlari (on/off)</span></div><div class="hctlrow" style="margin:6px 0"><button class="hchip on" id="stTabWc">🚻 Restroom</button><button class="hchip" id="stTabPark">🅿️ Parking</button><button class="hchip" id="stTabEv">⚡ EV</button><span class="small">— roʻyxatlar</span></div><div id="wcPanel"><ul class="list" id="wcList"></ul><button class="ghost" id="wcRefresh">Yangilash (jonli OSM)</button><div class="src">Manba: OpenStreetMap / NYC Open Data. Ish vaqtlari oʻzgarishi mumkin.</div></div></div></details>
 
   <details class="mod" id="modPark"><summary><span>🅿️ Parking Assistant</span><span class="badge b-est">ESTIMATED</span></summary><div class="in"><div id="parkBox"></div><ul class="list" id="garageList"></ul><div class="src">Manba: NYC DOT qoidalari (umumiy). Joyning boʻshligi real vaqtda kafolatlanmaydi — doim koʻcha belgisini tekshiring.</div></div></details>
 
@@ -347,6 +347,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=100"></script>
+<script type="module" src="./app.js?v=101"></script>
 </body>
 </html>

@@ -545,17 +545,17 @@ function refreshWC(notify=true){
   const q='[out:json][timeout:10];node["amenity"="toilets"](around:9000,'+userLat()+","+userLon()+");out 40;";
   overpass(q).then(j=>{
     const items=j.elements.filter(e=>e.lat).map(e=>({n:(e.tags&&(e.tags.name||e.tags.operator))||"Jamoat hojatxonasi",lat:e.lat,lon:e.lon}));
-    if(items.length){apiStat.overpass="OK";$("wcList").innerHTML=listHTML(distSort(items),"🚻");if(notify)toast("Hojatxonalar yangilandi (OSM)");return}
+    if(items.length){apiStat.overpass="OK";$("wcList").innerHTML=listHTML(distSort(items),"🚻");WC_ITEMS=distSort(items);drawStLayers();if(notify)toast("Hojatxonalar yangilandi (OSM)");return}
     throw new Error("empty");
-  }).catch(()=>{ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻"); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
+  }).catch(()=>{ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻"); WC_ITEMS=distSort(WC_FB);drawStLayers(); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
 }
 function refreshEV(notify=true){
   const q='[out:json][timeout:10];node["amenity"="charging_station"](around:26000,'+userLat()+","+userLon()+");out 60;";
   overpass(q).then(j=>{
     const items=j.elements.filter(e=>e.lat).map(e=>{const t=e.tags||{};const tesla=/tesla/i.test((t.brand||"")+" "+(t.operator||"")+" "+(t.name||""));return {n:(t.name||t.operator||t.brand||"Zaryadlash stansiyasi")+(tesla?" ⚡Tesla":""),lat:e.lat,lon:e.lon}});
-    if(items.length){apiStat.overpass="OK";$("evList").innerHTML=listHTML(distSort(items),"⚡");if(notify)toast("Zaryadlash stansiyalari yangilandi (OSM)");return}
+    if(items.length){apiStat.overpass="OK";$("evList").innerHTML=listHTML(distSort(items),"⚡");EV_ITEMS=distSort(items);drawStLayers();if(notify)toast("Zaryadlash stansiyalari yangilandi (OSM)");return}
     throw new Error("empty");
-  }).catch(()=>{ $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡")+'<div class="small">Zaxira roʻyxat — aniq manzil/quvvatni Tesla ilovasida tekshiring.</div>'; if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
+  }).catch(()=>{ $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡")+'<div class="small">Zaxira roʻyxat — aniq manzil/quvvatni Tesla ilovasida tekshiring.</div>'; EV_ITEMS=distSort(EV_FB);drawStLayers(); if(notify)toast("Jonli OSM ishlamadi — zaxira roʻyxat"); });
 }
 function refreshCam(notify=true){
   const q='[out:json][timeout:10];node["highway"="speed_camera"](around:15000,'+userLat()+","+userLon()+");out 80;";
@@ -566,6 +566,56 @@ function refreshCam(notify=true){
       if(notify)toast("Kameralar yangilandi (OSM)");return}
     throw new Error("empty");
   }).catch(()=>{ $("camList").innerHTML=listHTML(distSort(CAMS_FB),"📷"); if(notify)toast("Jonli OSM ishlamadi — zaxira (taxminiy) roʻyxat"); });
+}
+/* ===== Umumiy xarita: Stops & Charging (v10.1) ===== */
+let stMap=null,stWcLayer=null,stParkLayer=null,stEvLayer=null,stShowWc=true,stShowPark=true,stShowEv=true,stTab="wc";
+let WC_ITEMS=null,EV_ITEMS=null;
+function stWcPts(){return (WC_ITEMS||distSort(WC_FB)).slice(0,20)}
+function stEvPts(){return (EV_ITEMS||distSort(EV_FB)).slice(0,20)}
+function stParkPts(){return distSort(GARAGES)}
+function stPop(x,icon){return "<b>"+icon+" "+esc(x.n)+"</b><br>"+distTxt(hav(userLat(),userLon(),x.lat,x.lon))+" uzoqlikda"+(x.note?"<br>"+esc(x.note):"")}
+function drawStLayers(){
+  if(!stMap)return;
+  if(stWcLayer){stWcLayer.clearLayers();if(stShowWc)stWcPts().forEach(x=>{L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#2f7cf6",fillOpacity:.9}).addTo(stWcLayer).bindPopup(stPop(x,"\uD83D\uDEBB"))})}
+  if(stParkLayer){stParkLayer.clearLayers();if(stShowPark)stParkPts().forEach(x=>{L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#ff9f0a",fillOpacity:.9}).addTo(stParkLayer).bindPopup(stPop(x,"\uD83C\uDD7F\uFE0F"))})}
+  if(stEvLayer){stEvLayer.clearLayers();if(stShowEv)stEvPts().forEach(x=>{L.circleMarker([x.lat,x.lon],{radius:6,color:"#fff",weight:1.5,fillColor:"#30d158",fillOpacity:.9}).addTo(stEvLayer).bindPopup(stPop(x,"\u26A1"))})}
+  updateStNote();
+}
+function fitStMap(){
+  if(!stMap)return;const pts=[];
+  if(stShowWc)stWcPts().forEach(x=>pts.push([x.lat,x.lon]));
+  if(stShowPark)stParkPts().forEach(x=>pts.push([x.lat,x.lon]));
+  if(stShowEv)stEvPts().forEach(x=>pts.push([x.lat,x.lon]));
+  if(pts.length){try{stMap.fitBounds(L.latLngBounds(pts),{padding:[24,24],maxZoom:14})}catch(e){}}
+}
+function refreshStMap(){
+  const el=$("stMap");if(!el||!el.clientWidth)return;
+  if(!stMap){stMap=L.map("stMap",{scrollWheelZoom:false}).setView([userLat(),userLon()],12);tiles().addTo(stMap);stWcLayer=L.layerGroup().addTo(stMap);stParkLayer=L.layerGroup().addTo(stMap);stEvLayer=L.layerGroup().addTo(stMap);drawStLayers();fitStMap();return}
+  try{stMap.invalidateSize()}catch(e){}
+  drawStLayers();
+  try{const ctr=stMap.getCenter();if(ctr&&hav(userLat(),userLon(),ctr.lat,ctr.lng)>150)fitStMap()}catch(e){}
+}
+function updateStNote(){
+  const n=$("stMapNote");if(!n)return;
+  n.textContent="Qatlamlar: \uD83D\uDEBB Restroom "+(stShowWc?("yoniq \u00b7 "+stWcPts().length+" ta"):"o\u02bbchiq")+" \u00b7 \uD83C\uDD7F\uFE0F Parking "+(stShowPark?("yoniq \u00b7 "+stParkPts().length+" ta"):"o\u02bbchiq")+" \u00b7 \u26A1 EV "+(stShowEv?("yoniq \u00b7 "+stEvPts().length+" ta"):"o\u02bbchiq")+". Belgini bosing \u2014 nomi va masofasi chiqadi; ro\u02bbxatdagi GO \u2014 Google Maps.";
+}
+function setStToggle(w){
+  if(w==="wc")stShowWc=!stShowWc;else if(w==="park")stShowPark=!stShowPark;else stShowEv=!stShowEv;
+  const b1=$("stTgWc");if(b1)b1.classList.toggle("on",stShowWc);
+  const b2=$("stTgPark");if(b2)b2.classList.toggle("on",stShowPark);
+  const b3=$("stTgEv");if(b3)b3.classList.toggle("on",stShowEv);
+  drawStLayers();fitStMap();
+}
+function setStTab(t){
+  stTab=t;
+  const wp=$("wcPanel"),mp=$("modPark"),me=$("modEv");
+  if(wp)wp.style.display=t==="wc"?"":"none";
+  if(mp)mp.style.display=t==="park"?"":"none";
+  if(me)me.style.display=t==="ev"?"":"none";
+  const b1=$("stTabWc");if(b1)b1.classList.toggle("on",t==="wc");
+  const b2=$("stTabPark");if(b2)b2.classList.toggle("on",t==="park");
+  const b3=$("stTabEv");if(b3)b3.classList.toggle("on",t==="ev");
+  setTimeout(refreshStMap,60);
 }
 function renderCams(){ refreshCam(false); }
 function renderEventsClosures(){
@@ -775,7 +825,7 @@ function renderParking(){
   const off=ASP_OFF.indexOf(ds)>=0;
   const asp=dow===0?"Yakshanba — koʻpchilik ASP qoidalari amal qilmaydi":off?"Bugun bayram — ASP (Alternate Side Parking) toʻxtatilgan, meterlar ham odatda ishlamaydi":"Bugun ASP qoidalari AMALDA — koʻcha belgisidagi vaqtga qarang";
   $("parkBox").innerHTML='<div class="mid">'+esc(asp)+'</div><div class="small" style="margin-top:6px">Meter: odatda 1 soatlik cheklov zonalarga qarab farq qiladi; yakshanba meter bepul (koʻpchilik joylarda). Belgilar va qoidalar koʻrsatiladi, boʻsh joy real vaqtda kafolatlanmaydi.</div>';
-  $("garageList").innerHTML=listHTML(distSort(GARAGES),"🅿️");
+  $("garageList").innerHTML=listHTML(distSort(GARAGES),"🅿️");drawStLayers();
 }
 
 /* ================= Earnings Calculator (Modul 4) ================= */
@@ -899,6 +949,12 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHom
 {const s2=$("evSortBig");if(s2)s2.addEventListener("click",()=>setEvSort("big"));}
 {const ep=$("evPrev");if(ep)ep.addEventListener("click",()=>{if(evPage>0){evPage--;renderEvents()}});}
 {const en=$("evNext");if(en)en.addEventListener("click",()=>{evPage++;renderEvents()});}
+{const g1=$("stTgWc");if(g1)g1.addEventListener("click",()=>setStToggle("wc"));}
+{const g2=$("stTgPark");if(g2)g2.addEventListener("click",()=>setStToggle("park"));}
+{const g3=$("stTgEv");if(g3)g3.addEventListener("click",()=>setStToggle("ev"));}
+{const t1=$("stTabWc");if(t1)t1.addEventListener("click",()=>setStTab("wc"));}
+{const t2=$("stTabPark");if(t2)t2.addEventListener("click",()=>setStTab("park"));}
+{const t3=$("stTabEv");if(t3)t3.addEventListener("click",()=>setStTab("ev"));}
 {const me2=$("modEvents");if(me2)me2.addEventListener("toggle",()=>{if(me2.open)loadEvents(false)});}
 {const md=$("modClose");if(md)md.addEventListener("toggle",()=>{if(md.open)loadClosures(false)});}
 
@@ -923,6 +979,7 @@ function modMoveIn(d){const body=$("modBody");if(!body)return;if(d.parentElement
 function openModule(id){
   const d=$(id);if(!d)return;
   if(id==="modEvents"||id==="modClose"){openGroup("events");setTimeout(()=>setErTab(id==="modClose"?"rd":"ev"),40);return}
+  if(id==="modRest"||id==="modPark"||id==="modEv"){openGroup("stops");setTimeout(()=>setStTab(id==="modPark"?"park":id==="modEv"?"ev":"wc"),40);return}
   const cur=document.querySelector(".view.act");if(cur)modPrev=cur.id.replace("view-","");
   const t=d.querySelector("summary span");$("modTitle").textContent=t?t.textContent.replace(/\s+/g," ").trim():"Modul";
   modMoveIn(d);showModView();
@@ -935,18 +992,19 @@ function openGroup(key){
   g[1].forEach(id=>{const d=$(id);if(d)modMoveIn(d)});
   showModView();
   if(key==="events")setTimeout(()=>setErTab("ev"),40);
-  setTimeout(refreshErMap,160);
+  if(key==="stops")setTimeout(()=>setStTab("wc"),40);
+  setTimeout(refreshErMap,160);setTimeout(refreshStMap,160);
 }
 function closeModule(){
   const body=$("modBody");
-  if(body){body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;d.style.display="";const _ep=$("evPanel");if(_ep)_ep.style.display="";if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}})}
+  if(body){body.querySelectorAll("details.mod").forEach(d=>{const hm=modHomes[d.id];d.open=false;d.style.display="";const _ep=$("evPanel");if(_ep)_ep.style.display="";const _wp=$("wcPanel");if(_wp)_wp.style.display="";if(hm){if(hm.n&&hm.n.parentNode===hm.p)hm.p.insertBefore(d,hm.n);else hm.p.appendChild(d);delete modHomes[d.id]}})}
   go(modPrev||"menu");
 }
 {const mb=$("modBack");if(mb)mb.addEventListener("click",closeModule);}
 document.querySelectorAll("details.mod").forEach(d=>d.addEventListener("toggle",()=>{if(d.open&&d.parentElement!==$("modBody"))openModule(d.id)}));
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-nav"))));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
-document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60)}));
+document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60);const sb=b.getAttribute("data-sttab");if(sb)setTimeout(()=>setStTab(sb),60)}));
 document.querySelectorAll("#layerChips .chip").forEach(ch=>ch.addEventListener("click",()=>{ch.classList.toggle("on");toggleLayer(ch.getAttribute("data-layer"),ch.classList.contains("on"))}));
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
