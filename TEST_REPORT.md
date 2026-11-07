@@ -390,3 +390,15 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Foydalanuvchi: Map strip dagi Tesla belgisi OFF da kulrang filtr bilan ko'rinmasdi -> to'qroq qil.
 - CSS: .mpill[data-layer="ev"] OFF da filter:none, opacity .85, path fill #8B0000 (to'q qizil); ON da #CC0000.
 - QA PASS (2/2): OFF = to'q qizil aniq ko'rinadi, qolgan tugmalar kulrang; ON = yorqin qizil + markerlar/ro'yxat. SW tlc-pro-v50, ?v=123.
+
+## v10.24 (2026-11-06, commit f98e81f) — dizayn paketi (foydalanuvchi 6,5,3,1 tanladi)
+- (1) Tungi xarita: .mapctl ustuniga Recenter ostiga 🌙 tugma; tiles() settings.darkmap bo'yicha Esri World_Dark_Gray_Base; BASE_LAYERS registry + setUrl bilan barcha xaritalar (map/mapHome/erMap/stMap) almashadi; tanlov drv_settings da saqlanadi.
+- (3) Strip ikonkalari: wc/loc/cruise/air emoji -> chiziqli SVG (currentColor); OFF #8e8e93 aniq kulrang; ON ranglari: wc #0A84FF, loc #34C759, cruise #BF5AF2, air #FF9500; Tesla v10.23 holatida.
+- (5) Attribution: 9px, rgba(255,255,255,.5) fon.
+- (6) Map ochilishi: setView z12 -> z13 (foydalanuvchi markazda).
+- QA PASS (4/4): ikonka ranglari birma-bir, 🌙 dark/light + toastlar, attribution ixcham, ochilish ~z13. SW tlc-pro-v51, ?v=124.
+
+## v10.25 (2026-11-07) — qatlam tugmalari chap ustunga
+- Ovozli buyruq (foydalanuvchi tasdiqladi): Restroom/Tesla/Location/Cruise/Airport tugmalari pastki stripdan chap ustunga, EZPass ostiga ko'chdi.
+- Tartib: +, -, Traffic, EZPass, Restroom, Tesla, Location, Cruise, Airport, Recenter, Tungi (🌙). Tugmalar .mc-layer (ikonka-only, 20px SVG); ON ranglari strip dagidek; Tesla OFF to'q qizil.
+- Pastki #layerChips strip olib tashlandi; #mapPanel (tepa-o'ng) o'zgarmadi.

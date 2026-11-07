@@ -238,3 +238,13 @@ body.drive #view-home{overflow-y:auto}
 .mpill.on[data-layer="air"] .tab-ic{color:#FF9500}
 .leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.5)!important;color:#444!important;padding:0 4px}
 .leaflet-control-attribution a{color:#444!important}
+
+/* v10.25: qatlam tugmalari chap ustunda (EZPass ostida) */
+.mc-btn.mc-layer .mc-ic{filter:none;opacity:1;color:#8e8e93}
+.mc-btn.mc-layer .mc-ic svg{width:20px;height:20px;display:block}
+.mc-btn.mc-layer.on[data-layer="wc"] .mc-ic{color:#0A84FF}
+.mc-btn.mc-layer.on[data-layer="loc"] .mc-ic{color:#34C759}
+.mc-btn.mc-layer.on[data-layer="cruise"] .mc-ic{color:#BF5AF2}
+.mc-btn.mc-layer.on[data-layer="air"] .mc-ic{color:#FF9500}
+.mc-btn.mc-layer[data-layer="ev"] .mc-ic svg path{fill:#8B0000}
+.mc-btn.mc-layer.on[data-layer="ev"] .mc-ic svg path{fill:#CC0000}
