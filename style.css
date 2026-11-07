@@ -224,3 +224,8 @@ body.drive #view-home{overflow-y:auto}
 #view-home details.more>summary{padding:9px 2px;min-height:42px}
 #view-home .hero .clock{font-size:min(33px,4.3dvh)}
 #view-home .card{padding:12px}
+
+/* v10.23: Tesla belgisi OFF holatda ham ko'rinadi — kulrang o'rniga to'q qizil */
+.mpill[data-layer="ev"] .tab-ic{filter:none;opacity:.85}
+.mpill[data-layer="ev"] .tab-ic svg path{fill:#8B0000}
+.mpill.on[data-layer="ev"] .tab-ic svg path{fill:#CC0000}
