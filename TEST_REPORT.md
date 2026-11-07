@@ -368,3 +368,20 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Foydalanuvchi tartibi: +, − (Leaflet zoom), Traffic, EZPass, Recenter — yuqori chap burchakdagi vertikal ustun (Leaflet control); strip yana 5 tugma.
 - EZPass holati tugma ostidagi ON/OFF mikromatnda; ⚠ Traffic tugmasidagi burchak belgisiga ko'chdi; Recenter: "Siz" ga markazlash, zoom >= 14, savedMapView bekor qilinadi.
 - QA PASS 6/6 (2026-11-06 15:18–15:20 EST): footer v10.18; ustun tartibi aniq; Traffic/EZPass almashinishi (ikonka kulrang, overlay/toast); Recenter z11 dan ~z14 ga markaz bilan qaytdi.
+
+## v10.19 (2026-11-06) — Home bitta ekran
+- CSS: #view-home.act flex column, balandlik = view-map formulasi (100dvh - 70px - safe-area), overflow hidden; hero/soat/plita/karta siqildi; drive rejimida scroll istisnosi qoldi.
+- Maqsad: foydalanuvchi talabi — Home tepa-pastga tushmasin.
+
+## v10.20 (2026-11-06) — Batafsil istisnosi
+- #view-home:has(details.more[open]){overflow-y:auto} — yopiq = bitta ekran, ochiq = ichki scroll.
+- QA (desktop): asosiy bloklar sig'di, scroll yo'q; AMMO footer qatori birinchi yuklanishda kesilib qoldi (ochib-yopgandan keyin chiqdi); Batafsil ichida mini-xarita bo'sh (init-while-hidden), test profilda ma'lumotlar (ob-havo/ball/TOP5) yuklanmadi.
+
+## v10.21 (2026-11-06) — siqish + mini-xarita tuzatish
+- CSS: summary/soat/karta padding siqildi (~38px). JS: homeMore toggle -> initMaps + mapHome.invalidateSize/setView.
+- QA: mini-xarita TUZALDI (tile lar + Siz belgisi chizildi); doiralar kulrang — sabab: heatCircles D==null da #9ca3af beradi, test profilda zones qo'llanmadi; zones.json o'zi VM dan tekshirildi — jonli va to'g'ri (TLC 2025-09). Footer birinchi yuklanishda YANA kesildi.
+
+## v10.22 (2026-11-06, commit 2fb2044) — footer ko'chdi
+- Versiya qatori Home oqimidan Batafsil ichining oxiriga ko'chirildi. Push 2 marta approval_expired bo'ldi, uchinchisida o'tdi.
+- QA PASS (2/2): yangi yuklanishda Home bitta ekran (hero+4 plita+Best+Earnings+Batafsil), scroll yo'q, versiya qatori yopiq Home da yo'q; Batafsil pastida versiya qatori oxirgi element.
+- SW tlc-pro-v49, assetlar ?v=122.
