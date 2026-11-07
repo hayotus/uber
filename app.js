@@ -135,7 +135,7 @@ const DEF_POS={lat:40.7580,lon:-73.9855}; /* Times Square — GPS kelguncha */
 let pos=null, wxData=null, rainProb3h=0;
 let ZD=null, zoneWx={}, zoneWxH={}, adsb={}, lastRPH=null;
 let hotOff=0, hotSort="score", hotMax=0, hotAll=false, lastHotList=[];
-let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,drive:0,weights:null,airports:["JFK","LGA","EWR"],zone:"",traffic:true,ezpass:true};
+let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,drive:0,weights:null,airports:["JFK","LGA","EWR"],zone:"",traffic:true,ezpass:true,darkmap:false};
 try{const s=JSON.parse(localStorage.getItem("drv_settings")||"null");if(s)settings=Object.assign(settings,s)}catch(e){}
 /* ================= IndexedDB (3-bosqich) ================= */
 function idbOpen(){return new Promise((res,rej)=>{try{const rq=indexedDB.open("drvdb",1);rq.onupgradeneeded=()=>{rq.result.createObjectStore("kv")};rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error)}catch(e){rej(e)}})}
@@ -548,7 +548,13 @@ function drawWx(j){
 /* ================= Maps & Layers (Modul 1, 6, 12, 13, 15) ================= */
 let map=null,mapHome=null,heatLayer=null,heatHome=null,userMk=null,userMkH=null;
 const layerGroups={};
-function tiles(){return L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Esri, OpenStreetMap",maxZoom:18})}
+const BASE_LIGHT="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const BASE_DARK="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const BASE_LAYERS=[];
+function tiles(){const t=L.tileLayer(settings.darkmap?BASE_DARK:BASE_LIGHT,{attribution:"Esri, OpenStreetMap",maxZoom:18});BASE_LAYERS.push(t);return t}
+function updateThemeUI(){const b=$("btnTheme");if(b)b.classList.toggle("on",!!settings.darkmap)}
+function applyBaseTheme(){const u=settings.darkmap?BASE_DARK:BASE_LIGHT;BASE_LAYERS.forEach(t=>{try{t.setUrl(u)}catch(e){}});updateThemeUI()}
+function toggleTheme(){settings.darkmap=!settings.darkmap;saveSettings();applyBaseTheme();toast(settings.darkmap?"Tungi xarita yoqildi":"Kunduzgi xarita yoqildi")}
 function heatCircles(target){
   const g=L.layerGroup();const sc=zoneScores();
   sc.forEach(s=>{const col=s.D==null?"#9ca3af":s.D>=75?"#ef4444":s.D>=50?"#f5b301":"#22c55e";
@@ -558,7 +564,7 @@ function heatCircles(target){
 }
 function initMaps(){
   if(map)return;
-  map=L.map("map").setView([userLat(),userLon()],12);tiles().addTo(map);
+  map=L.map("map").setView([userLat(),userLon()],13);tiles().addTo(map);
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
   layerGroups.loc=L.layerGroup();layerGroups.cruise=L.layerGroup();layerGroups.air=L.layerGroup();
@@ -573,7 +579,7 @@ function initMaps(){
   const mc=L.control({position:"topleft"});
   mc.onAdd=function(){
     const d=L.DomUtil.create("div","mapctl");
-    d.innerHTML='<a href="#" id="btnTraffic" class="mc-btn" title="Traffic"><span class="mc-ic">\uD83D\uDEA6</span><span class="mc-warn">\u26A0</span></a><a href="#" id="btnEzpass" class="mc-btn" title="EZPass"><span class="mc-ic">\uD83D\uDEE3\uFE0F</span><span class="mc-state">ON</span></a><a href="#" id="btnRecenter" class="mc-btn" title="Recenter"><span class="mc-ic">\uD83C\uDFAF</span></a>';
+    d.innerHTML='<a href="#" id="btnTraffic" class="mc-btn" title="Traffic"><span class="mc-ic">\uD83D\uDEA6</span><span class="mc-warn">\u26A0</span></a><a href="#" id="btnEzpass" class="mc-btn" title="EZPass"><span class="mc-ic">\uD83D\uDEE3\uFE0F</span><span class="mc-state">ON</span></a><a href="#" id="btnRecenter" class="mc-btn" title="Recenter"><span class="mc-ic">\uD83C\uDFAF</span></a><a href="#" id="btnTheme" class="mc-btn" title="Tungi xarita"><span class="mc-ic">\uD83C\uDF19</span></a>';
     L.DomEvent.disableClickPropagation(d);
     return d;
   };
@@ -581,7 +587,8 @@ function initMaps(){
   $("btnTraffic").addEventListener("click",e=>{e.preventDefault();toggleTraffic()});
   $("btnEzpass").addEventListener("click",e=>{e.preventDefault();toggleEzpass()});
   $("btnRecenter").addEventListener("click",e=>{e.preventDefault();recenterMap()});
-  updateTrafficUI();updateEzpassUI();
+  $("btnTheme").addEventListener("click",e=>{e.preventDefault();toggleTheme()});
+  updateTrafficUI();updateEzpassUI();updateThemeUI();
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
   mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);
   heatHome=heatCircles(mapHome);heatHome.addTo(mapHome);

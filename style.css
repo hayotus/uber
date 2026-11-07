@@ -229,3 +229,12 @@ body.drive #view-home{overflow-y:auto}
 .mpill[data-layer="ev"] .tab-ic{filter:none;opacity:.85}
 .mpill[data-layer="ev"] .tab-ic svg path{fill:#8B0000}
 .mpill.on[data-layer="ev"] .tab-ic svg path{fill:#CC0000}
+
+/* v10.24: strip SVG ikonkalar + attribution ixcham + tungi xarita tugma holati */
+.mpill .tab-ic{color:#8e8e93;filter:none;opacity:1}
+.mpill.on[data-layer="wc"] .tab-ic{color:#0A84FF}
+.mpill.on[data-layer="loc"] .tab-ic{color:#34C759}
+.mpill.on[data-layer="cruise"] .tab-ic{color:#BF5AF2}
+.mpill.on[data-layer="air"] .tab-ic{color:#FF9500}
+.leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.5)!important;color:#444!important;padding:0 4px}
+.leaflet-control-attribution a{color:#444!important}
