@@ -385,3 +385,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Versiya qatori Home oqimidan Batafsil ichining oxiriga ko'chirildi. Push 2 marta approval_expired bo'ldi, uchinchisida o'tdi.
 - QA PASS (2/2): yangi yuklanishda Home bitta ekran (hero+4 plita+Best+Earnings+Batafsil), scroll yo'q, versiya qatori yopiq Home da yo'q; Batafsil pastida versiya qatori oxirgi element.
 - SW tlc-pro-v49, assetlar ?v=122.
+
+## v10.23 (2026-11-06, commit 5e4493f) — Tesla belgisi
+- Foydalanuvchi: Map strip dagi Tesla belgisi OFF da kulrang filtr bilan ko'rinmasdi -> to'qroq qil.
+- CSS: .mpill[data-layer="ev"] OFF da filter:none, opacity .85, path fill #8B0000 (to'q qizil); ON da #CC0000.
+- QA PASS (2/2): OFF = to'q qizil aniq ko'rinadi, qolgan tugmalar kulrang; ON = yorqin qizil + markerlar/ro'yxat. SW tlc-pro-v50, ?v=123.
