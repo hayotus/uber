@@ -410,4 +410,4 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - (4) **"Shu oy" filtri:** jFilter ga month varianti (joriy kalendar oyi bo'yicha).
 - SW tlc-pro-v53, assetlar ?v=126. Commit: 9016ee5.
 - **Lokal tekshiruvlar: PASS** — node --check app.js; takroriy ID 0 ta; jPreview/jSum HTML+JS da bog'langan; diff faqat Jurnal kesimida (boshqa modullarga tegilmadi).
-- **Jonli QA:** repo tomonda tasdiqlandi (GitHub dagi index.html da v10.26, jPreview, jSum, "Shu oy" bor). Pages build kechikishi mumkin — telefonda Journal ekranini ochib, forma/preview ni foydalanuvchi tekshirishi tavsiya etiladi (brauzer keshi eski v10.25 ni ko'rsatishi mumkin).
+- **Jonli QA: PASS (5/5)** (2026-11-07 22:55 EST, jonli brauzer) — footer v10.26; preview: 200/8s/120mi/10 kiritilganda "Taxminiy sof: $179.92 · $22.49/soat · $1.50/mil" (hisob aniq: 200 − 120×0.28×0.30 − 10 = 179.92); filtrda "Shu oy" bor; saqlangan yozuvda "$22.49/soat" va "Filtr jami: 1 smena · Gross $200.00 · Sof $179.92 · 8 soat · $22.49/soat · 120.0 mi" chiqdi; test yozuvi o'chirildi, hisoblagichlar $0.00 ga qaytdi.
