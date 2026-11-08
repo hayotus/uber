@@ -248,3 +248,7 @@ body.drive #view-home{overflow-y:auto}
 .mc-btn.mc-layer.on[data-layer="air"] .mc-ic{color:#FF9500}
 .mc-btn.mc-layer[data-layer="ev"] .mc-ic svg path{fill:#8B0000}
 .mc-btn.mc-layer.on[data-layer="ev"] .mc-ic svg path{fill:#CC0000}
+
+/* v10.29: versiya qatori — Home ning eng pastida fixed, kichik harfda, doim ko'rinadi */
+#verLine{display:none;position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));text-align:center;font-size:11px;letter-spacing:.3px;color:var(--mut);z-index:940;pointer-events:none}
+#view-home.act ~ #verLine{display:block}
