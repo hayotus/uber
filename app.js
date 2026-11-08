@@ -254,6 +254,7 @@ function renderHome(){
   $("bestReasons").innerHTML="<b>Nima uchun bu joy?</b><br>• "+rs.map(esc).join("<br>• ");
   $("hotTop").innerHTML=sc.slice(0,5).map((s,i)=>'<div class="r" style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)"><span>'+(i+1)+". "+esc(s.z.n)+'</span><b class="mono">'+s.score+" · "+(s.raw!=null?Math.round(s.raw)+" pikap/s":"—")+"</b></div>").join("");
   renderHot();renderSmart(sc);renderEventsClosures();
+  try{fitHome()}catch(e){}
 }
 /* Hotspot Ranking 2.0 (Modul 10) — vaqt tanlash, boy kartalar, saralash, GO */
 function zoneRates(){const m={};journal.forEach(e=>{if(!e.zone||!(e.hours>0))return;const k=e.zone;if(!m[k])m[k]={net:0,h:0,n:0};m[k].net+=netOf(e.gross,e.miles,e.exp);m[k].h+=e.hours;m[k].n++});const out={};Object.keys(m).forEach(k=>{if(m[k].h>0)out[k]={v:m[k].net/m[k].h,n:m[k].n}});return out}
@@ -1254,7 +1255,7 @@ function go(view,modId){
   $("view-"+view).classList.add("act");
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
-  if(view==="home")setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)} fitHome()},80);
+  if(view==="home"){setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)} fitHome()},80);setTimeout(fitHome,450)}
   if(view==="airports"){loadLiveFlights(false);renderAirports()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
@@ -1434,11 +1435,15 @@ window.addEventListener("online",()=>{setOnline();toast("Internet qaytdi — ma�
 window.addEventListener("offline",()=>{setOnline();toast("Offline — keshdagi maʼlumot koʻrsatiladi; jonli maʼlumot eskirgan boʻlishi mumkin")});
 let wxTimer=null;function armWx(){if(wxTimer)clearInterval(wxTimer);wxTimer=setInterval(loadWeather,(settings.refresh||10)*60000)}
 
-/* v10.29: Home avtomatik masshtab — birinchi sahifa to'liq ekranga sig'adi, scroll kerak emas.
+/* v10.30: Home sig’imi — avval compact tartib (kichikroq oraliqlar, yordamchi yozuvlar yashirin), zoom faqat oxirgi chora va 0.85 dan past emas; o’lchov layout joylashgandan keyin olinadi, shuning uchun view almashtirishda ekran kichrayib qolmaydi.
+   v10.29: Home avtomatik masshtab — birinchi sahifa to'liq ekranga sig'adi, scroll kerak emas.
    Kontent tabiiy balandligi konteynerdan oshsa, zoom bilan proportsional kichraytiriladi (displeyga qarab). */
-function fitHome(){const v=$("view-home");if(!v)return;const d=$("homeMore");if((d&&d.open)||document.body.classList.contains("drive")){v.style.zoom="";return}
-  v.style.zoom="";const vr=v.getBoundingClientRect();let need=0;for(const c of v.children){const r=c.getBoundingClientRect();if(r.height)need=Math.max(need,r.bottom-vr.top)}
-  const have=v.clientHeight;if(need>have+2&&have>0)v.style.zoom=Math.max(0.6,(have/need)).toFixed(3)}
+function fitHome(){const v=$("view-home");if(!v||!v.classList.contains("act"))return;const d=$("homeMore");if((d&&d.open)||document.body.classList.contains("drive")){v.style.zoom="";v.classList.remove("compact");return}
+  const measure=()=>{const vr=v.getBoundingClientRect();let need=0;for(const c of v.children){const r=c.getBoundingClientRect();if(r.height)need=Math.max(need,r.bottom-vr.top)}return need};
+  v.style.zoom="";v.classList.remove("compact");void v.offsetHeight;
+  const have=v.clientHeight;let need=measure();
+  if(need>have+2){v.classList.add("compact");void v.offsetHeight;need=measure()}
+  if(need>have+2&&have>0)v.style.zoom=Math.max(0.85,(have/need)).toFixed(3)}
 /* ================= Init ================= */
 $("jDate").value=dayStr(nowNY());
 {const jz=$("jZone");if(jz)jz.innerHTML='<option value="">— belgilanmagan —</option>'+ZONES.map(z=>'<option value="'+esc(z.n)+'">'+esc(z.n)+'</option>').join("");
@@ -1450,7 +1455,7 @@ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
 setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){}}},700);
-setTimeout(fitHome,850);setTimeout(fitHome,2200);setTimeout(fitHome,4800);window.addEventListener("resize",()=>fitHome());window.addEventListener("orientationchange",()=>setTimeout(fitHome,300));
+setTimeout(fitHome,850);setTimeout(fitHome,2200);setTimeout(fitHome,4800);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitHome());window.addEventListener("resize",()=>fitHome());window.addEventListener("orientationchange",()=>setTimeout(fitHome,300));
 {const hmF=$("homeMore");if(hmF)hmF.addEventListener("toggle",()=>setTimeout(fitHome,60))}
 loadZones();loadZoneWx();
 loadWeather();armWx();
