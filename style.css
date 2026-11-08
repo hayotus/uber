@@ -219,6 +219,21 @@ body.drive #view-home{overflow-y:auto}
 
 /* v10.20: Batafsil ochilganda Home ichki scroll bo'ladi (yopiq holatda scroll yo'q) */
 #view-home:has(details.more[open]){overflow-y:auto}
+/* v10.30: compact tartib — sig'maganda avval oraliqlar kichrayadi, yordamchi .src yozuvlar yashirinadi (zoom o'rniga) */
+#view-home.compact .hero{padding:9px;margin-bottom:7px}
+#view-home.compact .hero .clock{font-size:28px}
+#view-home.compact #driveBtn{min-height:36px!important;margin-top:6px!important}
+#view-home.compact .tiles{gap:6px;margin-bottom:7px}
+#view-home.compact .tile{padding:8px 10px}
+#view-home.compact .tile .v{font-size:17px;margin-top:3px}
+#view-home.compact .card{padding:10px;margin-bottom:6px}
+#view-home.compact #bestCard{padding:10px}
+#view-home.compact #bestCard .go{padding:8px 10px}
+#view-home.compact #recOnly{min-height:28px;margin-top:5px!important}
+#view-home.compact .src{display:none}
+#view-home.compact details.more>summary{padding:6px 2px;min-height:36px}
+#view-home.compact .stat3 .cell{padding:7px}
+
 
 /* v10.21: birinchi yuklanishda ham hamma blok (footer ham) sig'adi */
 #view-home details.more>summary{padding:9px 2px;min-height:42px}
