@@ -428,3 +428,10 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - (2) Versiya qatori "Batafsil" ichidan Home ning eng oxiriga (tashqariga) ko'chdi — birinchi sahifa pastida doim ko'rinadi.
 - SW tlc-pro-v55, assetlar ?v=128. Lokal tekshiruv: node --check (app.js, sw.js) PASS; versiya izchilligi PASS.
 - **NOT TESTED:** fizik qurilmadagi (iPhone Safari) yakuniy ko'rinish va zoom harakati — foydalanuvchi jonli saytda tekshiradi.
+
+## v10.29 (2026-11-08) — Versiya qatori fixed pastda (foydalanuvchi so'rovi, v10.28 QA tuzatishi)
+- **v10.28 jonli QA: FAIL (qisman)** — brauzer tekshiruvi (1920×1000): sahifa to'liq chiziladi, lekin versiya qatori ekranda ko'rinmadi — Home konteyneri (overflow:hidden) uni kesib qolgan; fitHome zoom i ishga tushmagan (flex konteynerda scrollHeight o'lchovi ishonchsiz chiqdi). Foydalanuvchi ham "yarim ochilyapti" deb tasdiqladi.
+- (1) Versiya qatori endi alohida `#verLine` element: Home ning eng pastida **fixed** (pastki navigatsiya tepasida), 11px kichik harf, faqat Home faol bo'lganda ko'rinadi — konteyner kesishiga bog'liq emas, doim ko'rinadi.
+- (2) fitHome o'lchovi bolalar rect lari bo'yicha qayta yozildi (scrollHeight o'rniga) + kech qayta hisoblar (2.2s, 4.8s) qo'shildi — asinxron kontent o'sishini ham ushlaydi.
+- SW tlc-pro-v56, assetlar ?v=129. Lokal: node --check PASS.
+- **NOT TESTED:** fizik qurilmada yakuniy ko'rinish — jonli brauzer tekshiruvi va foydalanuvchi tasdig'i kutiladi.
