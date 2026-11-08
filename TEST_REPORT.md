@@ -402,3 +402,12 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Ovozli buyruq (foydalanuvchi tasdiqladi): Restroom/Tesla/Location/Cruise/Airport tugmalari pastki stripdan chap ustunga, EZPass ostiga ko'chdi.
 - Tartib: +, -, Traffic, EZPass, Restroom, Tesla, Location, Cruise, Airport, Recenter, Tungi (🌙). Tugmalar .mc-layer (ikonka-only, 20px SVG); ON ranglari strip dagidek; Tesla OFF to'q qizil.
 - Pastki #layerChips strip olib tashlandi; #mapPanel (tepa-o'ng) o'zgarmadi.
+
+## v10.26 (2026-11-07) — Jurnal yaxshilanishi (Muse tashabbusi, foydalanuvchi "o'zing o'zgarish kirit, mendan so'ramasdan" dedi)
+- (1) **Jonli sof hisob (preview):** Smena qo'shish formasida tushum/soat/mil/xarajat kiritilishi bilan "Taxminiy sof: $X · $Y/soat · $Z/mil — elektr xarajati hisobga olingan" qatori chiqadi (#jPreview, renderJPreview; tahrirlashda ham to'ladi, saqlagandan keyin tozalanadi).
+- (2) **Har yozuvda net/soat:** Tarix ro'yxatida har smena qatoriga sof yonida $/soat qo'shildi (soat>0 bo'lsa).
+- (3) **Filtr jami:** Tarix tepasida #jSum — tanlangan filtr bo'yicha jami: smenalar soni, gross, sof, soat, o'rtacha $/soat, masofa.
+- (4) **"Shu oy" filtri:** jFilter ga month varianti (joriy kalendar oyi bo'yicha).
+- SW tlc-pro-v53, assetlar ?v=126. Commit: 9016ee5.
+- **Lokal tekshiruvlar: PASS** — node --check app.js; takroriy ID 0 ta; jPreview/jSum HTML+JS da bog'langan; diff faqat Jurnal kesimida (boshqa modullarga tegilmadi).
+- **Jonli QA:** repo tomonda tasdiqlandi (GitHub dagi index.html da v10.26, jPreview, jSum, "Shu oy" bor). Pages build kechikishi mumkin — telefonda Journal ekranini ochib, forma/preview ni foydalanuvchi tekshirishi tavsiya etiladi (brauzer keshi eski v10.25 ni ko'rsatishi mumkin).
