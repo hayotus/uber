@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="./style.css?v=125">
+<link rel="stylesheet" href="./style.css?v=126">
 </head>
 <body>
 <main>
@@ -118,7 +118,7 @@
   </div>
 
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
-  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v10.25 · Case12 uber dashboard</div>
+  <div class="small" style="text-align:center;margin:10px 0 4px">TLC Pro · v10.26 · Case12 uber dashboard</div>
   </details>
 </section>
 
@@ -320,13 +320,14 @@
       <div><label>Boshlanish soati</label><select id="jHour"><option value="">—</option></select></div>
     </div>
     <label>Eslatma</label><input id="jNote" type="text" placeholder="Masalan: JFK kechki smena">
+    <div class="small" id="jPreview" style="margin-top:8px"></div>
     <button class="go" id="jAdd">Saqlash</button>
   </div>
   <div class="grid">
     <div class="card"><h3>Bugun (sof)</h3><div class="big mono" id="jToday">$0</div></div>
     <div class="card"><h3>7 kun (sof)</h3><div class="big mono" id="jWeek">$0</div></div>
   </div>
-  <div class="card"><h3>Tarix</h3><label>Filtr</label><select id="jFilter"><option value="all">Hammasi</option><option value="7">Oxirgi 7 kun</option><option value="30">Oxirgi 30 kun</option></select><div class="small" style="margin:6px 0">✏️ — tahrirlash: yozuv formaga yuklanadi, «Saqlash» yangilaydi.</div><ul class="list" id="jList"></ul>
+  <div class="card"><h3>Tarix</h3><label>Filtr</label><select id="jFilter"><option value="all">Hammasi</option><option value="7">Oxirgi 7 kun</option><option value="30">Oxirgi 30 kun</option><option value="month">Shu oy</option></select><div class="small" style="margin:6px 0">✏️ — tahrirlash: yozuv formaga yuklanadi, «Saqlash» yangilaydi.</div><div class="small" id="jSum" style="margin:6px 0"></div><ul class="list" id="jList"></ul>
     <div class="frow"><button class="ghost" id="jExport">⬇️ CSV eksport</button><button class="ghost" id="jClear">🗑️ Tozalash</button></div>
   </div>
 </section>
@@ -341,6 +342,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="./app.js?v=125"></script>
+<script type="module" src="./app.js?v=126"></script>
 </body>
 </html>

@@ -1137,14 +1137,17 @@ function renderJournal(){
   const tp=$("todayPerHour");if(tp)tp.textContent=tHours>0?money(tSum/tHours):"—";
   const fEl=$("jFilter");const f=fEl?fEl.value:"all";
   const fDays=f==="all"?null:parseInt(f,10);
-  const sorted=[].concat(journal).sort((a,b)=>b.date<a.date?-1:1).filter(e=>{if(!fDays)return true;const d=new Date(e.date+"T12:00:00");return (nowNY()-d)<=fDays*864e5});
+  const sorted=[].concat(journal).sort((a,b)=>b.date<a.date?-1:1).filter(e=>{const d=new Date(e.date+"T12:00:00");if(f==="month"){const n=nowNY();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()}if(!fDays)return true;return (nowNY()-d)<=fDays*864e5});
+  const jsm=$("jSum");
+  if(jsm){let sg=0,sn=0,sh=0,smi=0;sorted.forEach(e=>{sg+=e.gross;sn+=netOf(e.gross,e.miles,e.exp);sh+=e.hours;smi+=e.miles});
+    jsm.innerHTML=sorted.length?("Filtr jami: <b>"+sorted.length+" smena</b> · Gross "+money(sg)+" · Sof <b>"+money(sn)+"</b> · "+(Math.round(sh*10)/10)+" soat"+(sh>0?" · "+money(sn/sh)+"/soat":"")+" · "+distTxt(smi)):""}
   $("jList").innerHTML=sorted.map(e=>{const net=netOf(e.gross,e.miles,e.exp);
-    return '<li><div class="r"><div><b>'+esc(e.date)+'</b> · <span class="mono">'+money(e.gross)+'</span><div class="small">'+e.hours+' soat · '+distTxt(e.miles)+' · sof: <b>'+money(net)+'</b>'+(e.zone?" · 📍"+esc(e.zone):"")+(e.startHour!=null?" · ▶ "+String(e.startHour).padStart(2,"0")+":00":"")+(e.note?" · "+esc(e.note):"")+'</div></div><div><button class="del" data-edit="'+e.id+'" title="Tahrirlash" style="color:var(--blu)">✏️</button><button class="del" data-del="'+e.id+'" title="O\u02bbchirish">✕</button></div></div></li>'}).join("")||'<li class="small">Bu filtrda yozuv yo\u02bbq.</li>';
+    return '<li><div class="r"><div><b>'+esc(e.date)+'</b> · <span class="mono">'+money(e.gross)+'</span><div class="small">'+e.hours+' soat · '+distTxt(e.miles)+' · sof: <b>'+money(net)+'</b>'+(e.hours>0?' · '+money(net/e.hours)+'/soat':'')+(e.zone?" · 📍"+esc(e.zone):"")+(e.startHour!=null?" · ▶ "+String(e.startHour).padStart(2,"0")+":00":"")+(e.note?" · "+esc(e.note):"")+'</div></div><div><button class="del" data-edit="'+e.id+'" title="Tahrirlash" style="color:var(--blu)">✏️</button><button class="del" data-del="'+e.id+'" title="O\u02bbchirish">✕</button></div></div></li>'}).join("")||'<li class="small">Bu filtrda yozuv yo\u02bbq.</li>';
   document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{journal=journal.filter(x=>x.id!=b.getAttribute("data-del"));saveJournal();renderJournal();toast("Yozuv oʻchirildi")}));
   document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{
     const e=journal.find(x=>x.id==b.getAttribute("data-edit"));if(!e)return;
     editingId=e.id;$("jDate").value=e.date;$("jGross").value=e.gross;$("jHours").value=e.hours;$("jMiles").value=e.miles;$("jExp").value=e.exp;$("jZone").value=e.zone||"";$("jHour").value=e.startHour==null?"":String(e.startHour);$("jNote").value=e.note||"";
-    $("jAdd").textContent="Yangilash (tahrir saqlansin)";window.scrollTo(0,0);toast("Tahrirlash rejimi — oʻzgartirib Saqlang");
+    $("jAdd").textContent="Yangilash (tahrir saqlansin)";renderJPreview();window.scrollTo(0,0);toast("Tahrirlash rejimi — oʻzgartirib Saqlang");
   }));
 }
 $("jAdd").addEventListener("click",()=>{
@@ -1153,8 +1156,16 @@ $("jAdd").addEventListener("click",()=>{
   if(editingId){const i=journal.findIndex(x=>x.id===editingId);if(i>=0)journal[i]=e;editingId=null;$("jAdd").textContent="Saqlash";toast("Yozuv yangilandi ✔")}
   else{journal.push(e);toast("Smena saqlandi ✔")}
   saveJournal();renderJournal();renderHome();renderCal();
-  $("jGross").value=$("jHours").value=$("jMiles").value=$("jExp").value=$("jNote").value="";$("jZone").value="";$("jHour").value="";
+  $("jGross").value=$("jHours").value=$("jMiles").value=$("jExp").value=$("jNote").value="";$("jZone").value="";$("jHour").value="";renderJPreview();
 });
+function renderJPreview(){
+  const el=$("jPreview");if(!el)return;
+  const g=parseFloat($("jGross").value)||0,h=parseFloat($("jHours").value)||0,mi=parseFloat($("jMiles").value)||0,ex=parseFloat($("jExp").value)||0;
+  if(!g&&!h&&!mi){el.textContent="";return}
+  const net=netOf(g,mi,ex);
+  el.innerHTML="Taxminiy sof: <b>"+money(net)+"</b>"+(h>0?" · "+money(net/h)+"/soat":"")+(mi>0?" · "+money(net/mi)+"/mil":"")+" — elektr xarajati hisobga olingan";
+}
+["jGross","jHours","jMiles","jExp"].forEach(id=>{const n=$(id);if(n)n.addEventListener("input",renderJPreview)});
 const jf=$("jFilter");if(jf)jf.addEventListener("change",renderJournal);
 $("jExport").addEventListener("click",()=>{
   if(!journal.length){toast("Eksport uchun yozuv yoʻq");return}
