@@ -435,3 +435,10 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - (2) fitHome o'lchovi bolalar rect lari bo'yicha qayta yozildi (scrollHeight o'rniga) + kech qayta hisoblar (2.2s, 4.8s) qo'shildi — asinxron kontent o'sishini ham ushlaydi.
 - SW tlc-pro-v56, assetlar ?v=129. Lokal: node --check PASS.
 - **NOT TESTED:** fizik qurilmada yakuniy ko'rinish — jonli brauzer tekshiruvi va foydalanuvchi tasdig'i kutiladi.
+
+## v10.30 (2026-11-08) — Home/Menu almashtirishda ekran kichrayishi tuzatildi
+- **Shikoyat:** foydalanuvchi telefonda Menu va Home tugmalari bosilganda (view almashtirilganda) ekran kichkina bo'lib qolishini xabar qildi (skrinshot bilan).
+- **Sabab:** v10.29 `fitHome()` kontent konteynerdan biroz baland bo'lsa, butun Home ni `zoom` bilan kichraytirardi (pol 0.6). Telefonda kontent deyarli har doim balandroq (~825 ga ~720-790), shuning uchun kichrayish doimiy edi; view almashtirishda o'lchov 80 ms da — kontent (bestReasons, ob-havo, shriftlar) joylashmasdan olinib, keyin qayta tuzatilmasdi, kichrayish qolib ketardi.
+- **Tuzatish (fitHome v2):** (1) avval `compact` CSS tartibi — oraliqlar/paddinglar kichrayadi, yordamchi `.src` yozuvlar yashirinadi, masshtab o'zgarmaydi; (2) zoom faqat compact ham sig'dira olmasa va **0.85 dan past emas**; (3) o'lchovdan oldin majburiy reflow (`void offsetHeight`), refitlar: renderHome oxirida, `document.fonts.ready` da, Home ga qaytishda 80 + 450 ms; (4) fitHome endi Home faol bo'lmasa ishlamaydi, Batafsil ochiq/Drive da compact ham tozalanadi.
+- SW tlc-pro-v57, assetlar ?v=130. Lokal tekshiruvlar: node --check (app.js, sw.js) PASS; versiya izchilligi (v10.30 / ?v=130 / v57) PASS.
+- **Cheklov:** bulut brauzerida telefon viewport emulyatsiyasi (402x874) mavjud emas — desktop (1919x998) da v10.29 da ham kichrayish kuzatilmadi (need≈have), telefon o'lchami raqamli o'lchanmadi; mexanizm koddan tasdiqlangan, yakuniy tasdiq — foydalanuvchi telefoni.
