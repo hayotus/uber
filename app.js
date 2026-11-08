@@ -1254,7 +1254,7 @@ function go(view,modId){
   $("view-"+view).classList.add("act");
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
-  if(view==="home")setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)}},80);
+  if(view==="home")setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)} fitHome()},80);
   if(view==="airports"){loadLiveFlights(false);renderAirports()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
@@ -1434,6 +1434,10 @@ window.addEventListener("online",()=>{setOnline();toast("Internet qaytdi — ma�
 window.addEventListener("offline",()=>{setOnline();toast("Offline — keshdagi maʼlumot koʻrsatiladi; jonli maʼlumot eskirgan boʻlishi mumkin")});
 let wxTimer=null;function armWx(){if(wxTimer)clearInterval(wxTimer);wxTimer=setInterval(loadWeather,(settings.refresh||10)*60000)}
 
+/* v10.28: Home avtomatik masshtab — birinchi sahifa to'liq ekranga sig'adi, scroll kerak emas.
+   Kontent tabiiy balandligi konteynerdan oshsa, zoom bilan proportsional kichraytiriladi (displeyga qarab). */
+function fitHome(){const v=$("view-home");if(!v)return;const d=$("homeMore");if((d&&d.open)||document.body.classList.contains("drive")){v.style.zoom="";return}
+  v.style.zoom="";const need=v.scrollHeight,have=v.clientHeight;if(need>have&&have>0)v.style.zoom=Math.max(0.6,(have/need)).toFixed(3)}
 /* ================= Init ================= */
 $("jDate").value=dayStr(nowNY());
 {const jz=$("jZone");if(jz)jz.innerHTML='<option value="">— belgilanmagan —</option>'+ZONES.map(z=>'<option value="'+esc(z.n)+'">'+esc(z.n)+'</option>').join("");
@@ -1445,6 +1449,8 @@ $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 renderJournal();renderHome();renderAirports();initMaps();
 setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){}}},700);
+setTimeout(fitHome,850);window.addEventListener("resize",()=>fitHome());window.addEventListener("orientationchange",()=>setTimeout(fitHome,300));
+{const hmF=$("homeMore");if(hmF)hmF.addEventListener("toggle",()=>setTimeout(fitHome,60))}
 loadZones();loadZoneWx();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
