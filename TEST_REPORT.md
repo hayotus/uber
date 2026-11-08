@@ -421,3 +421,10 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - **API kalitlar (foydalanuvchi harakati kerak):** TomTom va AirLabs kalitlari statik frontendda ochiq qoladi — bu GitHub Pages arxitekturasida muqarrar; himoya panel tomondan: TomTom va AirLabs kabinetlarida kalitga `hayotus.github.io` referer/domen cheklovi qo'yish kerak. Eski bo'limdagi "kalitlar yo'q — PASS" yozuvi v8.7 dan keyin eskirgan.
 - SW tlc-pro-v54, assetlar ?v=127. Lokal tekshiruvlar: node --check (app.js, sw.js) PASS; versiya izchilligi PASS.
 - **NOT TESTED:** Wipe/Reset ning fizik qurilmadagi (iPhone Safari) IDB o'chirish oqimi; CI birinchi ishga tushishi.
+
+## v10.28 (2026-11-08) — Home avtomatik masshtab (foydalanuvchi so'rovi)
+- Muammo: qisqa displeylarda Home (fiks balandlik + overflow:hidden) ning pastki qismi kesilib qolardi, scroll ham yo'q edi; versiya qatori yopiq "Batafsil" ichida qolgan edi.
+- (1) **fitHome()** (app.js): Home kontentining tabiiy balandligi konteynerdan oshsa, `#view-home` ga proportsional `zoom` qo'llanadi (kamida 0.6) — birinchi sahifa to'liq ekranga sig'adi, scroll kerak emas, masshtab displey balandligiga avtomatik moslashadi. "Batafsil" ochiq bo'lganda yoki Drive rejimda zoom o'chadi (ichki scroll saqlanadi). Qayta hisob: yuklanishda, Home ga qaytganda, resize/orientation da, "Batafsil" ochilib-yopilganda.
+- (2) Versiya qatori "Batafsil" ichidan Home ning eng oxiriga (tashqariga) ko'chdi — birinchi sahifa pastida doim ko'rinadi.
+- SW tlc-pro-v55, assetlar ?v=128. Lokal tekshiruv: node --check (app.js, sw.js) PASS; versiya izchilligi PASS.
+- **NOT TESTED:** fizik qurilmadagi (iPhone Safari) yakuniy ko'rinish va zoom harakati — foydalanuvchi jonli saytda tekshiradi.
