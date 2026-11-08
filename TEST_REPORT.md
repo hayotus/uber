@@ -411,3 +411,13 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - SW tlc-pro-v53, assetlar ?v=126. Commit: 9016ee5.
 - **Lokal tekshiruvlar: PASS** — node --check app.js; takroriy ID 0 ta; jPreview/jSum HTML+JS da bog'langan; diff faqat Jurnal kesimida (boshqa modullarga tegilmadi).
 - **Jonli QA: PASS (5/5)** (2026-11-07 22:55 EST, jonli brauzer) — footer v10.26; preview: 200/8s/120mi/10 kiritilganda "Taxminiy sof: $179.92 · $22.49/soat · $1.50/mil" (hisob aniq: 200 − 120×0.28×0.30 − 10 = 179.92); filtrda "Shu oy" bor; saqlangan yozuvda "$22.49/soat" va "Filtr jami: 1 smena · Gross $200.00 · Sof $179.92 · 8 soat · $22.49/soat · 120.0 mi" chiqdi; test yozuvi o'chirildi, hisoblagichlar $0.00 ga qaytdi.
+
+## v10.27 (2026-11-08) — Kod tekshiruvi tuzatishlari (code review)
+- (1) **Wipe/Reset IndexedDB xatosi tuzatildi:** `sWipe`/`sReset` faqat localStorage ni o'chirardi, IndexedDB (`drvdb`) nusxasi qolardi va `idbRestore()` qayta yuklanishda ma'lumotni tiklab qo'yardi. Endi `idbDel()` qo'shildi: ikkala tugma ham avval IDB kalitlarini o'chirib (await), keyin localStorage ni tozalaydi; Wipe endi `drv_geo` keshini ham o'chiradi.
+- (2) **Service Worker jonli keshi tuzatildi:** bypass ro'yxatiga `api.tomtom.com` (marshrut/traffic), `geosearch.planninglabs.nyc`, `photon.komoot.io`, `overpass.kumi.systems` qo'shildi — ilgari ular "kesh avval" qoidasiga tushib, eskirgan javob qaytarishi mumkin edi.
+- (3) **Leaflet SRI:** unpkg dan yuklanadigan Leaflet 1.9.4 CSS/JS ga `integrity` (sha256, unpkg fayllaridan hisoblab tekshirildi) + `crossorigin` qo'shildi.
+- (4) **ASP_OFF 2027:** ro'yxatga 2027-yil federal bayramlarining kuzatiladigan sanalari qo'shildi (2026 naqshida: Juneteenth → 06-18, Mustaqillik → 07-05, Rojdestvo → 12-24).
+- (5) **CI:** `.github/workflows/check.yml` — har push/PR da node --check, JSON validligi, takroriy ID va versiya izchilligi tekshiriladi.
+- **API kalitlar (foydalanuvchi harakati kerak):** TomTom va AirLabs kalitlari statik frontendda ochiq qoladi — bu GitHub Pages arxitekturasida muqarrar; himoya panel tomondan: TomTom va AirLabs kabinetlarida kalitga `hayotus.github.io` referer/domen cheklovi qo'yish kerak. Eski bo'limdagi "kalitlar yo'q — PASS" yozuvi v8.7 dan keyin eskirgan.
+- SW tlc-pro-v54, assetlar ?v=127. Lokal tekshiruvlar: node --check (app.js, sw.js) PASS; versiya izchilligi PASS.
+- **NOT TESTED:** Wipe/Reset ning fizik qurilmadagi (iPhone Safari) IDB o'chirish oqimi; CI birinchi ishga tushishi.

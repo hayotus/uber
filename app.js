@@ -128,7 +128,7 @@ const GARAGES=[
 {n:"Battery Parking Garage (FiDi)",lat:40.7070,lon:-74.0150,note:"Katta sigʻim"},
 {n:"Queens — Flushing municipal lot",lat:40.7600,lon:-73.8320,note:"Meter va lot variantlari"}
 ];
-const ASP_OFF=["2026-01-01","2026-01-19","2026-02-16","2026-05-25","2026-06-19","2026-07-03","2026-09-07","2026-10-12","2026-11-11","2026-11-26","2026-12-25"];
+const ASP_OFF=["2026-01-01","2026-01-19","2026-02-16","2026-05-25","2026-06-19","2026-07-03","2026-09-07","2026-10-12","2026-11-11","2026-11-26","2026-12-25","2027-01-01","2027-01-18","2027-02-15","2027-05-31","2027-06-18","2027-07-05","2027-09-06","2027-10-11","2027-11-11","2027-11-25","2027-12-24"];
 
 /* ================= State & Settings ================= */
 const DEF_POS={lat:40.7580,lon:-73.9855}; /* Times Square — GPS kelguncha */
@@ -141,6 +141,7 @@ try{const s=JSON.parse(localStorage.getItem("drv_settings")||"null");if(s)settin
 function idbOpen(){return new Promise((res,rej)=>{try{const rq=indexedDB.open("drvdb",1);rq.onupgradeneeded=()=>{rq.result.createObjectStore("kv")};rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error)}catch(e){rej(e)}})}
 function idbSet(k,v){return idbOpen().then(db=>new Promise((res,rej)=>{const tx=db.transaction("kv","readwrite");tx.objectStore("kv").put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)}))}
 function idbGet(k){return idbOpen().then(db=>new Promise((res,rej)=>{const rq=db.transaction("kv").objectStore("kv").get(k);rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error)}))}
+function idbDel(k){return idbOpen().then(db=>new Promise((res,rej)=>{const tx=db.transaction("kv","readwrite");tx.objectStore("kv").delete(k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)}))}
 const IDB_KEYS=["drv_settings","drv_journal","drv_recs"];
 function idbMirror(){try{IDB_KEYS.forEach(k=>{const v=localStorage.getItem(k);if(v!=null)idbSet(k,v).catch(()=>{})})}catch(e){}}
 async function idbRestore(){try{let changed=false;for(const k of IDB_KEYS){if(!localStorage.getItem(k)){const v=await idbGet(k);if(v!=null){localStorage.setItem(k,v);changed=true}}}
@@ -1424,8 +1425,8 @@ $("sExport").addEventListener("click",()=>{
   const data=JSON.stringify({settings:settings,journal:journal,recommendations:recs},null,1);
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="tlc-pro-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
 });
-$("sWipe").addEventListener("click",()=>{if(confirm("Barcha lokal maʼlumot (jurnal, sozlamalar, tavsiyalar) oʻchirilsinmi?")){localStorage.removeItem("drv_journal");localStorage.removeItem("drv_settings");localStorage.removeItem("drv_recs");location.reload()}});
-$("sReset").addEventListener("click",()=>{if(confirm("Sozlamalar standart qiymatlarga qaytarilsinmi? (Jurnal saqlanadi)")){localStorage.removeItem("drv_settings");location.reload()}});
+$("sWipe").addEventListener("click",async()=>{if(confirm("Barcha lokal maʼlumot (jurnal, sozlamalar, tavsiyalar) oʻchirilsinmi?")){try{await Promise.all(IDB_KEYS.map(k=>idbDel(k).catch(()=>{})))}catch(e){} ["drv_journal","drv_settings","drv_recs","drv_geo"].forEach(k=>localStorage.removeItem(k));location.reload()}});
+$("sReset").addEventListener("click",async()=>{if(confirm("Sozlamalar standart qiymatlarga qaytarilsinmi? (Jurnal saqlanadi)")){try{await idbDel("drv_settings")}catch(e){} localStorage.removeItem("drv_settings");location.reload()}});
 
 /* ================= Online/Offline ================= */
 function setOnline(){const pl=$("livePill");if(!pl)return;if(navigator.onLine){pl.innerHTML="<i></i>LIVE";pl.style.color="var(--grn)";pl.style.borderColor="rgba(34,197,94,.4)"}else{pl.innerHTML="<i></i>OFFLINE";pl.style.color="var(--red)";pl.style.borderColor="var(--red)"}}
