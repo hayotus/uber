@@ -135,7 +135,7 @@ const DEF_POS={lat:40.7580,lon:-73.9855}; /* Times Square — GPS kelguncha */
 let pos=null, wxData=null, rainProb3h=0;
 let ZD=null, zoneWx={}, zoneWxH={}, adsb={}, lastRPH=null;
 let hotOff=0, hotSort="score", hotMax=0, hotAll=false, lastHotList=[];
-let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,drive:0,weights:null,airports:["JFK","LGA","EWR"],zone:"",traffic:true,ezpass:true,darkmap:false};
+let settings={name:"",car:"Tesla Model Y",price:0.30,cons:0.28,maint:0.06,lang:"uz-UZ",theme:"dark",units:"mi",speed:"mph",refresh:10,notif:0,drive:0,weights:null,airports:["JFK","LGA","EWR"],zone:"",traffic:true,ezpass:true,darkmap:false,apMode:"live"};
 try{const s=JSON.parse(localStorage.getItem("drv_settings")||"null");if(s)settings=Object.assign(settings,s)}catch(e){}
 /* ================= IndexedDB (3-bosqich) ================= */
 function idbOpen(){return new Promise((res,rej)=>{try{const rq=indexedDB.open("drvdb",1);rq.onupgradeneeded=()=>{rq.result.createObjectStore("kv")};rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error)}catch(e){rej(e)}})}
@@ -339,7 +339,8 @@ function airportScore(ap,zrMap){
   const zr=(zrMap&&zrMap[zn])||null;
   return {ap:ap,zn:zn,dist:dist,etaMin:etaMin,rawNow:rawNow,rawArr:rawArr,H:H==null?null:Math.round(H),L:L,P:Math.round(P),score:score,zr:zr,arrAt:arrAt};
 }
-function renderAirports(){
+function renderAirports(){syncApModeUI();if(apMode()==="live")renderAirportsLive();else renderAirportsHist()}
+function renderAirportsHist(){
   const h=nowNY().getHours();
   const zrMap=zoneRates();
   const scs=AIRPORTS.map(ap=>airportScore(ap,zrMap)).sort((a,b)=>b.score-a.score);
@@ -403,7 +404,7 @@ function renderAirports(){
     '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
     '<div class="src">Uber ichki navbati ochiq emas — uydirilmaydi. Qoʻnish vaqtlari masofa/tezlikdan taxminiy.</div></div>';
   }).join("");
-  drawFlights(curAp);
+  drawApChart();
   const ha=$("homeAirports");
   if(ha)ha.innerHTML=AIRPORTS.filter(ap=>settings.airports.indexOf(ap.code)>=0).map(ap=>{
     const a=adsb[ap.code];const zd=zdata(apZoneName(ap.code));const raw=zd?(isWE()?zd.we:zd.wd)[h]:null;
@@ -499,25 +500,155 @@ function etaMs(dMi,sp,alt,now){const km=dMi*1.60934;if(km<30)return now+8*60000;
 function apViewOpen(){const v=document.getElementById("view-airports");return !!(v&&v.classList.contains("act"))}
 function loadLiveFlights(force){
   const now=Date.now();
-  if(!force&&now-liveTs<1800000)return;
+  if(!force&&now-liveTs<240000)return;
   liveTs=now;
-  fetchT("https://airlabs.co/api/v9/flights?api_key="+AIRLABS_KEY,15000).then(r=>r.json()).then(j=>{
-    const fl=(j&&j.response)||[];
-    AIRPORTS.forEach(ap=>{
-      const enr=fl.filter(f=>f.arr_iata===ap.code&&(f.status==="en-route"||f.status==="active")&&typeof f.lat==="number"&&typeof f.lng==="number");
+  AIRPORTS.forEach(ap=>{
+    fetchT("https://airlabs.co/api/v9/flights?api_key="+AIRLABS_KEY+"&arr_iata="+ap.code,15000).then(r=>r.json()).then(j=>{
+      const fl=(j&&j.response)||[];
+      const enr=fl.filter(f=>(f.status==="en-route"||f.status==="active")&&typeof f.lat==="number"&&typeof f.lng==="number");
       const list=enr.map(f=>{const d=hav(ap.lat,ap.lon,f.lat,f.lng);return {f:f.flight_iata||"—",alt:(typeof f.alt==="number"?f.alt:null),d:d,dep:f.dep_iata||"",eta:etaMs(d,f.speed,f.alt,now)}}).sort((a,b)=>a.d-b.d);
       const near=list.filter(x=>x.d<=50).length;
       const wave=waveOf(list,now);
       const next60=wave.reduce((a,b)=>a+b,0);
+      const hours6=[0,0,0,0,0,0];list.forEach(x=>{const b=Math.floor((x.eta-now)/3600e3);if(b>=0&&b<6)hours6[b]++});
       const org={};enr.forEach(f=>{if(f.dep_iata)org[f.dep_iata]=(org[f.dep_iata]||0)+1});
       const origins=Object.keys(org).map(k=>({c:k,n:org[k]})).sort((a,b)=>b.n-a.n).slice(0,3);
-      adsb[ap.code]={ts:now,total:enr.length,low:near,list:list.slice(0,8),wave:wave,next60:next60,next30:wave[0]+wave[1]+wave[2],origins:origins};
-    });
-    apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-    renderApiStat();renderAirports();
-  }).catch(()=>{apiStat.adsb="XATO — AirLabs javob bermadi";renderApiStat()});
+      adsb[ap.code]={ts:now,total:enr.length,low:near,list:list.slice(0,8),wave:wave,next60:next60,next30:wave[0]+wave[1]+wave[2],hours6:hours6,origins:origins};
+      apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+      renderApiStat();renderAirports();
+    }).catch(()=>{apiStat.adsb="XATO — AirLabs javob bermadi";renderApiStat()});
+  });
 }
 let liveTs=0;
+
+/* ============ v10.31: Airports REAL TIME / HISTORICAL tanlovi (AirLabs jonli reyslar + TomTom jonli yo'l) ============ */
+let apEta={},etaTs=0;
+function apMode(){return settings.apMode==="hist"?"hist":"live"}
+function loadApEta(force){
+  const now=Date.now();
+  if(!force&&now-etaTs<480000)return;
+  etaTs=now;
+  AIRPORTS.forEach(ap=>{
+    const url="https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+ap.lat+","+ap.lon+"/json?key="+TT_KEY+"&traffic=true&travelMode=car"+(settings.ezpass?"":"&avoid=tollRoads");
+    fetchT(url,12000).then(r=>r.json()).then(j=>{
+      const sm=j&&j.routes&&j.routes[0]&&j.routes[0].summary;if(!sm)return;
+      apEta[ap.code]={ts:now,min:Math.max(2,Math.round(sm.travelTimeInSeconds/60)),delayMin:Math.round((sm.trafficDelayInSeconds||0)/60),km:Math.round(sm.lengthInMeters/100)/10};
+      if(apViewOpen()&&apMode()==="live")renderAirports();
+    }).catch(()=>{});
+  });
+}
+function airportScoreLive(ap,zrMap){
+  const zn=apZoneName(ap.code);
+  const dist=hav(userLat(),userLon(),ap.lat,ap.lon);
+  const et=apEta[ap.code]||null;
+  const etaMin=et?et.min:Math.max(2,Math.round(dist*3.2));
+  const sc=adsb[ap.code]||null;
+  let L=null,F=null;
+  if(sc){L=Math.max(5,Math.min(98,Math.round(sc.next60*3)));F=Math.max(5,Math.min(98,Math.round(sc.next30*4.5)))}
+  let P=Math.max(5,Math.round(100-etaMin*1.1));if(settings.zone&&settings.zone===zn)P=Math.min(100,P+6);
+  let acc=0,wsum=0;
+  [["L",L,0.5],["F",F,0.25],["P",P,0.25]].forEach(kv=>{if(kv[1]==null)return;acc+=kv[2]*kv[1];wsum+=kv[2]});
+  const score=wsum?Math.round(acc/wsum):0;
+  const zr=(zrMap&&zrMap[zn])||null;
+  return {ap:ap,zn:zn,dist:dist,etaMin:etaMin,etaLive:!!et,score:score,L:L,F:F,P:P,zr:zr,sc:sc,et:et};
+}
+function setApMode(m){settings.apMode=(m==="hist"?"hist":"live");saveSettings();syncApModeUI();if(settings.apMode==="live"){loadLiveFlights(false);loadApEta(false)}renderAirports()}
+function syncApModeUI(){
+  document.querySelectorAll("#apModeChips .chip[data-apmode]").forEach(ch=>ch.classList.toggle("on",ch.getAttribute("data-apmode")===apMode()));
+  const u=$("apUpd");if(!u)return;
+  if(apMode()==="live"){const t=liveTs?new Date(liveTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";u.innerHTML="Rejim: <b>REAL TIME</b> · AirLabs jonli reyslari + TomTom jonli yoʻl · Yangilandi: "+t+" · Aeroport ekrani ochiq boʻlsa, avto-yangilanish ≈5 daq"}
+  else u.innerHTML="Rejim: <b>HISTORICAL</b> · TLC HVFHS 2025-09 oʻrtacha naqshi — jonli emas, kun/soat boʻyicha odatiy oqim";
+}
+function renderAirportsLive(){
+  const zrMap=zoneRates();
+  const scs=AIRPORTS.map(ap=>airportScoreLive(ap,zrMap)).sort((a,b)=>b.score-a.score);
+  const best=scs[0];
+  const bEl=$("apBest");
+  if(bEl&&best){
+    const sc=best.sc,et=best.et,rs=[];
+    if(sc)rs.push("Jonli: "+sc.total+" reys havoda kelmoqda, keyingi 60 daqiqada ≈"+sc.next60+" qoʻnish (jonli pozitsiyalar boʻyicha taxmin)");
+    rs.push("Yoʻl: "+distTxt(best.dist)+" · ≈"+best.etaMin+" daq"+(et?" (jonli tirbandlik"+(et.delayMin?", +"+et.delayMin+" daq":"")+")":" (taxminiy, TomTom kutilmoqda)"));
+    if(best.zr)rs.push("Jurnalingiz: "+money(best.zr.v)+"/soat ("+best.zr.n+" smena)");
+    let advice="";
+    if(sc&&sc.wave){let pk=0;sc.wave.forEach((v,i)=>{if(v>sc.wave[pk])pk=i});const curb=pk*10+5+20;
+      if(Math.abs(best.etaMin-curb)<=10)advice="⏰ Hozir chiqish ayni muddao — qoʻnish toʻlqini siz yetgan paytga kuchayadi.";
+      else if(best.etaMin<curb-10)advice="⏰ Erta yetasiz — toʻlqingacha ≈"+(curb-best.etaMin)+" daq kutish mumkin.";
+      else advice="⏰ Bu toʻlqin oʻtib ketishi mumkin — keyingi oynani kuzating."}
+    bEl.innerHTML='<div class="card apbest"><h3>🏆 Hozir eng foydali: '+best.ap.code+' — '+esc(best.ap.name)+'</h3>'+
+    '<div class="big mono">'+best.score+' <span style="font-size:14px;color:var(--mut)">/100 REAL TIME balli</span></div>'+
+    '<div class="small">• '+rs.map(esc).join("<br>• ")+'</div>'+
+    (advice?'<div class="small" style="margin-top:4px">'+esc(advice)+'</div>':"")+
+    '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+best.ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+best.ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
+    '<div class="src">Ball: L jonli qoʻnish toʻlqini (60 daq) ×0.50 + F yaqin oqim (30 daq) ×0.25 + P jonli yoʻl vaqti ×0.25. Manbalar: AirLabs jonli reyslar, TomTom Traffic (jonli).</div></div>';
+  }
+  const cEl=$("apCompare");
+  if(cEl){
+    const row=(lbl,fn)=>"<tr><td>"+lbl+"</td>"+scs.map(x=>"<td>"+fn(x)+"</td>").join("")+"</tr>";
+    cEl.innerHTML='<div class="card"><h3>Taqqoslash — 3 aeroport <span class="badge b-live">REAL TIME</span></h3><table><tr><th></th>'+scs.map(x=>"<th>"+x.ap.code+"</th>").join("")+"</tr>"+
+    row("Ball",x=>"<b>"+x.score+"</b>")+
+    row("Havoda kelmoqda",x=>x.sc?x.sc.total:"—")+
+    row("Qoʻnish 60 daq",x=>x.sc?"≈"+x.sc.next60:"—")+
+    row("Yaqin ≤50 mi",x=>x.sc?x.sc.low:"—")+
+    row("Yoʻl (jonli)",x=>"≈"+x.etaMin+" daq")+
+    row("Real $/soat",x=>x.zr?money(x.zr.v):"—")+
+    "</table></div>";
+  }
+  $("apCards").innerHTML=scs.map((s,idx)=>{
+    const ap=s.ap,sc=s.sc;
+    let liveHtml;
+    if(sc){
+      const mx=Math.max.apply(null,sc.wave.concat([1]));
+      const wave='<div class="wave">'+sc.wave.map((v,i)=>'<div class="wcol"><b>'+v+'</b><div class="wbar"><div class="wb" style="height:'+Math.max(3,Math.round(v/mx*44))+'px"></div></div><span>+'+(i*10)+'d</span></div>').join("")+'</div>';
+      liveHtml='<div class="stat3"><div class="cell"><b class="mono">'+sc.total+'</b><span>kelmoqda (LIVE)</span></div><div class="cell"><b class="mono">'+sc.low+'</b><span>yaqin ≤50 mi</span></div><div class="cell"><b class="mono">≈'+sc.next60+'</b><span>qoʻnish 60 daq</span></div></div>'+
+      '<div class="small" style="margin-top:6px">Qoʻnish toʻlqini (jonli pozitsiyalardan taxminiy qoʻnish vaqti, 10 daqiqalik oraliqlar):</div>'+wave+
+      (sc.origins&&sc.origins.length?'<div class="hchips">'+sc.origins.map(o=>'<span>🛫 '+esc(cityOf(o.c))+' ×'+o.n+'</span>').join("")+'</div>':"")+
+      (sc.list.length?'<div class="small">Eng yaqin reyslar (qoʻnish — taxminiy):<br>'+sc.list.map(x=>esc(x.f||"—")+" · "+esc(cityOf(x.dep))+" · ~"+new Date(x.eta).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+" · "+(x.alt!=null?Math.max(0,Math.round(x.alt))+" ft":"—")+" · "+distTxt(x.d)).join("<br>")+'</div>':"")+
+      '<div class="small">Yangilandi: '+new Date(sc.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+'</div>';
+    } else {
+      liveHtml='<div class="med">Jonli maʼlumot yuklanmoqda…</div><div class="small">AirLabs jonli reyslari soʻralmoqda. Kelmasa, 🔄 Yangilash ni bosing yoki HISTORICAL rejimga oʻting.</div>';
+    }
+    const rp=zoneWx[s.zn];
+    return '<div class="card'+(idx===0?" apbest":"")+'"><h3>✈️ '+ap.code+" — "+esc(ap.name)+' <span class="mono" style="float:right">'+s.score+'/100</span></h3>'+
+    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">REAL TIME</span> AirLabs jonli reyslar · TomTom Traffic</div>'+liveHtml+
+    '<div class="hchips" style="margin-top:8px"><span>📍 '+distTxt(s.dist)+' · ≈'+s.etaMin+' daq'+(s.etaLive?" (jonli)":"")+'</span><span>💵 '+(s.zr?money(s.zr.v)+"/soat · "+s.zr.n+" smena":"maʼlumot yoʻq")+'</span>'+(rp!=null?'<span>🌧 '+Math.round(rp)+'%</span>':"")+'<span>L '+(s.L==null?"—":s.L)+' · F '+(s.F==null?"—":s.F)+' · P '+s.P+'</span></div>'+
+    '<div class="small">'+esc(ap.term)+'</div>'+
+    '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
+    '<div class="src">Uber ichki navbati ochiq emas — uydirilmaydi. Qoʻnish vaqtlari jonli pozitsiya/masofadan taxminiy.</div></div>';
+  }).join("");
+  drawApChart();
+  const ha=$("homeAirports");
+  if(ha)ha.innerHTML=AIRPORTS.filter(ap=>settings.airports.indexOf(ap.code)>=0).map(ap=>{
+    const a=adsb[ap.code];
+    return "<b>"+ap.code+"</b>: "+(a?("jonli "+a.total+" reys · toʻlqin 60 daq ≈"+a.next60):"jonli maʼlumot yoʻq");
+  }).join("<br>")||"Sozlamalarda aeroport tanlanmagan";
+}
+function drawFlightsLive(code){
+  const cv=$("flightChart");if(!cv)return;const ctx=cv.getContext("2d");const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const a=adsb[code];
+  if(!a||!a.hours6){$("flightNote").textContent=code+": jonli reyslar hali yuklanmadi — AirLabs soʻrovi kutilmoqda.";return}
+  const hrs=a.hours6;const mx=Math.max.apply(null,hrs.concat([1]))*1.15;const bw=W/6;const now=nowNY();
+  for(let i=0;i<6;i++){
+    const bh=(H-36)*(hrs[i]/mx);
+    ctx.fillStyle=i===0?"#22c55e":"#3b82f6";
+    ctx.fillRect(i*bw+8,H-22-bh,bw-16,bh);
+    ctx.fillStyle=inkF();ctx.font="bold 11px sans-serif";ctx.textAlign="center";ctx.fillText(hrs[i],i*bw+bw/2,H-26-bh);
+    const lbl=new Date(now.getTime()+i*3600e3);ctx.fillStyle="#6f7278";ctx.font="10px sans-serif";ctx.fillText(String(lbl.getHours()).padStart(2,"0")+":00",i*bw+bw/2,H-6);
+  }
+  $("flightNote").textContent=code+": havodagi reyslarning taxminiy qoʻnishlari boʻyicha keyingi 6 soatda ≈"+hrs.reduce((x,y)=>x+y,0)+" reys shu aeroportga kelmoqda (jonli). Joriy soat: "+hrs[0]+" reys.";
+}
+function drawApChart(){
+  const t=$("apChartTitle"),src=$("apChartSrc");
+  if(apMode()==="live"){
+    if(t)t.innerHTML='Aeroport oqimi — keyingi 6 soat <span class="badge b-live">REAL TIME</span>';
+    if(src)src.textContent="Grafik: AirLabs jonli reyslari (havodagi pozitsiyalar) boʻyicha keyingi 6 soatda kutilayotgan qoʻnishlar soni — taxminiy qoʻnish vaqtlariga koʻra.";
+    drawFlightsLive(curAp);
+  } else {
+    if(t)t.innerHTML='Aeroport oqimi — 24 soat <span class="badge b-hist">HISTORICAL</span>';
+    if(src)src.textContent="Grafik: TLC HVFHS 2025-09 tarixiy oʻrtacha pikap oqimi — kelgan yoʻlovchilarning aeroportdan chiqish proksi. Jonli reyslar REAL TIME rejimida. Aniq reyslar uchun aviakompaniya ilovasini tekshiring.";
+    drawFlights(curAp);
+  }
+}
 
 /* ================= Weather (Modul 11) ================= */
 const WX_TXT={0:"Ochiq osmon",1:"Asosan ochiq",2:"Qisman bulutli",3:"Bulutli",45:"Tuman",48:"Tuman",51:"Yengil yomgʻir",53:"Yomgʻir",55:"Yomgʻir",61:"Yomgʻir",63:"Kuchli yomgʻir",65:"Jala",71:"Qor",73:"Qor",75:"Kuchli qor",80:"Yomgʻir shovashi",81:"Yomgʻir shovashi",82:"Kuchli shova",95:"Momaqaldiroq"};
@@ -1256,7 +1387,7 @@ function go(view,modId){
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
   if(view==="home"){setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)} fitHome()},80);setTimeout(fitHome,450)}
-  if(view==="airports"){loadLiveFlights(false);renderAirports()}
+  if(view==="airports"){loadLiveFlights(false);if(apMode()==="live"){loadApEta(false)}renderAirports()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
 
@@ -1299,7 +1430,9 @@ document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()
 const hm=$("homeMore");
 if(hm)hm.addEventListener("toggle",()=>{if(hm.open){if(!map)initMaps();if(mapHome)setTimeout(()=>{try{mapHome.invalidateSize();mapHome.setView([userLat(),userLon()],11)}catch(e){}},60)}});
 
-document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawFlights(curAp)}));
+document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawApChart()}));
+document.querySelectorAll("#apModeChips .chip[data-apmode]").forEach(ch=>ch.addEventListener("click",()=>setApMode(ch.getAttribute("data-apmode"))));
+{const rb=$("apRefresh");if(rb)rb.addEventListener("click",()=>{if(apMode()==="live"){loadLiveFlights(true);loadApEta(true);toast("Jonli maʼlumot yangilanmoqda…")}else{renderAirports();toast("Historical — TLC tarixiy naqsh (jonli emas)")}})}
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
 function recordRecFor(s){if(!s)return false;recs.unshift({t:new Date().toISOString(),zone:s.z.n,score:s.score,conf:s.conf||null,c:{D:s.D,F:s.F,E:s.E,W:s.W,T:s.T,P:s.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs));idbMirror()}catch(e){}renderCal();return true}
 function recordRec(){return recordRecFor(bestPick)}
@@ -1461,7 +1594,7 @@ loadZones();loadZoneWx();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
 loadEvents(true);setInterval(()=>loadEvents(false),600000);
-setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
+setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(()=>{if(apViewOpen()&&apMode()==="live"){loadLiveFlights(false);loadApEta(false)}},60000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 
