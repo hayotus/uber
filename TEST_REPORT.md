@@ -472,3 +472,11 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.36 (2026-11-08) — zones holati yerdagi haqiqatdan (ZD) chiqariladi
 - Bulut brauzer profilida (5 ta SW almashinuvi + tiqilgan deploylar) zones maʼlumoti yuklanib ishlasa ham, Settings dagi holat yozuvi eski XATO boʻlib qolaverdi. Endi renderApiStat zones qatorini ZD dan chiqaradi: maʼlumot bor boʻlsa — doim "OK · (20 zona)". Indikator hech qachon yolgʻon XATO koʻrsatmaydi.
 - Tekshiruv: node --check OK. SW tlc-pro-v63, assetlar ?v=136.
+
+## v10.37 (2026-11-09) — Xarita Tesla belgisi rangi
+- Foydalanuvchi soʻrovi: xarita chap menyusidagi Tesla belgisi oʻchirilganda juda toʻq (toʻq qizil #8B0000) koʻrinardi. Endi: oʻchiq holatda toʻq kulrang (#5a5a5e), yoniq (ON) holatda toʻq qizil (#8B0000). style.css dagi toʻrt qoida oʻzgardi (chap menyu .mc-btn va qatlam pill .mpill — ikkalasi ham bir xil Tesla belgisi).
+- Tekshiruv: node --check (sw.js) OK. SW tlc-pro-v64, assetlar ?v=137.
+
+## v10.38 (2026-11-09) — Xarita Airport belgisi — haqiqiy samolyot
+- Foydalanuvchi soʻrovi: chap menyudagi Airport tugmasi qogʻoz samolyot (send) belgisida edi — aeroportligi bilinmasdi. Endi toʻliq samolyot silueti (Material "flight" belgisi, currentColor): oʻchiqda kulrang, yoniqda toʻq sariq (#FF9500) — qolgan qatlam tugmalari bilan bir xil tizim.
+- Tekshiruv: node --check OK. SW tlc-pro-v65, assetlar ?v=138.

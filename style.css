@@ -242,8 +242,8 @@ body.drive #view-home{overflow-y:auto}
 
 /* v10.23: Tesla belgisi OFF holatda ham ko'rinadi — kulrang o'rniga to'q qizil */
 .mpill[data-layer="ev"] .tab-ic{filter:none;opacity:.85}
-.mpill[data-layer="ev"] .tab-ic svg path{fill:#8B0000}
-.mpill.on[data-layer="ev"] .tab-ic svg path{fill:#CC0000}
+.mpill[data-layer="ev"] .tab-ic svg path{fill:#5a5a5e}
+.mpill.on[data-layer="ev"] .tab-ic svg path{fill:#8B0000}
 
 /* v10.24: strip SVG ikonkalar + attribution ixcham + tungi xarita tugma holati */
 .mpill .tab-ic{color:#8e8e93;filter:none;opacity:1}
@@ -261,8 +261,8 @@ body.drive #view-home{overflow-y:auto}
 .mc-btn.mc-layer.on[data-layer="loc"] .mc-ic{color:#34C759}
 .mc-btn.mc-layer.on[data-layer="cruise"] .mc-ic{color:#BF5AF2}
 .mc-btn.mc-layer.on[data-layer="air"] .mc-ic{color:#FF9500}
-.mc-btn.mc-layer[data-layer="ev"] .mc-ic svg path{fill:#8B0000}
-.mc-btn.mc-layer.on[data-layer="ev"] .mc-ic svg path{fill:#CC0000}
+.mc-btn.mc-layer[data-layer="ev"] .mc-ic svg path{fill:#5a5a5e}
+.mc-btn.mc-layer.on[data-layer="ev"] .mc-ic svg path{fill:#8B0000}
 
 /* v10.29: versiya qatori — Home ning eng pastida fixed, kichik harfda, doim ko'rinadi */
 #verLine{display:none;position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));text-align:center;font-size:11px;letter-spacing:.3px;color:var(--mut);z-index:940;pointer-events:none}
