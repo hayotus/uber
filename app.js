@@ -155,7 +155,7 @@ function spdTxt(mph){return settings.speed==="kmh"?Math.round(mph*1.60934)+" km/
 const AIRLABS_KEY="e47a4224-471e-4631-8e57-67aea417485e";
 const apiStat={weather:"tekshirilmagan",zones:"tekshirilmagan",adsb:"tekshirilmagan",overpass:"tekshirilmagan",rain:"tekshirilmagan",closures:"tekshirilmagan",events:"tekshirilmagan",tiles:"Esri (kalitsiz)"};
 let lastCalcAt=null;
-function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>NYC DOT yopilishlar: <b>"+esc(apiStat.closures)+"</b><br>NYC Events (tadbirlar): <b>"+esc(apiStat.events)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
+function renderApiStat(){const el=$("apiStat");if(el)el.innerHTML="Open-Meteo (ob-havo): <b>"+esc(apiStat.weather)+"</b><br>TLC zones.json (tarixiy): <b>"+esc(ZD?("OK · TLC HVFHS 2025-09 ("+ZD.zones.length+" zona)"):apiStat.zones)+"</b><br>AirLabs (jonli reyslar): <b>"+esc(apiStat.adsb)+"</b><br>Overpass/OSM (joylar): <b>"+esc(apiStat.overpass)+"</b><br>RainViewer (radar): <b>"+esc(apiStat.rain)+"</b><br>NYC DOT yopilishlar: <b>"+esc(apiStat.closures)+"</b><br>NYC Events (tadbirlar): <b>"+esc(apiStat.events)+"</b><br>Xarita tiles: <b>"+esc(apiStat.tiles)+"</b>"+(lastCalcAt?"<br>Smart Engine oxirgi hisob: <b>"+esc(lastCalcAt)+"</b>":"")}
 function userLat(){return pos?pos.lat:DEF_POS.lat}
 function userLon(){return pos?pos.lon:DEF_POS.lon}
 
