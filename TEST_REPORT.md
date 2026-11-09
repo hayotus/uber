@@ -480,3 +480,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.38 (2026-11-09) — Xarita Airport belgisi — haqiqiy samolyot
 - Foydalanuvchi soʻrovi: chap menyudagi Airport tugmasi qogʻoz samolyot (send) belgisida edi — aeroportligi bilinmasdi. Endi toʻliq samolyot silueti (Material "flight" belgisi, currentColor): oʻchiqda kulrang, yoniqda toʻq sariq (#FF9500) — qolgan qatlam tugmalari bilan bir xil tizim.
 - Tekshiruv: node --check OK. SW tlc-pro-v65, assetlar ?v=138.
+
+## v10.39 (2026-11-09) — Xarita tugmalarida ON/OFF yozuvi
+- Foydalanuvchi soʻrovi: chap menyudagi barcha tugmalar tagida EZPass dagi kabi ON/OFF yozuvi boʻlsin. Qoʻshildi: Traffic, Restroom, Tesla, Location, Cruise, Airport va Theme (tungi xarita) tugmalariga .mc-state yozuvi — yoniqda yashil "ON", oʻchiqda kulrang "OFF"; mapToggle/updateTrafficUI/updateThemeUI holat bilan sinxron yangilaydi. Recenter — harakat tugmasi, yozuvsiz qoldi.
+- Tekshiruv: node --check OK. SW tlc-pro-v66, assetlar ?v=139.
