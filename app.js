@@ -687,7 +687,7 @@ function heatCircles(target){
   return g;
 }
 function initMaps(){
-  if(map)return;
+  if(map||typeof L==="undefined")return;
   map=L.map("map").setView([userLat(),userLon()],13);tiles().addTo(map);
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
@@ -1577,17 +1577,18 @@ tickClock();setInterval(tickClock,30000);
 renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
-renderJournal();renderHome();renderAirports();initMaps();
-setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){}}},700);
-setTimeout(fitHome,850);setTimeout(fitHome,2200);setTimeout(fitHome,4800);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitHome());window.addEventListener("resize",()=>fitHome());window.addEventListener("orientationchange",()=>setTimeout(fitHome,300));
-{const hmF=$("homeMore");if(hmF)hmF.addEventListener("toggle",()=>setTimeout(fitHome,60))}
+renderJournal();renderHome();renderAirports();
 loadZones();loadZoneWx();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
 loadEvents(true);setInterval(()=>loadEvents(false),600000);
 setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(()=>{if(apViewOpen()&&apMode()==="live"){loadLiveFlights(false);loadApEta(false)}},60000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
-refreshWC(false);refreshEV(false);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+try{initMaps()}catch(e){}setTimeout(()=>{try{initMaps()}catch(e){}},3000);
+setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){}}},700);
+setTimeout(fitHome,850);setTimeout(fitHome,2200);setTimeout(fitHome,4800);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitHome());window.addEventListener("resize",()=>fitHome());window.addEventListener("orientationchange",()=>setTimeout(fitHome,300));
+{const hmF=$("homeMore");if(hmF)hmF.addEventListener("toggle",()=>setTimeout(fitHome,60))}
+refreshWC(false);refreshEV(false);
 
 /* Fayl ajratilgach (3-bosqich): generatsiya qilingan HTML dagi inline onclick uchun */
 window.gmaps=gmaps;
