@@ -460,3 +460,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Topilma (v10.31/v10.32 jonli QA): bulut brauzerda zones.json HECH yuklanmadi, apiStat dagi boshqa manbalar ham "tekshirilmagan" qoldi — sabab: initMaps() init da loadZones/loadWeather/loadClosures/loadEvents DAN OLDIN chaqirilardi; Leaflet (unpkg) oʻsha muhitda kelmasa, initMaps dagi xato butun init zanjirini uzardi (telefonda Leaflet yuklanadi — muammo koʻrinmagan).
 - Tuzatish: barcha maʼlumot yuklagichlar va SW roʻyxati initMaps DAN OLDINGA koʻchirildi; initMaps try/catch ichida + 3 soniyadan keyin qayta urinish; initMaps ichida typeof L tekshiruvi.
 - Tekshiruv: node --check OK. SW tlc-pro-v60, assetlar ?v=133.
+
+## v10.34 (2026-11-08) — zones yuklanishini kafolatlash
+- v10.33 QA: xarita sogʻ chiqdi (Leaflet aybdor emas), lekin zones baribir yuklanmadi. Endi: loadZones chaqirilganda apiStat darhol "yuklanmoqda…" boʻladi (chaqirilmagan vs osilgan ajratiladi), in-flight guard qoʻshildi, go() har navigatsiyada loadZones ni chaqiradi, init da yuklagichlar renderlardan oldin turadi.
+- Tekshiruv: node --check OK. SW tlc-pro-v61, assetlar ?v=134.
