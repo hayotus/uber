@@ -464,3 +464,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.34 (2026-11-08) — zones yuklanishini kafolatlash
 - v10.33 QA: xarita sogʻ chiqdi (Leaflet aybdor emas), lekin zones baribir yuklanmadi. Endi: loadZones chaqirilganda apiStat darhol "yuklanmoqda…" boʻladi (chaqirilmagan vs osilgan ajratiladi), in-flight guard qoʻshildi, go() har navigatsiyada loadZones ni chaqiradi, init da yuklagichlar renderlardan oldin turadi.
 - Tekshiruv: node --check OK. SW tlc-pro-v61, assetlar ?v=134.
+
+## v10.35 (2026-11-08) — zones: keshni aylanib qayta urinish
+- v10.34 QA: Historical ISHLADI (raqamlar zones.json we[] bilan aynan mos), lekin Settings dagi holat satri XATO boʻlib qoldi — birinchi fetch eski SW keshi dagi buzuq nusxaga urilgan boʻlishi mumkin. Endi: qayta urinishlar zones.json?nc=<vaqt> bilan keshi aylanadi, urinishlar cheksiz (5s→60s backoff) ZD kelguncha; muvaffaqiyatda holat OK boʻladi.
+- Tekshiruv: node --check OK. SW tlc-pro-v62, assetlar ?v=135.
