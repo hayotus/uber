@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<link rel="stylesheet" href="./style.css?v=130">
+<link rel="stylesheet" href="./style.css?v=131">
 </head>
 <body>
 <main>
@@ -120,7 +120,7 @@
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
 </section>
-<div id="verLine">TLC Pro · v10.30 · Case12 uber dashboard</div>
+<div id="verLine">TLC Pro · v10.31 · Case12 uber dashboard</div>
 
 <!-- ============ MAP ============ -->
 <section id="view-map" class="view">
@@ -130,12 +130,12 @@
 
 <!-- ============ AIRPORTS ============ -->
 <section id="view-airports" class="view">
-  <div class="card"><h3>✈️ Airport Intelligence <span class="badge b-live">LIVE</span></h3><div class="small">JFK · LGA · EWR — jonli qoʻnish toʻlqini (AirLabs), TLC tarixiy oqim, sizning jurnalingiz va masofa — bitta qaror ekranida. Uber ichki navbati ochiq emas — uydirilmaydi.</div></div>
+  <div class="card"><h3>✈️ Airport Intelligence</h3><div class="small">JFK · LGA · EWR — rejimni tanlang: <b>Real time</b> — jonli reyslar jadvali va jonli yoʻl vaqti; <b>Historical</b> — TLC tarixiy oqim naqshi. Uber ichki navbati ochiq emas — uydirilmaydi.</div><div class="chips" id="apModeChips"><button class="chip on" data-apmode="live">🔴 Real time</button><button class="chip" data-apmode="hist">📊 Historical</button><button class="chip" id="apRefresh">🔄 Yangilash</button></div><div class="small" id="apUpd"></div></div>
   <div id="apBest"></div>
   <div id="apCompare"></div>
   <div id="apCards"></div>
   <div class="card">
-    <h3>Aeroport oqimi — 24 soat <span class="badge b-hist">HISTORICAL</span></h3>
+    <h3 id="apChartTitle">Aeroport oqimi — 24 soat <span class="badge b-hist">HISTORICAL</span></h3>
     <div class="chips" id="apTabs">
       <button class="chip on" data-ap="JFK">JFK</button>
       <button class="chip" data-ap="LGA">LGA</button>
@@ -143,7 +143,7 @@
     </div>
     <canvas class="wx" id="flightChart" width="680" height="150"></canvas>
     <div class="small" id="flightNote"></div>
-    <div class="src">Grafik: TLC HVFHS 2025-09 tarixiy oʻrtacha pikap oqimi — kelgan yoʻlovchilarning aeroportdan chiqish proksi. Jonli reyslar yuqoridagi AirLabs (LIVE) blokida. Aniq reyslar uchun aviakompaniya ilovasini tekshiring.</div>
+    <div class="src" id="apChartSrc">Grafik: TLC HVFHS 2025-09 tarixiy oʻrtacha pikap oqimi — kelgan yoʻlovchilarning aeroportdan chiqish proksi. Jonli reyslar yuqoridagi AirLabs (LIVE) blokida. Aniq reyslar uchun aviakompaniya ilovasini tekshiring.</div>
   </div>
 </section>
 
@@ -342,6 +342,6 @@
 </nav>
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script type="module" src="./app.js?v=130"></script>
+<script type="module" src="./app.js?v=131"></script>
 </body>
 </html>
