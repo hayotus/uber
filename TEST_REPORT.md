@@ -468,3 +468,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.35 (2026-11-08) — zones: keshni aylanib qayta urinish
 - v10.34 QA: Historical ISHLADI (raqamlar zones.json we[] bilan aynan mos), lekin Settings dagi holat satri XATO boʻlib qoldi — birinchi fetch eski SW keshi dagi buzuq nusxaga urilgan boʻlishi mumkin. Endi: qayta urinishlar zones.json?nc=<vaqt> bilan keshi aylanadi, urinishlar cheksiz (5s→60s backoff) ZD kelguncha; muvaffaqiyatda holat OK boʻladi.
 - Tekshiruv: node --check OK. SW tlc-pro-v62, assetlar ?v=135.
+
+## v10.36 (2026-11-08) — zones holati yerdagi haqiqatdan (ZD) chiqariladi
+- Bulut brauzer profilida (5 ta SW almashinuvi + tiqilgan deploylar) zones maʼlumoti yuklanib ishlasa ham, Settings dagi holat yozuvi eski XATO boʻlib qolaverdi. Endi renderApiStat zones qatorini ZD dan chiqaradi: maʼlumot bor boʻlsa — doim "OK · (20 zona)". Indikator hech qachon yolgʻon XATO koʻrsatmaydi.
+- Tekshiruv: node --check OK. SW tlc-pro-v63, assetlar ?v=136.
