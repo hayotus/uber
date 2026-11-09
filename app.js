@@ -706,7 +706,9 @@ function heatCircles(target,sel){
   const pop=s=>"<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy \u00b7 "+DAYLBL[dayIdx]+" "+String(hour).padStart(2,"0")+":00): "+(s.D==null?"\u2014":s.D)+"/100<br>Ball: "+s.score+(s.raw!=null?" \u00b7 TLC: "+Math.round(s.raw)+" pikap/soat":"");
   let heatOk=false;
   const pts=sc.filter(s=>s.D!=null&&s.D>0).map(s=>[s.z.lat,s.z.lon,s.D]);
-  if(pts.length&&typeof L.heatLayer==="function"){
+  const tsz=(target&&target.getSize)?target.getSize():null;
+  const canHeat=(!tsz||(tsz.x>0&&tsz.y>0));
+  if(pts.length&&canHeat&&typeof L.heatLayer==="function"){
     try{L.heatLayer(pts,{minOpacity:.25,radius:58,blur:38,maxZoom:17,max:100,gradient:{0.1:"#ffffcc",0.3:"#ffeda0",0.5:"#feb24c",0.7:"#fd8d3c",0.85:"#fc4e2a",1:"#bd0026"}}).addTo(g);heatOk=true}catch(e){heatOk=false}
   }
   sc.forEach(s=>{
@@ -1374,7 +1376,7 @@ function refreshHeat(){try{
   if(mapHome&&heatHome){mapHome.removeLayer(heatHome);heatHome=heatCircles(mapHome);heatHome.addTo(mapHome)}
 }catch(e){}}
 {const db=$("driveBtn");if(db)db.addEventListener("click",()=>{settings.drive=!settings.drive;saveSettings();applyDrive();toast(settings.drive?"🚗 Haydash rejimi yoniq":"Haydash rejimi oʻchiq")});
-const hm=$("homeMore");if(hm)hm.addEventListener("toggle",()=>{if(hm.open&&mapHome)setTimeout(()=>{try{mapHome.invalidateSize()}catch(e){}},80)});
+const hm=$("homeMore");if(hm)hm.addEventListener("toggle",()=>{if(hm.open&&mapHome)setTimeout(()=>{try{mapHome.invalidateSize()}catch(e){} redrawHomeHeat()},80)});
 let lastHour=null;
 setInterval(()=>{const h=nowNY().getHours();if(lastHour===null){lastHour=h;return}if(h!==lastHour){lastHour=h;renderHome();refreshHeat()}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHome();loadClosures(false);loadEvents(false)}});}
@@ -1416,9 +1418,12 @@ function redrawMapHeat(){
   map.removeLayer(heatLayer);heatLayer=heatCircles(map,sel);heatLayer.addTo(map);if(typeof layerGroups!=="undefined")layerGroups.heat=heatLayer;
   lastHeatKey=key;
 }
+function redrawHomeHeat(){
+  if(mapHome&&heatHome){mapHome.removeLayer(heatHome);heatHome=heatCircles(mapHome);heatHome.addTo(mapHome)}
+}
 function redrawHeats(){
   if(map&&heatLayer){map.removeLayer(heatLayer);heatLayer=heatCircles(map,heatSel());heatLayer.addTo(map);if(typeof layerGroups!=="undefined")layerGroups.heat=heatLayer}
-  if(mapHome&&heatHome){mapHome.removeLayer(heatHome);heatHome=heatCircles(mapHome);heatHome.addTo(mapHome)}
+  redrawHomeHeat();
 }
 function syncMapTimeUI(){
   const sl=$("mapTimeSlider");if(!sl)return;
@@ -1453,7 +1458,7 @@ function go(view,modId){
   $("view-"+view).classList.add("act");
   document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("on",b.getAttribute("data-nav")===view));
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
-  if(view==="home"){setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)} fitHome()},80);setTimeout(fitHome,450)}
+  if(view==="home"){setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11);redrawHomeHeat()} fitHome()},80);setTimeout(fitHome,450)}
   if(view==="airports"){loadLiveFlights(false);if(apMode()==="live"){loadApEta(false)}renderAirports()}
   if(view==="map"){resetMapTime()}
   if(view==="analytics")renderAnalytics();
@@ -1496,7 +1501,7 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.getAttribute("data-go"),b.getAttribute("data-mod")||undefined)));
 document.querySelectorAll("[data-grp]").forEach(b=>b.addEventListener("click",()=>{openGroup(b.getAttribute("data-grp"));const tb=b.getAttribute("data-ertab");if(tb)setTimeout(()=>setErTab(tb),60);const sb=b.getAttribute("data-sttab");if(sb)setTimeout(()=>setStTab(sb),60)}));
 const hm=$("homeMore");
-if(hm)hm.addEventListener("toggle",()=>{if(hm.open){if(!map)initMaps();if(mapHome)setTimeout(()=>{try{mapHome.invalidateSize();mapHome.setView([userLat(),userLon()],11)}catch(e){}},60)}});
+if(hm)hm.addEventListener("toggle",()=>{if(hm.open){if(!map)initMaps();if(mapHome)setTimeout(()=>{try{mapHome.invalidateSize();mapHome.setView([userLat(),userLon()],11)}catch(e){} redrawHomeHeat()},60)}});
 
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawApChart()}));
 document.querySelectorAll("#apModeChips .chip[data-apmode]").forEach(ch=>ch.addEventListener("click",()=>setApMode(ch.getAttribute("data-apmode"))));
