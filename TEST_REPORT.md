@@ -484,3 +484,11 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.39 (2026-11-09) — Xarita tugmalarida ON/OFF yozuvi
 - Foydalanuvchi soʻrovi: chap menyudagi barcha tugmalar tagida EZPass dagi kabi ON/OFF yozuvi boʻlsin. Qoʻshildi: Traffic, Restroom, Tesla, Location, Cruise, Airport va Theme (tungi xarita) tugmalariga .mc-state yozuvi — yoniqda yashil "ON", oʻchiqda kulrang "OFF"; mapToggle/updateTrafficUI/updateThemeUI holat bilan sinxron yangilaydi. Recenter — harakat tugmasi, yozuvsiz qoldi.
 - Tekshiruv: node --check OK. SW tlc-pro-v66, assetlar ?v=139.
+
+## v10.40 (2026-11-09) — Talab xaritasi: doiralardan Uber-uslubidagi heatmap ga
+- Foydalanuvchi soʻrovi (ovozli chatda tasdiqlangan): Map dagi qattiq chetli talab doiralari oʻrniga yumshoq, bir-biriga ulanadigan issiqlik maydoni — kam joyda och sariq, oʻrtada toʻq sariq, eng koʻp joyda qizil.
+- Amalga oshirish: Leaflet.heat 0.2.0 plugin (unpkg, SRI sha256-65UqrlgGoRAnKfKRuriH3eeDrOhZgZo1SCenduc+SGo=) — heatCircles() endi zoneScores() dagi D (tarixiy, TLC 2025-09, joriy soat) boʻyicha canvas heat qatlamini chizadi: radius 58, blur 38, max 100, gradient #ffffcc → #ffeda0 → #feb24c → #fd8d3c → #fc4e2a → #bd0026. Maʼlumot manbai va "tarixiy" belgisi OʻZGARMADI — live deb yozilmagan.
+- Popup saqlandi: heat ustida har zona uchun shaffof bosiladigan doira (fillOpacity 0) — bosilsa nomi, Talab (tarixiy) D/100, Ball va TLC pikap/soat chiqadi.
+- Fallback: plugin yuklanmasa (L.heatLayer yoʻq boʻlsa yoki xato bersa), eski rangli doiralar avtomatik ishlaydi — xarita buzilmaydi.
+- Ikkala xaritada (Map + Home) va refresh yoʻlida (heat qayta yaratiladi) ishlaydi — heatCircles chaqiruvchilari oʻzgarmadi.
+- Tekshiruv: node --check OK. SW tlc-pro-v67, assetlar ?v=140.

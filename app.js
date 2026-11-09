@@ -685,9 +685,20 @@ function applyBaseTheme(){const u=settings.darkmap?BASE_DARK:BASE_LIGHT;BASE_LAY
 function toggleTheme(){settings.darkmap=!settings.darkmap;saveSettings();applyBaseTheme();toast(settings.darkmap?"Tungi xarita yoqildi":"Kunduzgi xarita yoqildi")}
 function heatCircles(target){
   const g=L.layerGroup();const sc=zoneScores();
-  sc.forEach(s=>{const col=s.D==null?"#9ca3af":s.D>=75?"#ef4444":s.D>=50?"#f5b301":"#22c55e";
-    L.circle([s.z.lat,s.z.lon],{radius:500+(s.D||0)*14,color:col,weight:1,fillColor:col,fillOpacity:.32}).addTo(g)
-     .bindPopup("<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy): "+(s.D==null?"\u2014":s.D)+"/100<br>Ball: "+s.score+(s.raw!=null?" \u00b7 TLC: "+Math.round(s.raw)+" pikap/soat":""));});
+  const pop=s=>"<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy): "+(s.D==null?"\u2014":s.D)+"/100<br>Ball: "+s.score+(s.raw!=null?" \u00b7 TLC: "+Math.round(s.raw)+" pikap/soat":"");
+  let heatOk=false;
+  const pts=sc.filter(s=>s.D!=null&&s.D>0).map(s=>[s.z.lat,s.z.lon,s.D]);
+  if(pts.length&&typeof L.heatLayer==="function"){
+    try{L.heatLayer(pts,{minOpacity:.25,radius:58,blur:38,maxZoom:17,max:100,gradient:{0.1:"#ffffcc",0.3:"#ffeda0",0.5:"#feb24c",0.7:"#fd8d3c",0.85:"#fc4e2a",1:"#bd0026"}}).addTo(g);heatOk=true}catch(e){heatOk=false}
+  }
+  sc.forEach(s=>{
+    if(heatOk){
+      L.circle([s.z.lat,s.z.lon],{radius:500+(s.D||0)*14,stroke:false,fillColor:"#ffffff",fillOpacity:0}).addTo(g).bindPopup(pop(s));
+    }else{
+      const col=s.D==null?"#9ca3af":s.D>=75?"#ef4444":s.D>=50?"#f5b301":"#22c55e";
+      L.circle([s.z.lat,s.z.lon],{radius:500+(s.D||0)*14,color:col,weight:1,fillColor:col,fillOpacity:.32}).addTo(g).bindPopup(pop(s));
+    }
+  });
   return g;
 }
 function initMaps(){
