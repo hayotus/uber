@@ -450,3 +450,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - HISTORICAL: avvalgi xatti-harakat (TLC naqsh, H+P ball, 24s grafik) — renderAirportsHist.
 - Sinovdan oʻtmagan gʻoya: AirLabs /schedules — bepul kalitda faqat ~2 soat eskirgan landed oynasini beradi (lag 112 daq oʻlchandi), shuning uchun ishlatilmadi; kelajakdagi jadval sifatida yolgʻon boʻlardi.
 - Tekshiruv: node --check OK; jonli API parsing testi (JFK 87 reys/next60 32, LGA 59/33, EWR 54/27; TomTom JFK 56 daq, +6 daq tirbandlik). SW tlc-pro-v58, assetlar ?v=131.
+
+## v10.32 (2026-11-08) — Historical rejim tozaligi + zones qayta urinish
+- v10.31 jonli QA topilmasi: Historical rejimda kartalarda LIVE belgilari va jonli reyslar bloki qolib ketgan (aralash signallar), ballga ham jonli L aralashgan. Endi Historical mutlaqo tarixiy: airportScore(pureHist) L ni hisobga olmaydi (faqat H+P), kartalarda jonli blok va LIVE belgisi yoʻq, taqqoslashda "Pikap hozir" qatori, eng yaxshi kartada jonli sabab/maslahat yoʻq.
+- loadZones endi xatoda 5 soniyadan keyin bir marta oʻzi qayta urinadi (QA dagi boʻsh grafik GitHub Pages deploy tiqilishi paytidagi bir martalik holat edi — jonli zones.json 200/8810 bayt tekshirildi).
+- Tekshiruv: node --check OK. SW tlc-pro-v59, assetlar ?v=132.
