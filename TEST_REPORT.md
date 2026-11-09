@@ -455,3 +455,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - v10.31 jonli QA topilmasi: Historical rejimda kartalarda LIVE belgilari va jonli reyslar bloki qolib ketgan (aralash signallar), ballga ham jonli L aralashgan. Endi Historical mutlaqo tarixiy: airportScore(pureHist) L ni hisobga olmaydi (faqat H+P), kartalarda jonli blok va LIVE belgisi yoʻq, taqqoslashda "Pikap hozir" qatori, eng yaxshi kartada jonli sabab/maslahat yoʻq.
 - loadZones endi xatoda 5 soniyadan keyin bir marta oʻzi qayta urinadi (QA dagi boʻsh grafik GitHub Pages deploy tiqilishi paytidagi bir martalik holat edi — jonli zones.json 200/8810 bayt tekshirildi).
 - Tekshiruv: node --check OK. SW tlc-pro-v59, assetlar ?v=132.
+
+## v10.33 (2026-11-08) — Init tartibi: maʼlumot yuklagichlar xaritadan oldin
+- Topilma (v10.31/v10.32 jonli QA): bulut brauzerda zones.json HECH yuklanmadi, apiStat dagi boshqa manbalar ham "tekshirilmagan" qoldi — sabab: initMaps() init da loadZones/loadWeather/loadClosures/loadEvents DAN OLDIN chaqirilardi; Leaflet (unpkg) oʻsha muhitda kelmasa, initMaps dagi xato butun init zanjirini uzardi (telefonda Leaflet yuklanadi — muammo koʻrinmagan).
+- Tuzatish: barcha maʼlumot yuklagichlar va SW roʻyxati initMaps DAN OLDINGA koʻchirildi; initMaps try/catch ichida + 3 soniyadan keyin qayta urinish; initMaps ichida typeof L tekshiruvi.
+- Tekshiruv: node --check OK. SW tlc-pro-v60, assetlar ?v=133.
