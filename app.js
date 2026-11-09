@@ -425,9 +425,12 @@ function drawFlights(code){
   $("flightNote").textContent=code+": eng kuchli soatlar ≈ "+top3+" (TLC oʻrtacha). Hozirgi soat ("+String(h).padStart(2,"0")+":00, "+Math.round(arr[h])+" pikap/soat) kunning "+rank+"-oʻrnida. Sariq ustun — siz borib yetadigan soat (≈"+String(arrH).padStart(2,"0")+":00, "+Math.round(arr[arrH])+" pikap/soat).";
 }
 /* ================= Maʼlumot yuklagichlar (TLC / zona ob-havo / AirLabs) ================= */
+let zonesBusy=false;
 function loadZones(){
-  fetchT("zones.json",9000).then(r=>r.json()).then(j=>{ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
-  .catch(()=>{apiStat.zones="XATO — zones.json yuklanmadi (qayta urinish…)";renderApiStat();if(!loadZones._r){loadZones._r=1;setTimeout(loadZones,5000)}});
+  if(ZD||zonesBusy)return;
+  zonesBusy=true;apiStat.zones="yuklanmoqda…";renderApiStat();
+  fetchT("zones.json",9000).then(r=>r.json()).then(j=>{zonesBusy=false;ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
+  .catch(()=>{zonesBusy=false;apiStat.zones="XATO — zones.json yuklanmadi (qayta urinish…)";renderApiStat();if(!loadZones._r){loadZones._r=1;setTimeout(loadZones,5000)}});
 }
 function loadZoneWx(){
   const lats=ZONES.map(z=>z.lat).join(","),lons=ZONES.map(z=>z.lon).join(",");
@@ -1371,6 +1374,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHom
 
 /* ================= Navigation & Geo ================= */
 function go(view,modId){
+  loadZones();
   if(modId){openModule(modId);return}
   if($("modBody")&&$("modBody").querySelector("details.mod"))modClear();
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("act"));
@@ -1577,8 +1581,8 @@ tickClock();setInterval(tickClock,30000);
 renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
-renderJournal();renderHome();renderAirports();
 loadZones();loadZoneWx();
+renderJournal();renderHome();renderAirports();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
 loadEvents(true);setInterval(()=>loadEvents(false),600000);
