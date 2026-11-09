@@ -442,3 +442,11 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - **Tuzatish (fitHome v2):** (1) avval `compact` CSS tartibi — oraliqlar/paddinglar kichrayadi, yordamchi `.src` yozuvlar yashirinadi, masshtab o'zgarmaydi; (2) zoom faqat compact ham sig'dira olmasa va **0.85 dan past emas**; (3) o'lchovdan oldin majburiy reflow (`void offsetHeight`), refitlar: renderHome oxirida, `document.fonts.ready` da, Home ga qaytishda 80 + 450 ms; (4) fitHome endi Home faol bo'lmasa ishlamaydi, Batafsil ochiq/Drive da compact ham tozalanadi.
 - SW tlc-pro-v57, assetlar ?v=130. Lokal tekshiruvlar: node --check (app.js, sw.js) PASS; versiya izchilligi (v10.30 / ?v=130 / v57) PASS.
 - **Cheklov:** bulut brauzerida telefon viewport emulyatsiyasi (402x874) mavjud emas — desktop (1919x998) da v10.29 da ham kichrayish kuzatilmadi (need≈have), telefon o'lchami raqamli o'lchanmadi; mexanizm koddan tasdiqlangan, yakuniy tasdiq — foydalanuvchi telefoni.
+
+## v10.31 (2026-11-08) — Airports: Real time / Historical tanlovi
+- Foydalanuvchi soʻrovi: Airports dagi maʼlumotlar real rejimda boʻlsin + Real time va Historical ni tanlash mumkin boʻlsin.
+- Rejim tugmalari Airports tepasida: 🔴 Real time / 📊 Historical + 🔄 Yangilash; tanlov settings.apMode da saqlanadi (default: live). Holat satri (apUpd): rejim, manbalar, oxirgi yangilanish vaqti, avto-yangilanish ≈5 daq (ekran ochiq boʻlsa).
+- REAL TIME (yangi): (1) AirLabs reyslari endi server tomonda arr_iata boʻyicha filtrlanadi (har aeroportga alohida soʻrov — yengil), yangilanish 30 daq → 4 daq; hours6 — keyingi 6 soat qoʻnishlari jonli pozitsiyalardan. (2) TomTom jonli yoʻl vaqti har aeroportga (traffic=true): haqiqiy ETA + tirbandlik kechikishi, 8 daq throttle. (3) Ball butunlay jonli: L toʻlqin (60 daq) ×0.50 + F yaqin oqim (30 daq) ×0.25 + P jonli yoʻl ×0.25. (4) Grafik: keyingi 6 soat jonli qoʻnishlar.
+- HISTORICAL: avvalgi xatti-harakat (TLC naqsh, H+P ball, 24s grafik) — renderAirportsHist.
+- Sinovdan oʻtmagan gʻoya: AirLabs /schedules — bepul kalitda faqat ~2 soat eskirgan landed oynasini beradi (lag 112 daq oʻlchandi), shuning uchun ishlatilmadi; kelajakdagi jadval sifatida yolgʻon boʻlardi.
+- Tekshiruv: node --check OK; jonli API parsing testi (JFK 87 reys/next60 32, LGA 59/33, EWR 54/27; TomTom JFK 56 daq, +6 daq tirbandlik). SW tlc-pro-v58, assetlar ?v=131.
