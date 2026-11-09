@@ -430,7 +430,7 @@ function loadZones(){
   if(ZD||zonesBusy)return;
   zonesBusy=true;zonesTry++;apiStat.zones="yuklanmoqda…";renderApiStat();
   const u=zonesTry>1?("zones.json?nc="+Date.now()):"zones.json";
-  fetchT(u,9000).then(r=>r.json()).then(j=>{zonesBusy=false;ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
+  fetchT(u,9000).then(r=>r.json()).then(j=>{zonesBusy=false;ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports();if(typeof redrawHeats==="function")redrawHeats()})
   .catch(()=>{zonesBusy=false;apiStat.zones="XATO — zones.json yuklanmadi (qayta urinish…)";renderApiStat();setTimeout(loadZones,Math.min(60000,5000*zonesTry))});
 }
 function loadZoneWx(){
@@ -683,9 +683,27 @@ function tiles(){const t=L.tileLayer(settings.darkmap?BASE_DARK:BASE_LIGHT,{attr
 function updateThemeUI(){const b=$("btnTheme");if(b){b.classList.toggle("on",!!settings.darkmap);const tst=b.querySelector(".mc-state");if(tst)tst.textContent=settings.darkmap?"ON":"OFF"}}
 function applyBaseTheme(){const u=settings.darkmap?BASE_DARK:BASE_LIGHT;BASE_LAYERS.forEach(t=>{try{t.setUrl(u)}catch(e){}});updateThemeUI()}
 function toggleTheme(){settings.darkmap=!settings.darkmap;saveSettings();applyBaseTheme();toast(settings.darkmap?"Tungi xarita yoqildi":"Kunduzgi xarita yoqildi")}
-function heatCircles(target){
-  const g=L.layerGroup();const sc=zoneScores();
-  const pop=s=>"<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy): "+(s.D==null?"\u2014":s.D)+"/100<br>Ball: "+s.score+(s.raw!=null?" \u00b7 TLC: "+Math.round(s.raw)+" pikap/soat":"");
+const DAYLBL=["Mo","Tu","We","Th","Fr","Sa","Su"];
+let mapSelMin=null,mapSelDay=null,lastHeatKey="";
+function todayIdx(){return (nowNY().getDay()+6)%7}
+function dayRawAt(z,dayIdx,hour){const zd=zdata(z.n);if(!zd)return null;if(zd.days&&zd.days[dayIdx])return zd.days[dayIdx][hour];return ((dayIdx===5||dayIdx===6)?zd.we:zd.wd)[hour]}
+function heatScores(dayIdx,hour){
+  const base=zoneScoresAt(hour-nowNY().getHours());
+  const peakRef=ZD?ZD.meta.peakRef:0;const w=effW();
+  return base.map(s0=>{
+    const raw=dayRawAt(s0.z,dayIdx,hour);
+    if(raw==null||!peakRef)return s0;
+    const D=Math.min(100,raw/peakRef*100);
+    let acc=0,ws=0;[["D",D],["F",s0.F],["E",s0.E],["W",s0.W],["T",s0.T],["P",s0.P]].forEach(kv=>{if(kv[1]==null)return;acc+=w[kv[0]]*kv[1];ws+=w[kv[0]]});
+    return Object.assign({},s0,{raw:raw,D:Math.round(D),score:ws?Math.round(acc/ws):s0.score});
+  });
+}
+function heatCircles(target,sel){
+  const g=L.layerGroup();
+  const dayIdx=sel?sel.day:todayIdx();
+  const hour=sel?sel.hour:nowNY().getHours();
+  const sc=heatScores(dayIdx,hour);
+  const pop=s=>"<b>"+esc(s.z.n)+"</b><br>Talab (tarixiy \u00b7 "+DAYLBL[dayIdx]+" "+String(hour).padStart(2,"0")+":00): "+(s.D==null?"\u2014":s.D)+"/100<br>Ball: "+s.score+(s.raw!=null?" \u00b7 TLC: "+Math.round(s.raw)+" pikap/soat":"");
   let heatOk=false;
   const pts=sc.filter(s=>s.D!=null&&s.D>0).map(s=>[s.z.lat,s.z.lon,s.D]);
   if(pts.length&&typeof L.heatLayer==="function"){
@@ -1352,7 +1370,7 @@ function maybeNotify(){
 }
 function applyDrive(){document.body.classList.toggle("drive",!!settings.drive);const ds=$("driveState");if(ds)ds.textContent=settings.drive?"Yoniq":"Oʻchiq"}
 function refreshHeat(){try{
-  if(map&&heatLayer){map.removeLayer(heatLayer);heatLayer=heatCircles(map);heatLayer.addTo(map);if(typeof layerGroups!=="undefined")layerGroups.heat=heatLayer}
+  if(map&&heatLayer){map.removeLayer(heatLayer);heatLayer=heatCircles(map,heatSel());heatLayer.addTo(map);if(typeof layerGroups!=="undefined")layerGroups.heat=heatLayer}
   if(mapHome&&heatHome){mapHome.removeLayer(heatHome);heatHome=heatCircles(mapHome);heatHome.addTo(mapHome)}
 }catch(e){}}
 {const db=$("driveBtn");if(db)db.addEventListener("click",()=>{settings.drive=!settings.drive;saveSettings();applyDrive();toast(settings.drive?"🚗 Haydash rejimi yoniq":"Haydash rejimi oʻchiq")});
@@ -1386,6 +1404,47 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderHom
 {const md=$("modClose");if(md)md.addEventListener("toggle",()=>{if(md.open)loadClosures(false)});}
 
 /* ================= Navigation & Geo ================= */
+/* v10.41: Map vaqt slayderi + kun tanlash — faqat heat qatlami (kunlik tarixiy naqsh, zones.json days) */
+function heatSel(){
+  const mins=(mapSelMin==null)?(nowNY().getHours()*60+nowNY().getMinutes()):mapSelMin;
+  const day=(mapSelDay==null?todayIdx():mapSelDay);
+  return {day:(day+(mins>=1440?1:0))%7,hour:Math.floor(mins/60)%24};
+}
+function redrawMapHeat(){
+  if(!map||!heatLayer)return;
+  const sel=heatSel();const key=sel.day+"|"+sel.hour;
+  map.removeLayer(heatLayer);heatLayer=heatCircles(map,sel);heatLayer.addTo(map);if(typeof layerGroups!=="undefined")layerGroups.heat=heatLayer;
+  lastHeatKey=key;
+}
+function redrawHeats(){
+  if(map&&heatLayer){map.removeLayer(heatLayer);heatLayer=heatCircles(map,heatSel());heatLayer.addTo(map);if(typeof layerGroups!=="undefined")layerGroups.heat=heatLayer}
+  if(mapHome&&heatHome){mapHome.removeLayer(heatHome);heatHome=heatCircles(mapHome);heatHome.addTo(mapHome)}
+}
+function syncMapTimeUI(){
+  const sl=$("mapTimeSlider");if(!sl)return;
+  const n=nowNY();
+  const mins=(mapSelMin==null)?(n.getHours()*60+n.getMinutes()):mapSelMin;
+  sl.value=String(mins);
+  const val=$("mapTimeVal");if(val)val.textContent=String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
+  const sel=heatSel();
+  const nw=$("mapTimeNow");if(nw)nw.textContent=(mapSelMin==null&&mapSelDay==null)?" \u00b7 Hozir":"";
+  const db=$("mapDayBtn");if(db)db.textContent="\uD83D\uDCC5 "+DAYLBL[sel.day];
+  document.querySelectorAll("#mapDayRow .chip").forEach(c=>c.classList.toggle("on",+c.dataset.mday===sel.day));
+}
+function applyMapMinutes(v){
+  mapSelMin=parseInt(v,10)||0;
+  const sel=heatSel();const key=sel.day+"|"+sel.hour;
+  syncMapTimeUI();
+  if(key!==lastHeatKey)redrawMapHeat();
+}
+function applyMapDay(d){
+  mapSelDay=(+d===todayIdx())?null:+d;
+  syncMapTimeUI();redrawMapHeat();
+}
+function resetMapTime(){
+  mapSelMin=null;mapSelDay=null;
+  syncMapTimeUI();redrawMapHeat();
+}
 function go(view,modId){
   loadZones();
   if(modId){openModule(modId);return}
@@ -1396,6 +1455,7 @@ function go(view,modId){
   if(view==="map"){initMaps();setTimeout(()=>{map.invalidateSize();map.setView([userLat(),userLon()],12)},80)}
   if(view==="home"){setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){} mapHome.setView([userLat(),userLon()],11)} fitHome()},80);setTimeout(fitHome,450)}
   if(view==="airports"){loadLiveFlights(false);if(apMode()==="live"){loadApEta(false)}renderAirports()}
+  if(view==="map"){resetMapTime()}
   if(view==="analytics")renderAnalytics();
   if(view==="settings")renderApiStat();
 
@@ -1441,6 +1501,9 @@ if(hm)hm.addEventListener("toggle",()=>{if(hm.open){if(!map)initMaps();if(mapHom
 document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("click",()=>{document.querySelectorAll("#apTabs .chip").forEach(x=>x.classList.remove("on"));ch.classList.add("on");curAp=ch.getAttribute("data-ap");drawApChart()}));
 document.querySelectorAll("#apModeChips .chip[data-apmode]").forEach(ch=>ch.addEventListener("click",()=>setApMode(ch.getAttribute("data-apmode"))));
 {const rb=$("apRefresh");if(rb)rb.addEventListener("click",()=>{if(apMode()==="live"){loadLiveFlights(true);loadApEta(true);toast("Jonli maʼlumot yangilanmoqda…")}else{renderAirports();toast("Historical — TLC tarixiy naqsh (jonli emas)")}})}
+{const mts=$("mapTimeSlider");if(mts)mts.addEventListener("input",e=>applyMapMinutes(e.target.value));}
+{const db=$("mapDayBtn");if(db)db.addEventListener("click",()=>{const r=$("mapDayRow");if(r)r.style.display=(r.style.display==="none"||!r.style.display)?"flex":"none"});}
+document.querySelectorAll("#mapDayRow .chip").forEach(c=>c.addEventListener("click",()=>applyMapDay(c.dataset.mday)));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
 function recordRecFor(s){if(!s)return false;recs.unshift({t:new Date().toISOString(),zone:s.z.n,score:s.score,conf:s.conf||null,c:{D:s.D,F:s.F,E:s.E,W:s.W,T:s.T,P:s.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs));idbMirror()}catch(e){}renderCal();return true}
 function recordRec(){return recordRecFor(bestPick)}
@@ -1595,7 +1658,7 @@ renderEventsClosures();renderParking();renderCams();
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 loadZones();loadZoneWx();
-renderJournal();renderHome();renderAirports();
+renderJournal();renderHome();renderAirports();syncMapTimeUI();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
 loadEvents(true);setInterval(()=>loadEvents(false),600000);
