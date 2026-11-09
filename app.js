@@ -425,12 +425,13 @@ function drawFlights(code){
   $("flightNote").textContent=code+": eng kuchli soatlar ≈ "+top3+" (TLC oʻrtacha). Hozirgi soat ("+String(h).padStart(2,"0")+":00, "+Math.round(arr[h])+" pikap/soat) kunning "+rank+"-oʻrnida. Sariq ustun — siz borib yetadigan soat (≈"+String(arrH).padStart(2,"0")+":00, "+Math.round(arr[arrH])+" pikap/soat).";
 }
 /* ================= Maʼlumot yuklagichlar (TLC / zona ob-havo / AirLabs) ================= */
-let zonesBusy=false;
+let zonesBusy=false,zonesTry=0;
 function loadZones(){
   if(ZD||zonesBusy)return;
-  zonesBusy=true;apiStat.zones="yuklanmoqda…";renderApiStat();
-  fetchT("zones.json",9000).then(r=>r.json()).then(j=>{zonesBusy=false;ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
-  .catch(()=>{zonesBusy=false;apiStat.zones="XATO — zones.json yuklanmadi (qayta urinish…)";renderApiStat();if(!loadZones._r){loadZones._r=1;setTimeout(loadZones,5000)}});
+  zonesBusy=true;zonesTry++;apiStat.zones="yuklanmoqda…";renderApiStat();
+  const u=zonesTry>1?("zones.json?nc="+Date.now()):"zones.json";
+  fetchT(u,9000).then(r=>r.json()).then(j=>{zonesBusy=false;ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
+  .catch(()=>{zonesBusy=false;apiStat.zones="XATO — zones.json yuklanmadi (qayta urinish…)";renderApiStat();setTimeout(loadZones,Math.min(60000,5000*zonesTry))});
 }
 function loadZoneWx(){
   const lats=ZONES.map(z=>z.lat).join(","),lons=ZONES.map(z=>z.lon).join(",");
