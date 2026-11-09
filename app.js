@@ -319,7 +319,7 @@ function renderSmart(sc){
 /* ================= Airports (Modul 2 + 16) ================= */
 /* ================= Airports (Modul 2 + 16) — LIVE AirLabs + TLC tarixiy ================= */
 let curAp="JFK";
-function airportScore(ap,zrMap){
+function airportScore(ap,zrMap,pureHist){
   const zn=apZoneName(ap.code);
   const dist=hav(userLat(),userLon(),ap.lat,ap.lon);
   const etaMin=Math.max(2,Math.round(dist*3.2));
@@ -331,7 +331,7 @@ function airportScore(ap,zrMap){
   const H=(rawArr!=null&&peakRef)?Math.min(100,rawArr/peakRef*100):null;
   const a=adsb[ap.code];
   let L=null;
-  if(a&&rawNow){const r=a.next60/Math.max(1,rawNow);L=Math.max(5,Math.min(98,Math.round(20+60*r)))}
+  if(a&&rawNow&&!pureHist){const r=a.next60/Math.max(1,rawNow);L=Math.max(5,Math.min(98,Math.round(20+60*r)))}
   let P=Math.max(5,100-dist*7);if(settings.zone&&settings.zone===zn)P=Math.min(100,P+6);
   let acc=0,wsum=0;
   [["L",L,0.45],["H",H,0.35],["P",P,0.20]].forEach(kv=>{if(kv[1]==null)return;acc+=kv[2]*kv[1];wsum+=kv[2]});
@@ -343,38 +343,29 @@ function renderAirports(){syncApModeUI();if(apMode()==="live")renderAirportsLive
 function renderAirportsHist(){
   const h=nowNY().getHours();
   const zrMap=zoneRates();
-  const scs=AIRPORTS.map(ap=>airportScore(ap,zrMap)).sort((a,b)=>b.score-a.score);
+  const scs=AIRPORTS.map(ap=>airportScore(ap,zrMap,true)).sort((a,b)=>b.score-a.score);
   const best=scs[0];
   const bEl=$("apBest");
   if(bEl&&best){
     const a=adsb[best.ap.code];
     const rs=[];
-    if(a)rs.push("Jonli: "+a.total+" reys kelmoqda, keyingi 60 daqiqada ≈"+a.next60+" qoʻnish (toʻlqin)");
     if(best.rawArr!=null)rs.push("Borib yetganingizda tarixiy oqim ≈"+Math.round(best.rawArr)+" pikap/soat");
     rs.push("Borish: "+distTxt(best.dist)+" · ≈"+best.etaMin+" daq");
     if(best.zr)rs.push("Jurnalingiz: "+money(best.zr.v)+"/soat ("+best.zr.n+" smena)");
     let advice="";
-    if(a&&a.wave){
-      let pk=0;a.wave.forEach((v,i)=>{if(v>a.wave[pk])pk=i});
-      const curb=pk*10+5+20;
-      if(Math.abs(best.etaMin-curb)<=10)advice="⏰ Hozir chiqish ayni muddao — yoʻlovchi toʻlqini siz yetgan paytga kuchayadi.";
-      else if(best.etaMin<curb-10)advice="⏰ Erta yetasiz — toʻlqinga ≈"+(curb-best.etaMin)+" daq kutish mumkin.";
-      else advice="⏰ Bu toʻlqin oʻtib ketishi mumkin — keyingi oynani kuzating.";
-    }
     bEl.innerHTML='<div class="card apbest"><h3>🏆 Hozir eng foydali: '+best.ap.code+' — '+esc(best.ap.name)+'</h3>'+
     '<div class="big mono">'+best.score+' <span style="font-size:14px;color:var(--mut)">/100 aeroport balli (ESTIMATED)</span></div>'+
     '<div class="small">• '+rs.map(esc).join("<br>• ")+'</div>'+
     (advice?'<div class="small" style="margin-top:4px">'+esc(advice)+'</div>':"")+
     '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+best.ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+best.ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
-    '<div class="src">Ball: L jonli toʻlqin ×0.45 + H tarixiy oqim (borish vaqtiga) ×0.35 + P masofa ×0.20. Jonli boʻlmasa — H+P dan qayta meʼyorlanadi.</div></div>';
+    '<div class="src">Ball: H tarixiy oqim (borish vaqtiga) ×0.35 + P masofa ×0.20 — faqat tarixiy naqshdan, jonli maʼlumotsiz.</div></div>';
   }
   const cEl=$("apCompare");
   if(cEl){
     const row=(lbl,fn)=>"<tr><td>"+lbl+"</td>"+scs.map(x=>"<td>"+fn(x)+"</td>").join("")+"</tr>";
     cEl.innerHTML='<div class="card"><h3>Taqqoslash — 3 aeroport</h3><table><tr><th></th>'+scs.map(x=>"<th>"+x.ap.code+"</th>").join("")+"</tr>"+
     row("Ball",x=>"<b>"+x.score+"</b>")+
-    row("Jonli kelmoqda",x=>adsb[x.ap.code]?adsb[x.ap.code].total:"—")+
-    row("Toʻlqin 60 daq",x=>adsb[x.ap.code]?"≈"+adsb[x.ap.code].next60:"—")+
+    row("Pikap hozir",x=>x.rawNow!=null?Math.round(x.rawNow)+" pikap/s":"—")+
     row("Oqim (borishda)",x=>x.rawArr!=null?Math.round(x.rawArr)+" pikap/s":"—")+
     row("Real $/soat",x=>x.zr?money(x.zr.v):"—")+
     row("Masofa",x=>distTxt(x.dist)+" · ≈"+x.etaMin+" daq")+
@@ -397,9 +388,9 @@ function renderAirportsHist(){
     }
     const rp=zoneWx[s.zn];
     return '<div class="card'+(idx===0?" apbest":"")+'"><h3>✈️ '+ap.code+" — "+esc(ap.name)+' <span class="mono" style="float:right">'+s.score+'/100</span></h3>'+
-    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">LIVE</span> AirLabs · <span class="badge b-hist">HISTORICAL</span> TLC · <span class="badge b-est">ESTIMATED</span> ball</div>'+liveHtml+
+    '<div class="small" style="margin-bottom:4px"><span class="badge b-hist">HISTORICAL</span> TLC · <span class="badge b-est">ESTIMATED</span> ball</div>'+
     '<div class="stat3" style="margin-top:8px"><div class="cell"><b class="mono">'+(s.rawNow!=null?Math.round(s.rawNow):"—")+'</b><span>pikap/soat hozir (TLC)</span></div><div class="cell"><b class="mono">'+(s.rawArr!=null?Math.round(s.rawArr):"—")+'</b><span>borib yetganda</span></div><div class="cell"><b class="mono">'+(peak!=null?Math.round(peak):"—")+'</b><span>kun piki</span></div></div>'+
-    '<div class="hchips"><span>📍 '+distTxt(s.dist)+' · ≈'+s.etaMin+' daq</span><span>💵 '+(s.zr?money(s.zr.v)+"/soat · "+s.zr.n+" smena":"maʼlumot yoʻq")+'</span>'+(rp!=null?'<span>🌧 '+Math.round(rp)+'%</span>':"")+'<span>L '+(s.L==null?"—":s.L)+' · H '+(s.H==null?"—":s.H)+' · P '+s.P+'</span></div>'+
+    '<div class="hchips"><span>📍 '+distTxt(s.dist)+' · ≈'+s.etaMin+' daq</span><span>💵 '+(s.zr?money(s.zr.v)+"/soat · "+s.zr.n+" smena":"maʼlumot yoʻq")+'</span>'+(rp!=null?'<span>🌧 '+Math.round(rp)+'%</span>':"")+'<span>H '+(s.H==null?"—":s.H)+' · P '+s.P+'</span></div>'+
     '<div class="small">'+esc(ap.term)+'</div>'+
     '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
     '<div class="src">Uber ichki navbati ochiq emas — uydirilmaydi. Qoʻnish vaqtlari masofa/tezlikdan taxminiy.</div></div>';
@@ -436,7 +427,7 @@ function drawFlights(code){
 /* ================= Maʼlumot yuklagichlar (TLC / zona ob-havo / AirLabs) ================= */
 function loadZones(){
   fetchT("zones.json",9000).then(r=>r.json()).then(j=>{ZD=j;apiStat.zones="OK · TLC HVFHS 2025-09 ("+j.zones.length+" zona)";renderApiStat();renderHome();renderAirports()})
-  .catch(()=>{apiStat.zones="XATO — zones.json yuklanmadi (talab: maʼlumot yoʻq)";renderApiStat()});
+  .catch(()=>{apiStat.zones="XATO — zones.json yuklanmadi (qayta urinish…)";renderApiStat();if(!loadZones._r){loadZones._r=1;setTimeout(loadZones,5000)}});
 }
 function loadZoneWx(){
   const lats=ZONES.map(z=>z.lat).join(","),lons=ZONES.map(z=>z.lon).join(",");
