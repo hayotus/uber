@@ -529,3 +529,6 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.47 (2026-11-09) — Vaqt paneli tartibi: vaqt tepada, bir qatorda uzun slayder + kun tugmasi
 - Foydalanuvchi aniqlashtirdi: vaqt slayderning TEPASIDA koʻrinsin; pastda bitta qatorda — uzun (toʻliq eniga) slayder va hafta kunlari tugmasi.
 - Amalga oshirish: #mapTimeBar ikki qatorli boʻldi — .mtb-top (🕐 HH:MM · Hozir) va .mtb-row (slayder flex:1 toʻliq eniga + 📅 tugma). "Tarixiy/TLC" yozuvlari v10.46 da olib tashlangan holicha qoldi. SW tlc-pro-v74, assetlar ?v=147.
+
+## v10.48 (2026-11-09) — Sayt Map bilan ochiladi
+- Foydalanuvchi soʻrovi: asosiy/birinchi boʻlib Map ochilsin. Amalga oshirish: standart koʻrinish oʻzgardi — #view-map ga "act", pastki navigatsiyada Map tugmasiga "on" (Home dan olindi). Home va boshqalar avvalgidek tugmalar orqali ochiladi. SW tlc-pro-v75, assetlar ?v=148.
