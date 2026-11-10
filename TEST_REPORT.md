@@ -520,3 +520,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 
 ## v10.45 (2026-11-09) — HotelTochka kartochkasida hotel soni koʻrinadigan boʻldi
 - v10.44 QA kichik nuqson topdi: panel kartochkasida "N ta hotel" yozuvi koʻcha matni ellipsis i bilan kesilib, kartochka yuzida koʻrinmasdi (son faqat markerlarda edi). Tuzatish: sub tartibi oʻzgardi — avval "N ta hotel · ", keyin koʻcha oraligʻi. SW tlc-pro-v72, assetlar ?v=145.
+
+## v10.46 (2026-11-09) — Map da "tarixiy/TLC" yozuvlari yoʻq, slayder uzun
+- Foydalanuvchi soʻrovi: Map da "tarixiy talab"/"TLC" yozuvlari boʻlmasin; oʻrniga slayder yonida hafta kunlari tugmasi boʻlsin; slayder uzun boʻlsin.
+- Olib tashlandi: vaqt panelidagi "Tarixiy talab (TLC 2025-09)" yozuvi; zona popupidan "tarixiy" va "TLC:" soʻzlari (endi: "Talab · Mo 18:00: 33/100", "· 406 pikap/soat"); 🕐 tugma title "Vaqt". Boshqa boʻlimlar (Home/Airports/Settings) dagi yozuvlarga tegilmadi — soʻrov faqat Map haqida edi.
+- Tartib: panel endi bitta qatorda — vaqt yozuvi, UZUN slayder (flex:1, min 150px, wrap yoʻq), yonida 📅 kun tugmasi. SW tlc-pro-v73, assetlar ?v=146.
