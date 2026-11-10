@@ -537,3 +537,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Foydalanuvchi qarori: hayotus.github.io root TLC Pro ga yoʻnaltirsin; TLC Radar faqat TLC Pro pastki menyusidagi tugma orqali ochilsin.
 - Amalga oshirish (hayotus.github.io repo): Radar ilovasi toʻliq /radar/ papkasiga koʻchirildi (manifest scope/start_url va SW CORE nisbiy "./" ga moslandi); root index.html + 404.html — /uber/ ga redirect (meta refresh + JS). Eski root fayllar oʻchirildi.
 - TLC Pro tomonda: pastki menyu "📡 TLC Radar" havolasi endi https://hayotus.github.io/radar/. SW tlc-pro-v76, assetlar ?v=149.
+
+## v10.50 (2026-11-09) — Birinchi ochilishda qora xarita tuzatildi
+- Muammo (foydalanuvchi telefoni, skrinshot): v10.48 dan keyin sayt Map bilan ochiladi, lekin birinchi ochilishda xarita maydoni qora, boshqaruv tugmalari ham yoʻq — Leaflet (unpkg CDN) sekin kelganda initMaps ishlamay qoladi (guard: L undefined → return), startup da esa asosiy xaritaga invalidateSize hech qayerda chaqirilmasdi (faqat go("map") da bor edi).
+- Tuzatish: startup self-heal halqasi (800 ms × 20): L kelishi bilan initMaps qayta uriniladi; xarita yaratilgan boʻlsa invalidateSize chaqiriladi va oʻlcham 0 dan katta boʻlgach halqa toʻxtaydi; L ~5 soniyada kelmasa jsDelivr dan zaxira Leaflet ulanadi. SW tlc-pro-v77, assetlar ?v=150.
