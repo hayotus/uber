@@ -532,3 +532,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 
 ## v10.48 (2026-11-09) — Sayt Map bilan ochiladi
 - Foydalanuvchi soʻrovi: asosiy/birinchi boʻlib Map ochilsin. Amalga oshirish: standart koʻrinish oʻzgardi — #view-map ga "act", pastki navigatsiyada Map tugmasiga "on" (Home dan olindi). Home va boshqalar avvalgidek tugmalar orqali ochiladi. SW tlc-pro-v75, assetlar ?v=148.
+
+## v10.49 (2026-11-09) — Radar /radar/ ga koʻchdi, root TLC Pro ga yoʻnaltiradi
+- Foydalanuvchi qarori: hayotus.github.io root TLC Pro ga yoʻnaltirsin; TLC Radar faqat TLC Pro pastki menyusidagi tugma orqali ochilsin.
+- Amalga oshirish (hayotus.github.io repo): Radar ilovasi toʻliq /radar/ papkasiga koʻchirildi (manifest scope/start_url va SW CORE nisbiy "./" ga moslandi); root index.html + 404.html — /uber/ ga redirect (meta refresh + JS). Eski root fayllar oʻchirildi.
+- TLC Pro tomonda: pastki menyu "📡 TLC Radar" havolasi endi https://hayotus.github.io/radar/. SW tlc-pro-v76, assetlar ?v=149.
