@@ -1,9 +1,5 @@
 "use strict";
-/* v10.52 DIAGNOSTIKA (vaqtinchalik): ishga tushish jurnali ekranda — tuzatish chiqqach olib tashlanadi */
-window.__bootT0=Date.now();window.__boot=[];
-function blog(m){try{const t=((Date.now()-window.__bootT0)/1000).toFixed(1);window.__boot.push(t+"s "+m);let d=document.getElementById("bootLog");if(!d){d=document.createElement("div");d.id="bootLog";d.style.cssText="position:fixed;top:calc(4px + env(safe-area-inset-top));left:4px;z-index:99999;background:rgba(0,0,0,.85);color:#7CFC9A;font:9px/1.5 monospace;padding:4px 6px;border-radius:6px;pointer-events:none;max-width:94vw;white-space:pre-wrap";(document.body||document.documentElement).appendChild(d)}d.textContent=window.__boot.slice(-14).join("\n")}catch(e){}}
-window.addEventListener("error",e=>{blog("ERR: "+(e.message||e.type))});
-blog("modul start, L="+(typeof L));
+
 /* ================= Helpers ================= */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -738,7 +734,7 @@ function heatCircles(target,sel){
 }
 function initMaps(){
   if(map||typeof L==="undefined")return;
-  map=L.map("map").setView([userLat(),userLon()],13);tiles().addTo(map);blog("map+tiles OK, #map="+$("map").clientWidth+"x"+$("map").clientHeight);
+  map=L.map("map").setView([userLat(),userLon()],13);tiles().addTo(map);
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
   layerGroups.loc=L.layerGroup();layerGroups.cruise=L.layerGroup();layerGroups.air=L.layerGroup();
@@ -757,7 +753,7 @@ function initMaps(){
     L.DomEvent.disableClickPropagation(d);
     return d;
   };
-  mc.addTo(map);blog("ctl OK");
+  mc.addTo(map);
   $("btnMtime").addEventListener("click",e=>{e.preventDefault();toggleMtime()});
   $("btnTraffic").addEventListener("click",e=>{e.preventDefault();toggleTraffic()});
   $("btnEzpass").addEventListener("click",e=>{e.preventDefault();toggleEzpass()});
@@ -766,7 +762,7 @@ function initMaps(){
   document.querySelectorAll(".mc-layer").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();mapToggle(b.getAttribute("data-layer"),b)}));
   updateTrafficUI();updateEzpassUI();updateThemeUI();updateMtimeUI();
   userMk=L.marker([userLat(),userLon()]).addTo(map).bindPopup("Siz");
-  mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);blog("mapHome OK");
+  mapHome=L.map("mapHome",{scrollWheelZoom:false}).setView([userLat(),userLon()],11);tiles().addTo(mapHome);
   heatHome=heatCircles(mapHome);heatHome.addTo(mapHome);
   userMkH=L.marker([userLat(),userLon()]).addTo(mapHome).bindPopup("Siz");
 }
@@ -1144,6 +1140,7 @@ function clPts(){return clFiltered().filter(c=>c.lat!=null&&hav(userLat(),userLo
 /* ===== Umumiy xarita: Events & Road (v10.0) ===== */
 let erMap=null,erEvLayer=null,erRdLayer=null,erShowEv=true,erShowRd=true,erTab="ev",erMe=null;
 function erEvPts(){return EVENTS.filter(e=>e.lat!=null&&evState(e)!=="past").slice(0,80)}
+function updateErNote(){const el=$("erNote");if(!el)return;const ev=erShowEv?erEvPts().length:0;const rd=erShowRd?clPts().length:0;el.textContent="Xaritada: "+ev+" ta tadbir · "+rd+" ta yoʻl yopilishi"}
 function drawErLayers(){
   if(!erMap)return;
   if(erEvLayer){erEvLayer.clearLayers();if(erShowEv)erEvPts().forEach(e=>{L.marker([e.lat,e.lon]).addTo(erEvLayer).bindPopup(evPopup(e))})}
@@ -1467,7 +1464,6 @@ function resetMapTime(){
   syncMapTimeUI();redrawMapHeat();
 }
 function go(view,modId){
-  blog("go("+view+")");
   loadZones();
   if(modId){openModule(modId);return}
   if($("modBody")&&$("modBody").querySelector("details.mod"))modClear();
@@ -1676,24 +1672,23 @@ $("jDate").value=dayStr(nowNY());
 const jh=$("jHour");if(jh)jh.innerHTML='<option value="">—</option>'+Array.from({length:24},(_,i)=>'<option value="'+i+'">'+String(i).padStart(2,"0")+":00</option>").join("");}
 applyTheme();fillSettings();setOnline();
 tickClock();setInterval(tickClock,30000);
-renderEventsClosures();renderParking();renderCams();
+try{renderEventsClosures()}catch(e){}try{renderParking()}catch(e){}try{renderCams()}catch(e){}
 $("wcList").innerHTML=listHTML(distSort(WC_FB),"🚻");
 $("evList").innerHTML=listHTML(distSort(EV_FB),"⚡");
 loadZones();loadZoneWx();
-renderJournal();renderHome();renderAirports();syncMapTimeUI();updateMtimeUI();
+try{renderJournal()}catch(e){}try{renderHome()}catch(e){}try{renderAirports()}catch(e){}syncMapTimeUI();updateMtimeUI();
 loadWeather();armWx();
 loadClosures(true);setInterval(()=>loadClosures(false),300000);
 loadEvents(true);setInterval(()=>loadEvents(false),600000);
 setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(()=>{if(apViewOpen()&&apMode()==="live"){loadLiveFlights(false);loadApEta(false)}},60000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
-try{initMaps();blog("initMaps#1 map="+!!map)}catch(e){blog("initMaps#1 ERR: "+e.message)}setTimeout(()=>{try{initMaps();blog("initMaps#2 map="+!!map)}catch(e){blog("initMaps#2 ERR: "+e.message)}},3000);
-/* v10.51: Map-first startup self-heal (v10.50 faqat invalidateSize edi — yetarli bo\u2019lmadi, QA da qora ekran qaytdi; endi go("map") retsepti: invalidateSize + setView zoom 12, plitkalar chiqquncha takrorlanadi) — Leaflet CDN sekin/uzilsa ham xarita tiklanadi: L kelsa initMaps qayta chaqiriladi, xarita 0 o'lchamda yaratilgan bo'lsa invalidateSize bilan plitkalar yuklanadi; L 5 soniyada kelmasa jsDelivr zaxira nusxasi ulanadi. */
+try{initMaps()}catch(e){}setTimeout(()=>{try{initMaps()}catch(e){}},3000);
+/* Map-first startup self-heal: Leaflet kechiksa initMaps qayta uriniladi, plitkalar chiqquncha invalidateSize+setView takrorlanadi, L kelmasa jsDelivr zaxira nusxasi ulanadi. */
 let _mapFixTries=0;const _mapFix=setInterval(()=>{_mapFixTries++;
-  if(_mapFixTries===1||_mapFixTries===6||_mapFixTries===12||_mapFixTries===20)blog("tick"+_mapFixTries+" L="+(typeof L)+" map="+!!map+" tiles="+document.querySelectorAll("#map .leaflet-tile").length+"/"+document.querySelectorAll("#map .leaflet-tile-loaded").length+" sz="+($("map")?$("map").clientWidth+"x"+$("map").clientHeight:"?"));
-  const _tilesUp=()=>document.querySelectorAll("#map .leaflet-tile-loaded").length>0;
+    const _tilesUp=()=>document.querySelectorAll("#map .leaflet-tile-loaded").length>0;
   if(typeof L!=="undefined"){
     if(!map){try{initMaps()}catch(e){}}
-    if(map){if(!_tilesUp()){try{map.invalidateSize();map.setView([userLat(),userLon()],12)}catch(e){}}else{blog("TILES OK");clearInterval(_mapFix)}}
+    if(map){if(!_tilesUp()){try{map.invalidateSize();map.setView([userLat(),userLon()],12)}catch(e){}}else clearInterval(_mapFix)}
   }
   else if(_mapFixTries===6&&!window._leafletFb){window._leafletFb=1;const _sc=document.createElement("script");_sc.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js";document.head.appendChild(_sc)}
   if(_mapFixTries>=20)clearInterval(_mapFix)},800);
