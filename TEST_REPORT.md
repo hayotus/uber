@@ -545,3 +545,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.51 (2026-11-09) — Qora xarita: go("map") retsepti startup ga
 - v10.50 QA FAIL: birinchi ochilishda xarita 16+ soniya qora qoldi (faqat invalidateSize yetarli emas ekan). Home → Map har safar darhol ishlaydi — farq: go("map") invalidateSize + setView(zoom 12) qiladi (zoom 13→12 oʻzgarishi Leaflet ni plitkalarni qayta soʻrashga majbur qiladi).
 - v10.51: self-heal halqasi endi aynan shu retseptni qoʻllaydi — plitkalar (.leaflet-tile-loaded) paydo boʻlguncha har 800 ms invalidateSize + setView(12); plitka chiqsa halqa toʻxtaydi. jsDelivr zaxira Leaflet saqlandi. SW tlc-pro-v78, assetlar ?v=151.
+
+## v10.52 (2026-11-09) — DIAGNOSTIKA: ekrandagi boot-log
+- v10.50/v10.51 self-heal jonli QA da ishlamadi; brauzer muhitida DevTools ochib boʻlmadi. Shuning uchun vaqtinchalik diagnostika: app.js ishga tushish bosqichlarini (modul start, L holati, initMaps xatolari endi yutilmaydi, #map oʻlchami, plitkalar soni, go() chaqiruvlari, window.onerror) ekranning yuqori chap burchagida yashil boot-log sifatida koʻrsatadi.
+- Maqsad: qora xarita sababini aniq raqamlar bilan topish; tuzatish relizida boot-log olib tashlanadi. SW tlc-pro-v79, assetlar ?v=152.
