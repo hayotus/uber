@@ -533,12 +533,19 @@ function loadApEta(force){
   if(!force&&now-etaTs<480000)return;
   etaTs=now;
   AIRPORTS.forEach(ap=>{
-    const url="https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+ap.lat+","+ap.lon+"/json?key="+TT_KEY+"&traffic=true&travelMode=car"+(settings.ezpass?"":"&avoid=tollRoads");
-    fetchT(url,12000).then(r=>r.json()).then(j=>{
-      const sm=j&&j.routes&&j.routes[0]&&j.routes[0].summary;if(!sm)return;
-      apEta[ap.code]={ts:now,min:Math.max(2,Math.round(sm.travelTimeInSeconds/60)),delayMin:Math.round((sm.trafficDelayInSeconds||0)/60),km:Math.round(sm.lengthInMeters/100)/10};
-      if(apViewOpen()&&apMode()==="live")renderAirports();
-    }).catch(()=>{});
+    const ttFallback=()=>{
+      const url="https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+ap.lat+","+ap.lon+"/json?key="+TT_KEY+"&traffic=true&travelMode=car"+(settings.ezpass?"":"&avoid=tollRoads");
+      fetchT(url,12000).then(r=>r.json()).then(j=>{
+        const sm=j&&j.routes&&j.routes[0]&&j.routes[0].summary;if(!sm)return;
+        apEta[ap.code]={ts:now,min:Math.max(2,Math.round(sm.travelTimeInSeconds/60)),delayMin:Math.round((sm.trafficDelayInSeconds||0)/60),km:Math.round(sm.lengthInMeters/100)/10};
+        if(apViewOpen()&&apMode()==="live")renderAirports();
+      }).catch(()=>{});
+    };
+    /* v10.54: avval Google (duration_in_traffic) — Radar bilan bir xil raqamlar */
+    gRoute(ap).then(g=>{
+      if(g){apEta[ap.code]={ts:now,min:g.mins,delayMin:g.delayMin||0,km:Math.round(g.dist*16.0934)/10,src:"google"};if(apViewOpen()&&apMode()==="live")renderAirports()}
+      else ttFallback();
+    }).catch(()=>ttFallback());
   });
 }
 function airportScoreLive(ap,zrMap){
@@ -813,8 +820,59 @@ function routeKey(layer,x){return layer+"@"+x.lat.toFixed(4)+","+x.lon.toFixed(4
 
 let trafficLayer=null,routeDegraded=false,tileDegraded=false,routeEpoch=0,lastWcRoutePos=null;
 const kickSeq={},kickBusy={};
-function ttRoute(x){
-  const url="https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+x.lat+","+x.lon+"/json?key="+TT_KEY+"&traffic="+settings.traffic+"&routeRepresentation=polyline&travelMode=car"+(settings.ezpass?"":"&avoid=tollRoads");
+/* v10.54: Aeroport ETA — Google (TLC Radar dagi usul, pullik kalit): DirectionsService, duration_in_traffic.
+   Boshqa qatlamlar TomTom da qoladi (kvota tejash, Radar dagi kabi). Google ishlamasa — TomTom zaxira. */
+const GOOGLE_KEY="AIzaSyAllWCzmo5-jCq13g1AhvbQ0EafwblrXjg";
+let _gmapsPromise=null,_googleDisabled=false;
+function gUsage(){try{return JSON.parse(localStorage.getItem("drv_gusage")||"{}")}catch(e){return{}}}
+function gLeft(){const u=gUsage();return u.day===new Date().toDateString()?Math.max(0,300-(u.count||0)):300}
+function gCount(){try{const u=gUsage();const d=new Date().toDateString();if(u.day!==d){u.day=d;u.count=0}u.count=(u.count||0)+1;localStorage.setItem("drv_gusage",JSON.stringify(u))}catch(e){}}
+function loadGoogleMaps(){
+  if(window.google&&window.google.maps&&window.google.maps.DirectionsService)return Promise.resolve(true);
+  if(_gmapsPromise)return _gmapsPromise;
+  _gmapsPromise=new Promise(res=>{
+    const cb="__gmapsReady"+Date.now();let done=false;
+    const finish=ok=>{if(done)return;done=true;try{delete window[cb]}catch(e){}if(!ok)_gmapsPromise=null;res(ok)};
+    window[cb]=()=>finish(!!(window.google&&window.google.maps));
+    const sc=document.createElement("script");sc.src="https://maps.googleapis.com/maps/api/js?key="+GOOGLE_KEY+"&v=weekly&callback="+cb;sc.async=true;sc.defer=true;sc.onerror=()=>finish(false);
+    setTimeout(()=>finish(!!(window.google&&window.google.maps)),15000);
+    document.head.appendChild(sc);
+  });
+  return _gmapsPromise;
+}
+function gRoute(x){
+  if(!GOOGLE_KEY||_googleDisabled||gLeft()<=0)return Promise.resolve(null);
+  return loadGoogleMaps().then(ok=>{
+    if(!ok||!window.google||!window.google.maps)return null;
+    gCount();
+    return new Promise(res=>{
+      let done=false;const finish=v=>{if(!done){done=true;res(v)}};
+      setTimeout(()=>finish(null),10000);
+      try{
+        const svc=new google.maps.DirectionsService();
+        const req={origin:{lat:userLat(),lng:userLon()},destination:{lat:x.lat,lng:x.lon},travelMode:google.maps.TravelMode.DRIVING,drivingOptions:{departureTime:new Date(),trafficModel:google.maps.TrafficModel.BEST_GUESS}};
+        if(!settings.ezpass)req.avoidTolls=true;
+        svc.route(req,(r,st)=>{
+          if(st==="OK"&&r&&r.routes&&r.routes.length){
+            const leg=r.routes[0].legs[0];
+            const secs=(leg.duration_in_traffic&&leg.duration_in_traffic.value)||leg.duration.value;
+            const base=(leg.duration&&leg.duration.value)||secs;
+            finish({dist:leg.distance.value/1609.34,mins:Math.max(2,Math.round(secs/60)),delayMin:Math.max(0,Math.round((secs-base)/60)),pts:(r.routes[0].overview_path||[]).map(pt=>[pt.lat(),pt.lng()]),src:"google"});
+          }else{
+            if(st==="OVER_QUERY_LIMIT"||st==="REQUEST_DENIED")_googleDisabled=true;
+            finish(null);
+          }
+        });
+      }catch(e){finish(null)}
+    });
+  });
+}
+function ttRoute(x,useGoogle){
+  if(useGoogle)return gRoute(x).then(g=>g||ttRouteTT(x));
+  return ttRouteTT(x);
+}
+function ttRouteTT(x){
+  const url="https://api.tomtom.com/routing/1/calculateRoute/"+userLat()+","+userLon()+":"+x.lat+","+x.lon+"/json?key="+TT_KEY+"&traffic=true&routeRepresentation=polyline&travelMode=car"+(settings.ezpass?"":"&avoid=tollRoads");
   return fetchT(url,12000).then(r=>r.json()).then(j=>{
     const rt=j&&j.routes&&j.routes[0];
     if(!rt||!rt.summary)throw new Error("no route");
@@ -856,7 +914,7 @@ function kickRoutes(layer){
       const k=routeKey(layer,x);
       if(!routeInfo[k])routeInfo[k]={wait:1};
       try{
-        const v=await ttRoute(x);
+        const v=await ttRoute(x,layer==="air");
         if(ep!==routeEpoch)return;
         routeInfo[k]=v;
         let anyFail=false;
