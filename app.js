@@ -48,12 +48,20 @@ const PLACES=[
 {n:"Times Square",lat:40.7580,lon:-73.9855},
 {n:"Exit 13",lat:40.63072,lon:-73.89528}
 ];
-const TOCHKA5=[
-{n:"W 39th St & 8th Ave",lat:40.75526,lon:-73.99241,h:14},
-{n:"W 37th St & 6th Ave",lat:40.75091,lon:-73.98472,h:9},
-{n:"W 46th St & Broadway",lat:40.75782,lon:-73.98367,h:10},
-{n:"6th Ave & W 28th St",lat:40.74619,lon:-73.99029,h:14},
-{n:"W 48th St & 8th Ave",lat:40.76032,lon:-73.98579,h:10}
+/* HotelTochka (2026-11-09): Manhattan dagi eng hotel-zich nuqtalar.
+   Metod: NYC Open Data tjus-cn27 (2027), BIN boʻyicha unikal hotel binolari,
+   har nuqta atrofidagi ~310x230 m oynada (4 blok) sanalgan; H8 yotoqxonalar chiqarilgan. */
+const HOTEL_TOCHKA=[
+{n:"Garment District",sub:"8th\u20139th Ave \u00b7 W 36th\u201340th St",lat:40.755212,lon:-73.992663,h:25},
+{n:"Herald Square",sub:"5th\u20136th Ave \u00b7 W 35th\u201338th St",lat:40.750346,lon:-73.985078,h:18},
+{n:"Times Square",sub:"6th\u20137th Ave \u00b7 W 44th\u201347th St",lat:40.757382,lon:-73.984074,h:17},
+{n:"Chelsea",sub:"6th\u20137th Ave \u00b7 W 24th\u201328th St",lat:40.745141,lon:-73.992284,h:15},
+{n:"Grand Central",sub:"Lexington Ave \u00b7 E 47th\u201350th St",lat:40.755417,lon:-73.973034,h:15},
+{n:"Midtown (43rd\u201346th)",sub:"5th\u20136th Ave \u00b7 W 43rd\u201346th St",lat:40.755241,lon:-73.981305,h:14},
+{n:"NoMad",sub:"5th Ave / Madison \u00b7 E 29th\u2013W 33rd St",lat:40.745995,lon:-73.984367,h:13},
+{n:"Midtown (48th\u201350th)",sub:"8th Ave / Broadway \u00b7 W 48th\u201350th St",lat:40.760725,lon:-73.985951,h:13},
+{n:"Bowery",sub:"Bowery \u00b7 Grand\u2013Hester St",lat:40.718232,lon:-73.994349,h:11},
+{n:"Midtown North (54th\u201358th)",sub:"7th Ave \u00b7 W 54th\u201358th St",lat:40.764252,lon:-73.979292,h:11}
 ];
 const CRUISE2=[
 {n:"Manhattan Cruise Terminal (Pier 88/90)",lat:40.7672,lon:-73.9985},
@@ -740,7 +748,7 @@ function initMaps(){
   const mc=L.control({position:"topleft"});
   mc.onAdd=function(){
     const d=L.DomUtil.create("div","mapctl");
-    d.innerHTML='<a href="#" id="btnMtime" class="mc-btn" title="Vaqt — tarixiy talab"><span class="mc-ic">\uD83D\uDD50</span><span class="mc-state">OFF</span></a><a href="#" id="btnTraffic" class="mc-btn" title="Traffic"><span class="mc-ic">\uD83D\uDEA6</span><span class="mc-warn">\u26A0</span><span class="mc-state">ON</span></a><a href="#" id="btnEzpass" class="mc-btn" title="EZPass"><span class="mc-ic">\uD83D\uDEE3\uFE0F</span><span class="mc-state">ON</span></a><a href="#" class="mc-btn mc-layer" data-layer="wc" title="Restroom"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.8" cy="4.4" r="1.7"/><path d="M6.8 6.8v5.4M4.6 9.4h4.4M6.8 12.2 5.4 20M6.8 12.2 8.2 20M12.2 3.6v16.8"/><circle cx="17.2" cy="4.4" r="1.7"/><path d="M17.2 6.8 15 12.6h4.4L17.2 6.8zM15.8 12.6 15 20M18.6 12.6 19.4 20"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="ev" title="Tesla"><span class="mc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#CC0000" d="m12 5.362l2.475-3.026s4.245.09 8.471 2.054c-1.082 1.636-3.231 2.438-3.231 2.438c-.146-1.439-1.154-1.79-4.354-1.79L12 24L8.619 5.034c-3.18 0-4.188.354-4.335 1.792c0 0-2.146-.795-3.229-2.43C5.28 2.431 9.525 2.34 9.525 2.34zl-.004.002H12zm0-3.899c3.415-.03 7.326.528 11.328 2.28c.535-.968.672-1.395.672-1.395C19.625.612 15.528.015 12 0C8.472.015 4.375.61 0 2.349c0 0 .195.525.672 1.396C4.674 1.989 8.585 1.435 12 1.46z"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="loc" title="Location"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21.2S5 15.4 5 9.9a7 7 0 1 1 14 0c0 5.5-7 11.3-7 11.3z"/><circle cx="12" cy="9.9" r="2.6"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="cruise" title="Cruise"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 15.5h17l-2 4.8H5.5l-2-4.8z"/><path d="M6 15.5v-2.8h12v2.8M9 12.7V10h6v2.7M12 10V7.4"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="air" title="Airport"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span><span class="mc-state">OFF</span></a><a href="#" id="btnRecenter" class="mc-btn" title="Recenter"><span class="mc-ic">\uD83C\uDFAF</span></a><a href="#" id="btnTheme" class="mc-btn" title="Tungi xarita"><span class="mc-ic">\uD83C\uDF19</span><span class="mc-state">OFF</span></a>';
+    d.innerHTML='<a href="#" id="btnMtime" class="mc-btn" title="Vaqt — tarixiy talab"><span class="mc-ic">\uD83D\uDD50</span><span class="mc-state">OFF</span></a><a href="#" id="btnTraffic" class="mc-btn" title="Traffic"><span class="mc-ic">\uD83D\uDEA6</span><span class="mc-warn">\u26A0</span><span class="mc-state">ON</span></a><a href="#" id="btnEzpass" class="mc-btn" title="EZPass"><span class="mc-ic">\uD83D\uDEE3\uFE0F</span><span class="mc-state">ON</span></a><a href="#" class="mc-btn mc-layer" data-layer="wc" title="Restroom"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.8" cy="4.4" r="1.7"/><path d="M6.8 6.8v5.4M4.6 9.4h4.4M6.8 12.2 5.4 20M6.8 12.2 8.2 20M12.2 3.6v16.8"/><circle cx="17.2" cy="4.4" r="1.7"/><path d="M17.2 6.8 15 12.6h4.4L17.2 6.8zM15.8 12.6 15 20M18.6 12.6 19.4 20"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="ev" title="Tesla"><span class="mc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#CC0000" d="m12 5.362l2.475-3.026s4.245.09 8.471 2.054c-1.082 1.636-3.231 2.438-3.231 2.438c-.146-1.439-1.154-1.79-4.354-1.79L12 24L8.619 5.034c-3.18 0-4.188.354-4.335 1.792c0 0-2.146-.795-3.229-2.43C5.28 2.431 9.525 2.34 9.525 2.34zl-.004.002H12zm0-3.899c3.415-.03 7.326.528 11.328 2.28c.535-.968.672-1.395.672-1.395C19.625.612 15.528.015 12 0C8.472.015 4.375.61 0 2.349c0 0 .195.525.672 1.396C4.674 1.989 8.585 1.435 12 1.46z"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="loc" title="HotelTochka"><span class="mc-ic">\uD83C\uDFE8</span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="cruise" title="Cruise"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 15.5h17l-2 4.8H5.5l-2-4.8z"/><path d="M6 15.5v-2.8h12v2.8M9 12.7V10h6v2.7M12 10V7.4"/></svg></span><span class="mc-state">OFF</span></a><a href="#" class="mc-btn mc-layer" data-layer="air" title="Airport"><span class="mc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span><span class="mc-state">OFF</span></a><a href="#" id="btnRecenter" class="mc-btn" title="Recenter"><span class="mc-ic">\uD83C\uDFAF</span></a><a href="#" id="btnTheme" class="mc-btn" title="Tungi xarita"><span class="mc-ic">\uD83C\uDF19</span><span class="mc-state">OFF</span></a>';
     L.DomEvent.disableClickPropagation(d);
     return d;
   };
@@ -783,12 +791,12 @@ function mkIcon(cls,html){return L.divIcon({className:"",html:'<div class="mk '+
 function layerItems(layer){
   if(layer==="wc")return (WC_ITEMS||distSort(WC_FB)).slice(0,20).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
   if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
-  if(layer==="loc")return distSort(PLACES.map(p=>({n:p.n,sub:"Saqlangan joy",lat:p.lat,lon:p.lon,kind:"loc"})).concat(TOCHKA5.map(p=>({n:p.n,sub:p.h+" ta mehmonxona yaqinida",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h})))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,kind:x.kind,h:x.h,d:x.d}));
+  if(layer==="loc")return HOTEL_TOCHKA.map(p=>({n:p.n,sub:p.sub+" \u00b7 "+p.h+" ta hotel",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h,d:hav(userLat(),userLon(),p.lat,p.lon)}));
   if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
   if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
   return [];
 }
-function sortedItems(layer){return layerItems(layer).slice().sort((p,q)=>{const rp=routeInfo[routeKey(layer,p)],rq=routeInfo[routeKey(layer,q)];const ep=rp&&rp.dist!=null?rp.dist:(p.d!=null?p.d:1e9),eq=rq&&rq.dist!=null?rq.dist:(q.d!=null?q.d:1e9);return ep-eq})}
+function sortedItems(layer){if(layer==="loc")return layerItems(layer).slice().sort((p,q)=>(q.h||0)-(p.h||0));return layerItems(layer).slice().sort((p,q)=>{const rp=routeInfo[routeKey(layer,p)],rq=routeInfo[routeKey(layer,q)];const ep=rp&&rp.dist!=null?rp.dist:(p.d!=null?p.d:1e9),eq=rq&&rq.dist!=null?rq.dist:(q.d!=null?q.d:1e9);return ep-eq})}
 function drawMapLayer(layer){
   if(typeof layerGroups==="undefined")return;
   const items=sortedItems(layer),vis=items.slice(0,visCount[layer]);
@@ -919,7 +927,7 @@ function renderMapPanel(){
     const mv=ri&&ri.mins!=null?String(ri.mins):"--";
     return '<button class="location-option" data-lat="'+x.lat+'" data-lon="'+x.lon+'"><span class="loc-dot" style="background:'+routeColor(i)+'"></span><span class="loc-main"><span class="loc-name">'+esc(x.n)+'</span>'+(x.sub?'<span class="loc-addr">'+esc(x.sub)+'</span>':"")+'</span><span class="loc-badges"><span class="loc-badge"><span class="v">'+dv+'</span><span class="u">mi</span></span><span class="loc-badge min"><span class="v">'+mv+'</span><span class="u">min</span></span></span></button>';
   }).join("");
-  if(items.length>visCount[layer])html+='<button class="location-option more" style="justify-content:center"><span class="loc-name">\u2B07 More</span></button>';
+  if(items.length>visCount[layer])html+='<button class="location-option more" style="justify-content:center"><span class="loc-name">\u2B07 '+(layer==="loc"?"Next":"More")+'</span></button>';
   p.innerHTML=html;
   if(layer==="wc")kickRoutesWc();else kickRoutes(layer);
   p.querySelectorAll(".location-option[data-lat]").forEach(b=>b.addEventListener("click",()=>(layer==="wc"?navGo:gmaps)(parseFloat(b.getAttribute("data-lat")),parseFloat(b.getAttribute("data-lon")))));
@@ -931,7 +939,7 @@ function zoomHalfMile(){
   const la=userLat(),lo=userLon(),dLa=805/111320,dLo=805/(111320*Math.cos(la*Math.PI/180));
   try{map.fitBounds([[la-dLa,lo-dLo],[la+dLa,lo+dLo]],{paddingTopLeft:[24,24],paddingBottomRight:[276,24]})}catch(e){}
 }
-const FIT_LAYERS=["wc","ev","cruise","air"];
+const FIT_LAYERS=["wc","ev","cruise","air","loc"];
 function fitLayerBounds(){
   if(!map)return;
   const pts=[[userLat(),userLon()]];

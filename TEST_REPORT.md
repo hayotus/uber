@@ -511,3 +511,9 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Foydalanuvchi soʻrovi: vaqt slayderi/kun funksiyasi bitta tugma boʻlsin — xarita chap-tepasida; ON boʻlsa panel pastda ochiladi, OFF boʻlsa yopiq.
 - Amalga oshirish: chap ustunning ENG TEPASIGA 🕐 tugma (btnMtime, ON/OFF yozuvi bilan, settings.mtime da saqlanadi, standart OFF). ON → #mapTimeBar (slayder + 📅 kun) pastda ochiladi; OFF → panel va kun qatori yopiladi, tanlov "hozir"ga qaytariladi (heat ham joriy vaqtga). Boshqa tugmalar oʻzgarmadi.
 - Tekshiruv: node --check OK. SW tlc-pro-v70, assetlar ?v=143.
+
+## v10.44 (2026-11-09) — Location tugmasi → HotelTochka
+- Foydalanuvchi soʻrovi: Map chap menyusidagi Location tugmasi HotelTochka funksiyasiga almashtirilsin — Manhattan dagi eng koʻp hotelli koordinatalar (narigi chatda hisoblanganidek), roʻyxatda avval eng koʻp hotelli 5 ta, Next bosilsa keyingi 5 ta va h.k.; parametrlar (mil, min, hotel soni) boshqa qatlamlar kabi.
+- Maʼlumot: HOTEL_TOCHKA Top-10 — Garment District 25, Herald Square 18, Times Square 17, Chelsea 15, Grand Central 15, Midtown 43–46 14, NoMad 13, Midtown 48–50 13, Bowery 11, Midtown North 11. Metod: NYC Open Data tjus-cn27 (2027), BIN-unikal binolar, ~310×230 m oyna, H8 yotoqxonalar chiqarilgan. Eski TOCHKA5 (5 nuqta, eski hisob) olib tashlandi; PLACES endi loc qatlamida ishlatilmaydi.
+- Amalga oshirish: tugma 🏨 "HotelTochka" (data-layer="loc" saqlandi); roʻyxat masofa boʻyicha emas, hotel soni boʻyicha saralanadi; markerlarda son belgisi (mk-tochka); panel kartochkalarida koʻcha oraligʻi + "N ta hotel" + mi/min marshrut parametrlari; sahifalash mavjud "More" mexanizmi (5+5), loc uchun tugma nomi "⬇ Next"; loc FIT_LAYERS ga qoʻshildi (yoqilganda xarita nuqtalarga moslanadi).
+- Tekshiruv: node --check OK. SW tlc-pro-v71, assetlar ?v=144.
