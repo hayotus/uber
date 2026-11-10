@@ -791,7 +791,7 @@ function mkIcon(cls,html){return L.divIcon({className:"",html:'<div class="mk '+
 function layerItems(layer){
   if(layer==="wc")return (WC_ITEMS||distSort(WC_FB)).slice(0,20).map(x=>({n:x.n,sub:"",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
   if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
-  if(layer==="loc")return HOTEL_TOCHKA.map(p=>({n:p.n,sub:p.sub+" \u00b7 "+p.h+" ta hotel",lat:p.lat,lon:p.lon,kind:"tochka",h:p.h,d:hav(userLat(),userLon(),p.lat,p.lon)}));
+  if(layer==="loc")return HOTEL_TOCHKA.map(p=>({n:p.n,sub:p.h+" ta hotel \u00b7 "+p.sub,lat:p.lat,lon:p.lon,kind:"tochka",h:p.h,d:hav(userLat(),userLon(),p.lat,p.lon)}));
   if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
   if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
   return [];
