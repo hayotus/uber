@@ -541,3 +541,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.50 (2026-11-09) — Birinchi ochilishda qora xarita tuzatildi
 - Muammo (foydalanuvchi telefoni, skrinshot): v10.48 dan keyin sayt Map bilan ochiladi, lekin birinchi ochilishda xarita maydoni qora, boshqaruv tugmalari ham yoʻq — Leaflet (unpkg CDN) sekin kelganda initMaps ishlamay qoladi (guard: L undefined → return), startup da esa asosiy xaritaga invalidateSize hech qayerda chaqirilmasdi (faqat go("map") da bor edi).
 - Tuzatish: startup self-heal halqasi (800 ms × 20): L kelishi bilan initMaps qayta uriniladi; xarita yaratilgan boʻlsa invalidateSize chaqiriladi va oʻlcham 0 dan katta boʻlgach halqa toʻxtaydi; L ~5 soniyada kelmasa jsDelivr dan zaxira Leaflet ulanadi. SW tlc-pro-v77, assetlar ?v=150.
+
+## v10.51 (2026-11-09) — Qora xarita: go("map") retsepti startup ga
+- v10.50 QA FAIL: birinchi ochilishda xarita 16+ soniya qora qoldi (faqat invalidateSize yetarli emas ekan). Home → Map har safar darhol ishlaydi — farq: go("map") invalidateSize + setView(zoom 12) qiladi (zoom 13→12 oʻzgarishi Leaflet ni plitkalarni qayta soʻrashga majbur qiladi).
+- v10.51: self-heal halqasi endi aynan shu retseptni qoʻllaydi — plitkalar (.leaflet-tile-loaded) paydo boʻlguncha har 800 ms invalidateSize + setView(12); plitka chiqsa halqa toʻxtaydi. jsDelivr zaxira Leaflet saqlandi. SW tlc-pro-v78, assetlar ?v=151.

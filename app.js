@@ -1681,9 +1681,13 @@ loadEvents(true);setInterval(()=>loadEvents(false),600000);
 setInterval(()=>{if(apViewOpen())loadLiveFlights(false)},1800000);setInterval(()=>{if(apViewOpen()&&apMode()==="live"){loadLiveFlights(false);loadApEta(false)}},60000);setInterval(idbMirror,60000);idbRestore();setInterval(loadZoneWx,1800000);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 try{initMaps()}catch(e){}setTimeout(()=>{try{initMaps()}catch(e){}},3000);
-/* v10.50: Map-first startup self-heal — Leaflet CDN sekin/uzilsa ham xarita tiklanadi: L kelsa initMaps qayta chaqiriladi, xarita 0 o'lchamda yaratilgan bo'lsa invalidateSize bilan plitkalar yuklanadi; L 5 soniyada kelmasa jsDelivr zaxira nusxasi ulanadi. */
+/* v10.51: Map-first startup self-heal (v10.50 faqat invalidateSize edi — yetarli bo\u2019lmadi, QA da qora ekran qaytdi; endi go("map") retsepti: invalidateSize + setView zoom 12, plitkalar chiqquncha takrorlanadi) — Leaflet CDN sekin/uzilsa ham xarita tiklanadi: L kelsa initMaps qayta chaqiriladi, xarita 0 o'lchamda yaratilgan bo'lsa invalidateSize bilan plitkalar yuklanadi; L 5 soniyada kelmasa jsDelivr zaxira nusxasi ulanadi. */
 let _mapFixTries=0;const _mapFix=setInterval(()=>{_mapFixTries++;
-  if(typeof L!=="undefined"){if(!map){try{initMaps()}catch(e){}}if(map){try{map.invalidateSize()}catch(e){}let _sz=null;try{_sz=map.getSize()}catch(e){}if(_sz&&_sz.x>0&&_sz.y>0)clearInterval(_mapFix)}}
+  const _tilesUp=()=>document.querySelectorAll("#map .leaflet-tile-loaded").length>0;
+  if(typeof L!=="undefined"){
+    if(!map){try{initMaps()}catch(e){}}
+    if(map){if(!_tilesUp()){try{map.invalidateSize();map.setView([userLat(),userLon()],12)}catch(e){}}else clearInterval(_mapFix)}
+  }
   else if(_mapFixTries===6&&!window._leafletFb){window._leafletFb=1;const _sc=document.createElement("script");_sc.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js";document.head.appendChild(_sc)}
   if(_mapFixTries>=20)clearInterval(_mapFix)},800);
 setTimeout(()=>{if(mapHome){try{mapHome.invalidateSize()}catch(e){}}},700);
