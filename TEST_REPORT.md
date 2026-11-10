@@ -525,3 +525,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Foydalanuvchi soʻrovi: Map da "tarixiy talab"/"TLC" yozuvlari boʻlmasin; oʻrniga slayder yonida hafta kunlari tugmasi boʻlsin; slayder uzun boʻlsin.
 - Olib tashlandi: vaqt panelidagi "Tarixiy talab (TLC 2025-09)" yozuvi; zona popupidan "tarixiy" va "TLC:" soʻzlari (endi: "Talab · Mo 18:00: 33/100", "· 406 pikap/soat"); 🕐 tugma title "Vaqt". Boshqa boʻlimlar (Home/Airports/Settings) dagi yozuvlarga tegilmadi — soʻrov faqat Map haqida edi.
 - Tartib: panel endi bitta qatorda — vaqt yozuvi, UZUN slayder (flex:1, min 150px, wrap yoʻq), yonida 📅 kun tugmasi. SW tlc-pro-v73, assetlar ?v=146.
+
+## v10.47 (2026-11-09) — Vaqt paneli tartibi: vaqt tepada, bir qatorda uzun slayder + kun tugmasi
+- Foydalanuvchi aniqlashtirdi: vaqt slayderning TEPASIDA koʻrinsin; pastda bitta qatorda — uzun (toʻliq eniga) slayder va hafta kunlari tugmasi.
+- Amalga oshirish: #mapTimeBar ikki qatorli boʻldi — .mtb-top (🕐 HH:MM · Hozir) va .mtb-row (slayder flex:1 toʻliq eniga + 📅 tugma). "Tarixiy/TLC" yozuvlari v10.46 da olib tashlangan holicha qoldi. SW tlc-pro-v74, assetlar ?v=147.

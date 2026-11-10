@@ -157,11 +157,12 @@ body{background:radial-gradient(1200px 620px at 50% -10%,rgba(34,197,94,.14) 0%,
 #view-map.act{display:flex;flex-direction:column;height:calc(100dvh - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 #view-map #map{flex:1 1 auto;height:auto;min-height:320px}
 #view-map .chips{flex:0 0 auto;margin-top:10px}
-#mapTimeBar{flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;padding:8px 12px;margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+#mapTimeBar{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;padding:8px 12px;margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.mtb-top{font-size:15px}
+.mtb-row{display:flex;align-items:center;gap:8px}
 #mapDayRow{flex:0 0 auto;margin-top:8px}
 #mapDayBtn{margin-left:auto}
-#mapTimeBar input[type=range]{flex:1 1 auto;accent-color:#f03b20;min-width:150px}
-#mapTimeBar .mtb-lbl{white-space:nowrap}
+.mtb-row input[type=range]{flex:1 1 auto;width:100%;min-width:0;accent-color:#f03b20}
 #mapTimeVal{font-size:15px}
 
 /* v10.9: Map — Radar uslubi: tugmalar bir qatorda, suzuvchi panel, dumaloq markerlar */

@@ -14,7 +14,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<link rel="stylesheet" href="./style.css?v=146">
+<link rel="stylesheet" href="./style.css?v=147">
 </head>
 <body>
 <main>
@@ -120,12 +120,12 @@
   <div class="card"><h3>Hotspot Ranking — TOP 5 <span class="badge b-est">ESTIMATED</span></h3><div id="hotTop"></div></div>
   </details>
 </section>
-<div id="verLine">TLC Pro · v10.46 · Case12 uber dashboard</div>
+<div id="verLine">TLC Pro · v10.47 · Case12 uber dashboard</div>
 
 <!-- ============ MAP ============ -->
 <section id="view-map" class="view">
   <div id="map"></div>
-  <div id="mapTimeBar" style="display:none"><span class="mtb-lbl">🕐 <b id="mapTimeVal">--:--</b><span id="mapTimeNow"></span></span><input type="range" id="mapTimeSlider" min="0" max="1440" step="1" value="0"><button class="chip" id="mapDayBtn">📅</button></div>
+  <div id="mapTimeBar" style="display:none"><div class="mtb-top">🕐 <b id="mapTimeVal">--:--</b><span id="mapTimeNow"></span></div><div class="mtb-row"><input type="range" id="mapTimeSlider" min="0" max="1440" step="1" value="0"><button class="chip" id="mapDayBtn">📅</button></div></div>
   <div id="mapDayRow" class="chips" style="display:none"><button class="chip" data-mday="0">Mo</button><button class="chip" data-mday="1">Tu</button><button class="chip" data-mday="2">We</button><button class="chip" data-mday="3">Th</button><button class="chip" data-mday="4">Fr</button><button class="chip" data-mday="5">Sa</button><button class="chip" data-mday="6">Su</button></div>
   <div id="mapPanel"></div>
 </section>
@@ -345,6 +345,6 @@
 <div id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js" integrity="sha256-65UqrlgGoRAnKfKRuriH3eeDrOhZgZo1SCenduc+SGo=" crossorigin=""></script>
-<script type="module" src="./app.js?v=146"></script>
+<script type="module" src="./app.js?v=147"></script>
 </body>
 </html>
