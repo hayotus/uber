@@ -506,3 +506,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - v10.41 jonli QA ikki nuqson topdi: (1) birinchi Map ochilishida heat chiqmay, kulrang doiralar qolardi (chiqish-qaytish davolardi); (2) Home kichik xaritasida heat umuman chiqmasdi. Ildiz sabab bitta: Leaflet.heat canvas qoʻshilgan paytdagi oʻlcham bilan chiziladi, "resize" ga reaksiya bermaydi (faqat moveend) — xarita yashirin/yigʻilgan (Home "Batafsil" yopiq) paytda qoʻshilsa, canvas 0-oʻlcham boʻlib qoladi.
 - Tuzatish: heatCircles endi nishon xarita oʻlchami 0 boʻlsa heat urinishini oʻtkazib yuboradi (vektor fallback chiziladi); Home "Batafsil" ochilganda (toggle) va Home ga oʻtilganda redrawHomeHeat() heat ni koʻrinadigan holatda qayta chizadi. Asosiy Map da go("map") dagi qayta chizish avvalgidek ishlaydi.
 - Tekshiruv: node --check OK. SW tlc-pro-v69, assetlar ?v=142.
+
+## v10.43 (2026-11-09) — Vaqt funksiyasi bitta tugmada (chap-tepa)
+- Foydalanuvchi soʻrovi: vaqt slayderi/kun funksiyasi bitta tugma boʻlsin — xarita chap-tepasida; ON boʻlsa panel pastda ochiladi, OFF boʻlsa yopiq.
+- Amalga oshirish: chap ustunning ENG TEPASIGA 🕐 tugma (btnMtime, ON/OFF yozuvi bilan, settings.mtime da saqlanadi, standart OFF). ON → #mapTimeBar (slayder + 📅 kun) pastda ochiladi; OFF → panel va kun qatori yopiladi, tanlov "hozir"ga qaytariladi (heat ham joriy vaqtga). Boshqa tugmalar oʻzgarmadi.
+- Tekshiruv: node --check OK. SW tlc-pro-v70, assetlar ?v=143.
