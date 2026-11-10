@@ -557,3 +557,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.55 (2026-11-10) — Airports: marshrut masofasi + Google yorliqlari
 - v10.54 QA topdi: Airports kartalaridagi mil — toʻgʻri chiziq (haversine) masofasi edi, daqiqalar esa marshrut (Google) — raqamlar bir-biriga mos kelmasdi (masalan LGA 6.0 mi / 27 daq vs Map panelida 9.4 mi / 26 daq). Endi airportScoreLive ETA mavjud boʻlsa marshrut masofasini (apEta.km) koʻrsatadi.
 - Yorliqlar yangilandi: "TomTom jonli yoʻl" → "Google jonli yoʻl" (rejim satri, manbalar satri, REAL TIME belgisi), "(taxminiy, TomTom kutilmoqda)" → "(taxminiy)". SW tlc-pro-v82, assetlar ?v=155.
+
+## v10.56 (2026-11-10) — Marshrut chiziqlari bitta koʻk rangda
+- Foydalanuvchi: yoʻnalish chiziqlari yashil/qizil va boshqa traffic ranglarida boʻlgani chalgʻitadi. Avval har bir marshrut ROUTE_PALETTE dan alohida rang olardi (qizil, yashil, sariq, binafsha...) — traffic oqimi ranglari bilan adashardi.
+- Endi barcha marshrut chiziqlari va panel nuqtalari bitta rangda: koʻk #1A73E8 (Google Maps marshrut rangi), weight 5. Traffic qatlami (haqiqiy tirbandlik) oʻzgarishsiz. SW tlc-pro-v83, assetlar ?v=156.
