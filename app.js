@@ -561,13 +561,13 @@ function airportScoreLive(ap,zrMap){
   [["L",L,0.5],["F",F,0.25],["P",P,0.25]].forEach(kv=>{if(kv[1]==null)return;acc+=kv[2]*kv[1];wsum+=kv[2]});
   const score=wsum?Math.round(acc/wsum):0;
   const zr=(zrMap&&zrMap[zn])||null;
-  return {ap:ap,zn:zn,dist:dist,etaMin:etaMin,etaLive:!!et,score:score,L:L,F:F,P:P,zr:zr,sc:sc,et:et};
+  return {ap:ap,zn:zn,dist:(et&&et.km)?Math.round(et.km/1.60934*10)/10:dist,etaMin:etaMin,etaLive:!!et,score:score,L:L,F:F,P:P,zr:zr,sc:sc,et:et};
 }
 function setApMode(m){settings.apMode=(m==="hist"?"hist":"live");saveSettings();syncApModeUI();if(settings.apMode==="live"){loadLiveFlights(false);loadApEta(false)}renderAirports()}
 function syncApModeUI(){
   document.querySelectorAll("#apModeChips .chip[data-apmode]").forEach(ch=>ch.classList.toggle("on",ch.getAttribute("data-apmode")===apMode()));
   const u=$("apUpd");if(!u)return;
-  if(apMode()==="live"){const t=liveTs?new Date(liveTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";u.innerHTML="Rejim: <b>REAL TIME</b> · AirLabs jonli reyslari + TomTom jonli yoʻl · Yangilandi: "+t+" · Aeroport ekrani ochiq boʻlsa, avto-yangilanish ≈5 daq"}
+  if(apMode()==="live"){const t=liveTs?new Date(liveTs).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—";u.innerHTML="Rejim: <b>REAL TIME</b> · AirLabs jonli reyslari + Google jonli yoʻl · Yangilandi: "+t+" · Aeroport ekrani ochiq boʻlsa, avto-yangilanish ≈5 daq"}
   else u.innerHTML="Rejim: <b>HISTORICAL</b> · TLC HVFHS 2025-09 oʻrtacha naqshi — jonli emas, kun/soat boʻyicha odatiy oqim";
 }
 function renderAirportsLive(){
@@ -578,7 +578,7 @@ function renderAirportsLive(){
   if(bEl&&best){
     const sc=best.sc,et=best.et,rs=[];
     if(sc)rs.push("Jonli: "+sc.total+" reys havoda kelmoqda, keyingi 60 daqiqada ≈"+sc.next60+" qoʻnish (jonli pozitsiyalar boʻyicha taxmin)");
-    rs.push("Yoʻl: "+distTxt(best.dist)+" · ≈"+best.etaMin+" daq"+(et?" (jonli tirbandlik"+(et.delayMin?", +"+et.delayMin+" daq":"")+")":" (taxminiy, TomTom kutilmoqda)"));
+    rs.push("Yoʻl: "+distTxt(best.dist)+" · ≈"+best.etaMin+" daq"+(et?" (jonli tirbandlik"+(et.delayMin?", +"+et.delayMin+" daq":"")+")":" (taxminiy)"));
     if(best.zr)rs.push("Jurnalingiz: "+money(best.zr.v)+"/soat ("+best.zr.n+" smena)");
     let advice="";
     if(sc&&sc.wave){let pk=0;sc.wave.forEach((v,i)=>{if(v>sc.wave[pk])pk=i});const curb=pk*10+5+20;
@@ -590,7 +590,7 @@ function renderAirportsLive(){
     '<div class="small">• '+rs.map(esc).join("<br>• ")+'</div>'+
     (advice?'<div class="small" style="margin-top:4px">'+esc(advice)+'</div>':"")+
     '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+best.ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+best.ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
-    '<div class="src">Ball: L jonli qoʻnish toʻlqini (60 daq) ×0.50 + F yaqin oqim (30 daq) ×0.25 + P jonli yoʻl vaqti ×0.25. Manbalar: AirLabs jonli reyslar, TomTom Traffic (jonli).</div></div>';
+    '<div class="src">Ball: L jonli qoʻnish toʻlqini (60 daq) ×0.50 + F yaqin oqim (30 daq) ×0.25 + P jonli yoʻl vaqti ×0.25. Manbalar: AirLabs jonli reyslar, Google jonli yoʻl (duration_in_traffic).</div></div>';
   }
   const cEl=$("apCompare");
   if(cEl){
@@ -620,7 +620,7 @@ function renderAirportsLive(){
     }
     const rp=zoneWx[s.zn];
     return '<div class="card'+(idx===0?" apbest":"")+'"><h3>✈️ '+ap.code+" — "+esc(ap.name)+' <span class="mono" style="float:right">'+s.score+'/100</span></h3>'+
-    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">REAL TIME</span> AirLabs jonli reyslar · TomTom Traffic</div>'+liveHtml+
+    '<div class="small" style="margin-bottom:4px"><span class="badge b-live">REAL TIME</span> AirLabs jonli reyslar · Google jonli yoʻl</div>'+liveHtml+
     '<div class="hchips" style="margin-top:8px"><span>📍 '+distTxt(s.dist)+' · ≈'+s.etaMin+' daq'+(s.etaLive?" (jonli)":"")+'</span><span>💵 '+(s.zr?money(s.zr.v)+"/soat · "+s.zr.n+" smena":"maʼlumot yoʻq")+'</span>'+(rp!=null?'<span>🌧 '+Math.round(rp)+'%</span>':"")+'<span>L '+(s.L==null?"—":s.L)+' · F '+(s.F==null?"—":s.F)+' · P '+s.P+'</span></div>'+
     '<div class="small">'+esc(ap.term)+'</div>'+
     '<div class="hbtns" style="margin-top:8px"><button class="go" onclick="apGo(\''+ap.code+'\')">📍 GO — Google Maps</button><button class="ghost" onclick="apRec(\''+ap.code+'\')">✔️ Yozib qoʻyish</button></div>'+
