@@ -583,3 +583,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.61 (2026-11-11) — ETA kartalar xarita ICHIDA (overlay)
 - Foydalanuvchi: kartalar xarita ichida joylashsin, xarita kattaligiga ta'sir qilmasin. Avval strip xarita ostida flex element edi — chiqsa xarita kichrayardi.
 - Endi #etaStrip #map ichiga koʻchirildi, position:absolute (bottom 8px, z-index 1200) — xarita oʻlchami oʻzgarmaydi. Shu sababli mapToggle dagi invalidateSize/refit timeout olib tashlandi; fitLayerBounds da air uchun pastki padding 170px (nuqtalar strip ostida qolmasin). SW tlc-pro-v88, assetlar ?v=161.
+
+## v10.62 (2026-11-11) — Pastki menyu koʻrinadi + aeroport fiti tigʻizroq
+- Muammo (foydalanuvchi skrinshoti): ETA strip (xarita ichida, bottom:8px, z-index 1200) pastki menyu ikonkalarini qoplab qoldi — Safari dvh o'zgarishi sababli xarita pastki cheti menyu ustiga chiqadi.
+- Tuzatish: #etaStrip endi position:fixed, pastki menyu ustida: bottom calc(76px + safe-area + 8px + --etaLift), eni min(760px, 100vw-16px), markazda — menyu bilan har doim 30px dan ortiq oraliq. Vaqt paneli (🕐) yoki kunlar qatori ochiq boʻlsa, updateEtaLift() strip ni ularning balandligicha yuqoriga koʻtaradi.
+- Fit: Airport uchun padding tigʻizlandi — chap 64 (chap tugmalar ustuni), oʻng 24 (oʻng panel air uchun yopiq), tepa 24, past 190. Barcha aeroportlar koʻrinib turgan holda maksimal yaqinlashish. Boshqa qatlamlar oʻzgarishsiz. SW tlc-pro-v89, assetlar ?v=162.

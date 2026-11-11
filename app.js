@@ -702,7 +702,7 @@ const BASE_DARK="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/Wor
 const BASE_LAYERS=[];
 function tiles(){const t=L.tileLayer(settings.darkmap?BASE_DARK:BASE_LIGHT,{attribution:"Esri, OpenStreetMap",maxZoom:18});BASE_LAYERS.push(t);return t}
 function updateThemeUI(){const b=$("btnTheme");if(b){b.classList.toggle("on",!!settings.darkmap);const tst=b.querySelector(".mc-state");if(tst)tst.textContent=settings.darkmap?"ON":"OFF"}}
-function updateMtimeUI(){const b=$("btnMtime");if(b){b.classList.toggle("on",!!settings.mtime);const bst=b.querySelector(".mc-state");if(bst)bst.textContent=settings.mtime?"ON":"OFF"}const bar=$("mapTimeBar");if(bar)bar.style.display=settings.mtime?"flex":"none";if(!settings.mtime){const dr=$("mapDayRow");if(dr)dr.style.display="none"}}
+function updateMtimeUI(){const b=$("btnMtime");if(b){b.classList.toggle("on",!!settings.mtime);const bst=b.querySelector(".mc-state");if(bst)bst.textContent=settings.mtime?"ON":"OFF"}const bar=$("mapTimeBar");if(bar)bar.style.display=settings.mtime?"flex":"none";if(!settings.mtime){const dr=$("mapDayRow");if(dr)dr.style.display="none"}updateEtaLift()}
 function toggleMtime(){settings.mtime=!settings.mtime;saveSettings();updateMtimeUI();if(!settings.mtime){mapSelMin=null;mapSelDay=null;syncMapTimeUI();redrawMapHeat()}toast(settings.mtime?"Vaqt paneli ochildi":"Vaqt paneli yopildi")}
 function applyBaseTheme(){const u=settings.darkmap?BASE_DARK:BASE_LIGHT;BASE_LAYERS.forEach(t=>{try{t.setUrl(u)}catch(e){}});updateThemeUI()}
 function toggleTheme(){settings.darkmap=!settings.darkmap;saveSettings();applyBaseTheme();toast(settings.darkmap?"Tungi xarita yoqildi":"Kunduzgi xarita yoqildi")}
@@ -1005,7 +1005,17 @@ function renderMapPanel(){
 }
 /* v10.59: Radar-uslubidagi ETA kartalar (faqat Airport) */
 function etaTargets(){return AIRPORTS.map(ap=>({code:ap.code,lat:ap.lat,lon:ap.lon,ico:ap.code==="JFK"?"\uD83D\uDEEB":ap.code==="LGA"?"\u2708\uFE0F":"\uD83D\uDEEC"})).concat([{code:"HOME",lat:HOME_PT.lat,lon:HOME_PT.lon,ico:"\uD83C\uDFE0",home:true}])}
+/* v10.62: strip pastki menyu ustida — vaqt paneli ochiq boʻlsa yuqoriga koʻtariladi */
+function updateEtaLift(){
+  const strip=$("etaStrip");if(!strip)return;
+  const bar=$("mapTimeBar"),row=$("mapDayRow");
+  let lift=0;
+  if(bar&&bar.style.display!=="none"&&bar.style.display!=="")lift+=bar.offsetHeight+10;
+  if(row&&row.style.display==="flex")lift+=row.offsetHeight+10;
+  strip.style.setProperty("--etaLift",lift+"px");
+}
 function renderEtaCards(){
+  updateEtaLift();
   const wrap=$("etaCards");if(!wrap)return;
   const tg=etaTargets();
   let best=null;tg.forEach(t=>{const ri=routeInfo[routeKey("air",t)];if(ri&&ri.mins!=null&&(best===null||ri.mins<best))best=ri.mins});
@@ -1071,7 +1081,10 @@ function fitLayerBounds(){
   FIT_LAYERS.forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(x=>pts.push([x.lat,x.lon]))});
   if(pts.length<2)return;
   const sz=map.getSize();
-  const bp=panelLayer==="air"?170:48;try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[88,48],paddingBottomRight:[sz.x>=700?308:88,bp],maxZoom:16})}catch(e){}
+  const isAir=panelLayer==="air";
+  const ptl=isAir?[64,24]:[88,48];
+  const pbr=isAir?[24,190]:[sz.x>=700?308:88,48];
+  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:ptl,paddingBottomRight:pbr,maxZoom:16})}catch(e){}
 }
 function mapToggle(layer,btn){
   if(!map)initMaps();
@@ -1645,7 +1658,7 @@ document.querySelectorAll("#apTabs .chip").forEach(ch=>ch.addEventListener("clic
 document.querySelectorAll("#apModeChips .chip[data-apmode]").forEach(ch=>ch.addEventListener("click",()=>setApMode(ch.getAttribute("data-apmode"))));
 {const rb=$("apRefresh");if(rb)rb.addEventListener("click",()=>{if(apMode()==="live"){loadLiveFlights(true);loadApEta(true);toast("Jonli maʼlumot yangilanmoqda…")}else{renderAirports();toast("Historical — TLC tarixiy naqsh (jonli emas)")}})}
 {const mts=$("mapTimeSlider");if(mts)mts.addEventListener("input",e=>applyMapMinutes(e.target.value));}
-{const db=$("mapDayBtn");if(db)db.addEventListener("click",()=>{const r=$("mapDayRow");if(r)r.style.display=(r.style.display==="none"||!r.style.display)?"flex":"none"});}
+{const db=$("mapDayBtn");if(db)db.addEventListener("click",()=>{const r=$("mapDayRow");if(r)r.style.display=(r.style.display==="none"||!r.style.display)?"flex":"none";updateEtaLift()});}
 document.querySelectorAll("#mapDayRow .chip").forEach(c=>c.addEventListener("click",()=>applyMapDay(c.dataset.mday)));
 let recs=[];try{recs=JSON.parse(localStorage.getItem("drv_recs")||"[]")}catch(e){recs=[]}
 function recordRecFor(s){if(!s)return false;recs.unshift({t:new Date().toISOString(),zone:s.z.n,score:s.score,conf:s.conf||null,c:{D:s.D,F:s.F,E:s.E,W:s.W,T:s.T,P:s.P}});recs=recs.slice(0,50);try{localStorage.setItem("drv_recs",JSON.stringify(recs));idbMirror()}catch(e){}renderCal();return true}
