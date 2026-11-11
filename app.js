@@ -691,6 +691,7 @@ function drawWx(j){
 
 /* ================= Maps & Layers (Modul 1, 6, 12, 13, 15) ================= */
 let map=null,mapHome=null,heatLayer=null,heatHome=null,userMk=null,userMkH=null;
+let mapUserControl=false,mapAutoCentered=false;
 const layerGroups={};
 const BASE_LIGHT="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
 const BASE_DARK="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
@@ -742,6 +743,7 @@ function heatCircles(target,sel){
 function initMaps(){
   if(map||typeof L==="undefined")return;
   map=L.map("map").setView([userLat(),userLon()],13);tiles().addTo(map);
+  map.on("zoomstart dragstart",()=>{mapUserControl=true});
   heatLayer=heatCircles(map);heatLayer.addTo(map);layerGroups.heat=heatLayer;
   layerGroups.cam=L.layerGroup();layerGroups.ev=L.layerGroup();layerGroups.wc=L.layerGroup();layerGroups.close=L.layerGroup();layerGroups.tesla=L.layerGroup();
   layerGroups.loc=L.layerGroup();layerGroups.cruise=L.layerGroup();layerGroups.air=L.layerGroup();
@@ -1005,7 +1007,7 @@ function fitLayerBounds(){
   FIT_LAYERS.forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(x=>pts.push([x.lat,x.lon]))});
   if(pts.length<2)return;
   const sz=map.getSize();
-  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[24,24],paddingBottomRight:[sz.x>=700?290:24,24],maxZoom:16});if(map.getZoom()<10)map.setZoom(10)}catch(e){}
+  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[24,24],paddingBottomRight:[sz.x>=700?290:24,24],maxZoom:16})}catch(e){}
 }
 function mapToggle(layer,btn){
   if(!map)initMaps();
@@ -1599,7 +1601,7 @@ if(navigator.geolocation){
   navigator.geolocation.watchPosition(p=>{
     pos={lat:p.coords.latitude,lon:p.coords.longitude};
     renderHome();
-    if(map){map.setView([pos.lat,pos.lon],12);if(userMk)userMk.setLatLng([pos.lat,pos.lon])}
+    if(map){if(userMk)userMk.setLatLng([pos.lat,pos.lon]);if(!mapAutoCentered&&!mapUserControl&&!FIT_LAYERS.some(l=>mapOn[l])){mapAutoCentered=true;map.setView([pos.lat,pos.lon],12)}}
     if(mapHome){mapHome.setView([pos.lat,pos.lon],11);if(userMkH)userMkH.setLatLng([pos.lat,pos.lon])}
     if(erMe)erMe.setLatLng([pos.lat,pos.lon]);
     if(stMe)stMe.setLatLng([pos.lat,pos.lon]);

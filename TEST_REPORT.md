@@ -560,3 +560,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 
 ## v10.56 BEKOR QILINDI (2026-11-11) — v10.55 tiklandi
 - Foydalanuvchi qarori: yagona koʻk marshrut chiziqlari bekor qilindi, v10.55 holati (har bir marshrut oʻz rangi, ROUTE_PALETTE) qayta tiklandi. Ushbu commit mazmunan v10.55 bilan bir xil (SW tlc-pro-v82, assetlar ?v=155).
+
+## v10.57 (2026-11-11) — Airport fit saqlanadi: GPS xaritani tortib ketmaydi
+- Muammo (foydalanuvchi): Airport ON qilinganda xarita 3 aeroportni sigʻdirib zoom boʻladi, lekin ~1 soniyadan keyin koʻrinish foydalanuvchiga qaytib, aeroportlar kadran chiqib ketadi.
+- Sabab: watchPosition har GPS signalida asosiy xaritaga setView([pos],12) qilardi — fit dan keyin kelgan birinchi signal (odatda ~1 soniya) koʻrinishni tortib ketardi. Yana bir nuqson: fitLayerBounds fit dan keyin zoom ni majburan 10 ga koʻtarardi (tor ekranda chet aeroportlar kesilishi mumkin edi).
+- Tuzatish: GPS endi faqat markerni yangilaydi; markazlash faqat BIR marta va faqat foydalanuvchi hali xaritaga tegmagan / fit qatlam yoqilmagan boʻlsa. Foydalanuvchi zoom/pan qilishi (zoomstart/dragstart) yoki fit qatlami darhol ustunlik oladi — qoʻl zoom har doim erkin. fitLayerBounds dagi majburiy setZoom(10) olib tashlandi. SW tlc-pro-v84, assetlar ?v=157.
