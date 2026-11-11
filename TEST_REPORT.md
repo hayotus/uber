@@ -588,3 +588,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Muammo (foydalanuvchi skrinshoti): ETA strip (xarita ichida, bottom:8px, z-index 1200) pastki menyu ikonkalarini qoplab qoldi — Safari dvh o'zgarishi sababli xarita pastki cheti menyu ustiga chiqadi.
 - Tuzatish: #etaStrip endi position:fixed, pastki menyu ustida: bottom calc(76px + safe-area + 8px + --etaLift), eni min(760px, 100vw-16px), markazda — menyu bilan har doim 30px dan ortiq oraliq. Vaqt paneli (🕐) yoki kunlar qatori ochiq boʻlsa, updateEtaLift() strip ni ularning balandligicha yuqoriga koʻtaradi.
 - Fit: Airport uchun padding tigʻizlandi — chap 64 (chap tugmalar ustuni), oʻng 24 (oʻng panel air uchun yopiq), tepa 24, past 190. Barcha aeroportlar koʻrinib turgan holda maksimal yaqinlashish. Boshqa qatlamlar oʻzgarishsiz. SW tlc-pro-v89, assetlar ?v=162.
+
+## v10.63 (2026-11-11) — ETA kartalar chap menyu uslubida (oq, kichik, fonsiz)
+- Foydalanuvchi (faqat Airport paneli): kartalar chap menyu (.mapctl) uslubida boʻlsin — oq fon, rangli chegara; kattaligi chap tugmalardan 2x (~70px); pastda markazda; orasi 7px (0.1x); kartalar orqasida prozrachnyy qora fon boʻlmasin; "LIVE AIRPORT & HOME ETAS" va "Auto Updating" yozuvlari olib tashlansin.
+- #etaHead oʻchirildi; #etaStrip foni/soya/padding olib tashlandi (faqat qatorni markazda ushlab turadi); .etaCard oq, 70px, border 2px rangli, ichki elementlar ixcham (belgi 18px, daqiqa 15px, GO oq fon + rangli chegara); "+" 20px. Strip pastroq boʻlgani uchun air fit pastki padding 190→120. SW tlc-pro-v90, assetlar ?v=163.

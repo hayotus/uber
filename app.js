@@ -1030,7 +1030,7 @@ function renderEtaCards(){
     '<div class="eta-code" style="color:'+c+'">'+t.code+'</div>'+
     '<div class="eta-min">'+mv+'<span class="eta-min-u">min</span></div>'+
     '<div class="eta-mi">'+dv+'</div>'+
-    '<button class="eta-go" style="background:'+hexA(c,.22)+';color:'+c+';border-color:'+hexA(c,.55)+'">GO</button></div>';
+    '<button class="eta-go" style="background:#fff;color:'+c+';border-color:'+c+'">GO</button></div>';
   }).join("");
   wrap.querySelectorAll(".etaCard").forEach(card=>{
     card.addEventListener("click",()=>{gmaps(+card.dataset.lat,+card.dataset.lon)});
@@ -1083,7 +1083,7 @@ function fitLayerBounds(){
   const sz=map.getSize();
   const isAir=panelLayer==="air";
   const ptl=isAir?[64,24]:[88,48];
-  const pbr=isAir?[24,190]:[sz.x>=700?308:88,48];
+  const pbr=isAir?[24,120]:[sz.x>=700?308:88,48];
   try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:ptl,paddingBottomRight:pbr,maxZoom:16})}catch(e){}
 }
 function mapToggle(layer,btn){

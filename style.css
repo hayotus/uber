@@ -276,21 +276,18 @@ body.drive #view-home{overflow-y:auto}
 #view-home.act ~ #verLine{display:block}
 
 /* v10.59: Radar-uslubidagi airport paneli (faqat Airport qatlami) */
-#etaStrip{position:fixed;left:50%;transform:translateX(-50%);width:min(760px,calc(100vw - 16px));bottom:calc(76px + env(safe-area-inset-bottom) + 8px + var(--etaLift,0px));z-index:1200;padding:8px;border-radius:18px;background:linear-gradient(to top,rgba(0,0,0,.88) 58%,rgba(0,0,0,.55));box-shadow:0 10px 30px rgba(0,0,0,.45)}
-#etaHead{display:flex;align-items:baseline;justify-content:space-between;padding:0 4px 8px}
-#etaTitle{font-size:12px;font-weight:800;letter-spacing:1.2px;color:#E5E7EB}
-#etaAuto{font-size:11px;font-weight:700;color:#22D3EE}
+#etaStrip{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom) + 8px + var(--etaLift,0px));z-index:1200;background:none;padding:0;box-shadow:none}
 #etaCards{display:flex;gap:7px;justify-content:center}
-.etaCard{position:relative;flex:1 1 0;min-width:0;max-width:118px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(17,24,39,.93);border:1.5px solid #888;border-radius:16px;padding:6px 4px;text-align:center;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.45);user-select:none;-webkit-tap-highlight-color:transparent;font-family:inherit}
+.etaCard{position:relative;flex:none;width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:2px solid #888;border-radius:10px;padding:4px 2px 5px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35);user-select:none;-webkit-tap-highlight-color:transparent;font-family:inherit}
 .etaCard:active{transform:scale(.97)}
-.eta-ico{width:25px;height:25px;border-radius:50%;margin:0 auto 2px;border:1.5px solid #888;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none}
-.eta-code{font-size:12px;font-weight:900;letter-spacing:.4px;line-height:1.1}
-.eta-min{color:#fff;font-size:19px;font-weight:900;line-height:1.1}
-.eta-min-u{font-size:10px;font-weight:600;color:#9CA3AF;margin-left:2px}
-.eta-mi{color:#9CA3AF;font-size:10px;font-weight:600;margin:0 0 4px;line-height:1.1}
-.eta-go{width:100%;border-radius:9px;padding:4px 0;font-size:11px;font-weight:900;letter-spacing:1px;cursor:pointer;border:1px solid;line-height:1.2}
+.eta-ico{width:18px;height:18px;border-radius:50%;margin:0 auto 1px;border:1.5px solid #888;display:flex;align-items:center;justify-content:center;font-size:10px;flex:none}
+.eta-code{font-size:10px;font-weight:900;letter-spacing:.4px;line-height:1.1}
+.eta-min{color:#111827;font-size:15px;font-weight:900;line-height:1.1}
+.eta-min-u{font-size:8px;font-weight:600;color:#6B7280;margin-left:1px}
+.eta-mi{color:#6B7280;font-size:9px;font-weight:600;margin:0 0 2px;line-height:1.1}
+.eta-go{width:100%;border-radius:7px;padding:3px 0;font-size:10px;font-weight:900;letter-spacing:1px;cursor:pointer;border:1px solid;line-height:1.2;background:#fff}
 .eta-go:active{transform:scale(.96)}
-.flightsBtn{position:absolute;top:-7px;right:-5px;width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#0A84FF,#30B0FF);color:#fff;border:2px solid rgba(255,255,255,.9);font-size:14px;font-weight:900;line-height:1;cursor:pointer;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.55);padding:0}
+.flightsBtn{position:absolute;top:-6px;right:-5px;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#0A84FF,#30B0FF);color:#fff;border:2px solid rgba(255,255,255,.9);font-size:12px;font-weight:900;line-height:1;cursor:pointer;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.55);padding:0}
 .flightsBtn:active{transform:scale(.92)}
 .airport-marker{width:56px;height:56px;border-radius:50%;border:3px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;letter-spacing:.3px;box-shadow:0 2px 10px rgba(0,0,0,.45);cursor:pointer}
 #flightsModal{display:none;position:fixed;inset:0;z-index:2100;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px}
