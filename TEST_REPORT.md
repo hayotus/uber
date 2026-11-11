@@ -596,3 +596,6 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.64 (2026-11-11) — Cruise fit: user pin fit ni choʻzmasin
 - Muammo (foydalanuvchi): Cruise ON boʻlganda xarita uzoqlashib ketadi. Sabab: fitLayerBounds har doim user pinni ham fit ga qoʻshardi. Foydalanuvchi Bay Ridge da (40.59) boʻlganda fit Manhattan terminaligacha (40.77) choʻzilib, zoom 12 ga tushardi — terminallar kichik koʻrinardi.
 - Tuzatish: user pin endi faqat qatlam nuqtalari yonida (bounds +25% atrofida) boʻlsa fit ga qoʻshiladi; uzoqda boʻlsa fit faqat nuqtalarga qilinadi (Cruise: zoom ~13, terminallar yaqin). Restroom/Tesla/Hotel nuqtalari user atrofida boʻlgani uchun ularda pin odatda kiritiladi — oʻzgarishsiz. Airport: user odatda aeroportlar oraligʻida boʻlgani uchun pin kiritiladi. SW tlc-pro-v91, assetlar ?v=164.
+
+## v10.65 (2026-11-11) — Cruise fit: user joylashuvi ham koʻrinsin
+- Foydalanuvchi: "Men turgan joy ham koʻrinsin". v10.64 dagi shartli qoida (pin uzoqda boʻlsa fit dan chiqarish) bekor qilindi — user pin endi yana har doim fit ga kiradi, barcha qatlamlarda. Bay Ridge dan Cruise fit endi yana pin + ikkala terminalni sigʻdiradi (zoom ~12 — pin va terminallar birga sigʻadigan eng yaqin zoom; undan yaqinroq boʻlsa pin yoki terminal kadrdan chiqadi). SW tlc-pro-v92, assetlar ?v=165.
