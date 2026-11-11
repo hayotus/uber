@@ -576,3 +576,6 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - HOME nuqtasi Radar dan olindi (40.5985,-73.9965); air qatlamiga 4-element sifatida qoʻshildi — Google marshrut, fit va chiziq avtomatik ishlaydi. Xaritada aeroportlar endi katta yumaloq rangli markerlar (56px, kod yozuvi bilan); marshrut chiziqlari air uchun qat'iy ranglarda (boshqa qatlamlar palette da qoldi).
 - "+" tugmasi (faqat aeroport kartalarida): Radar dagi reyslar oynasi — keyingi 1 soatda qoʻnadigan reyslar soni (adsb next60) va roʻyxat (~N daq, reys raqami, kelish shahri; More bilan davom). Ma'lumot: mavjud AirLabs jonli oqimi (adsb, eng yaqin 8 reys roʻyxati). Marker bosilsa ham shu oyna ochiladi (HOME marker = navigatsiya).
 - Panel #etaStrip — #view-map ichida flex element (xarita ostida), generic #mapPanel air uchun yashiriladi. Air yoqilganda loadLiveFlights chaqiriladi, strip chiqishi bilan invalidateSize+refit. SW tlc-pro-v86, assetlar ?v=159.
+
+## v10.60 (2026-11-11) — ETA kartalar kvadrat va kichikroq
+- Foydalanuvchi: kartalar kvadrat koʻrinishda va kichikroq boʻlsin. .etaCard: aspect-ratio 1/1, max-width 118px, qator markazda; ichki elementlar kichraytirildi (belgi 40→25px, daqiqa 26→19px, GO yupqaroq, "+" 28→23px). Faqat style.css + versiya belgilari. SW tlc-pro-v87, assetlar ?v=160.
