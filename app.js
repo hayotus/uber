@@ -881,9 +881,8 @@ function ttRouteTT(x){
     return {dist:rt.summary.lengthInMeters/1609.34,mins:Math.round(rt.summary.travelTimeInSeconds/60),pts:pts};
   });
 }
-/* v10.56: marshrut chiziqlari BITTA rangda — koʻk (traffic yashil/qizil/sariq ranglari bilan adashib, chalgʻitmasin) */
-const ROUTE_COLOR="#1A73E8";
-function routeColor(i){return ROUTE_COLOR}
+const ROUTE_PALETTE=["#0A84FF","#FF3B30","#30D158","#FF9F0A","#BF5AF2","#FF375F","#00C7BE","#CA8A04","#32ADE6","#7D7AFF","#FF6482","#AC8E68"];
+function routeColor(i){return ROUTE_PALETTE[i%ROUTE_PALETTE.length]}
 let routeGroup=null;
 function syncRouteLines(){
   if(!routeGroup)return;
@@ -892,7 +891,7 @@ function syncRouteLines(){
     if(!mapOn[l])return;
     sortedItems(l).slice(0,visCount[l]).forEach((x,i)=>{
       const ri=routeInfo[routeKey(l,x)];
-      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:ROUTE_COLOR,weight:5,opacity:.95}).addTo(routeGroup);
+      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:routeColor(i),weight:4,opacity:.85}).addTo(routeGroup);
     });
   });
 }
