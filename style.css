@@ -276,7 +276,7 @@ body.drive #view-home{overflow-y:auto}
 #view-home.act ~ #verLine{display:block}
 
 /* v10.59: Radar-uslubidagi airport paneli (faqat Airport qatlami) */
-#etaStrip{flex:none;margin-top:8px;padding:8px 8px calc(env(safe-area-inset-bottom) + 6px);border-radius:18px;background:linear-gradient(to top,rgba(0,0,0,.88) 58%,rgba(0,0,0,.55))}
+#etaStrip{position:absolute;left:8px;right:8px;bottom:8px;z-index:1200;padding:8px;border-radius:18px;background:linear-gradient(to top,rgba(0,0,0,.88) 58%,rgba(0,0,0,.55));box-shadow:0 10px 30px rgba(0,0,0,.45)}
 #etaHead{display:flex;align-items:baseline;justify-content:space-between;padding:0 4px 8px}
 #etaTitle{font-size:12px;font-weight:800;letter-spacing:1.2px;color:#E5E7EB}
 #etaAuto{font-size:11px;font-weight:700;color:#22D3EE}

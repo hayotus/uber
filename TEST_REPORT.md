@@ -579,3 +579,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 
 ## v10.60 (2026-11-11) — ETA kartalar kvadrat va kichikroq
 - Foydalanuvchi: kartalar kvadrat koʻrinishda va kichikroq boʻlsin. .etaCard: aspect-ratio 1/1, max-width 118px, qator markazda; ichki elementlar kichraytirildi (belgi 40→25px, daqiqa 26→19px, GO yupqaroq, "+" 28→23px). Faqat style.css + versiya belgilari. SW tlc-pro-v87, assetlar ?v=160.
+
+## v10.61 (2026-11-11) — ETA kartalar xarita ICHIDA (overlay)
+- Foydalanuvchi: kartalar xarita ichida joylashsin, xarita kattaligiga ta'sir qilmasin. Avval strip xarita ostida flex element edi — chiqsa xarita kichrayardi.
+- Endi #etaStrip #map ichiga koʻchirildi, position:absolute (bottom 8px, z-index 1200) — xarita oʻlchami oʻzgarmaydi. Shu sababli mapToggle dagi invalidateSize/refit timeout olib tashlandi; fitLayerBounds da air uchun pastki padding 170px (nuqtalar strip ostida qolmasin). SW tlc-pro-v88, assetlar ?v=161.

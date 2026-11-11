@@ -1071,7 +1071,7 @@ function fitLayerBounds(){
   FIT_LAYERS.forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(x=>pts.push([x.lat,x.lon]))});
   if(pts.length<2)return;
   const sz=map.getSize();
-  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[88,48],paddingBottomRight:[sz.x>=700?308:88,48],maxZoom:16})}catch(e){}
+  const bp=panelLayer==="air"?170:48;try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[88,48],paddingBottomRight:[sz.x>=700?308:88,bp],maxZoom:16})}catch(e){}
 }
 function mapToggle(layer,btn){
   if(!map)initMaps();
@@ -1089,7 +1089,7 @@ function mapToggle(layer,btn){
     else if(FIT_LAYERS.some(l=>mapOn[l]))fitLayerBounds();
     else if(savedMapView){map.setView(savedMapView.c,savedMapView.z);savedMapView=null}
   }
-  if(layer==="air"){if(on)loadLiveFlights();setTimeout(()=>{if(map){try{map.invalidateSize()}catch(e){} if(FIT_LAYERS.some(l=>mapOn[l]))fitLayerBounds()}},90)}
+  if(layer==="air"&&on)loadLiveFlights();
   syncRouteLines();
 }
 function distSort(a){return a.map(x=>Object.assign({},x,{d:hav(userLat(),userLon(),x.lat,x.lon)})).sort((x,y)=>x.d-y.d)}
