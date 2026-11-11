@@ -592,3 +592,7 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 ## v10.63 (2026-11-11) — ETA kartalar chap menyu uslubida (oq, kichik, fonsiz)
 - Foydalanuvchi (faqat Airport paneli): kartalar chap menyu (.mapctl) uslubida boʻlsin — oq fon, rangli chegara; kattaligi chap tugmalardan 2x (~70px); pastda markazda; orasi 7px (0.1x); kartalar orqasida prozrachnyy qora fon boʻlmasin; "LIVE AIRPORT & HOME ETAS" va "Auto Updating" yozuvlari olib tashlansin.
 - #etaHead oʻchirildi; #etaStrip foni/soya/padding olib tashlandi (faqat qatorni markazda ushlab turadi); .etaCard oq, 70px, border 2px rangli, ichki elementlar ixcham (belgi 18px, daqiqa 15px, GO oq fon + rangli chegara); "+" 20px. Strip pastroq boʻlgani uchun air fit pastki padding 190→120. SW tlc-pro-v90, assetlar ?v=163.
+
+## v10.64 (2026-11-11) — Cruise fit: user pin fit ni choʻzmasin
+- Muammo (foydalanuvchi): Cruise ON boʻlganda xarita uzoqlashib ketadi. Sabab: fitLayerBounds har doim user pinni ham fit ga qoʻshardi. Foydalanuvchi Bay Ridge da (40.59) boʻlganda fit Manhattan terminaligacha (40.77) choʻzilib, zoom 12 ga tushardi — terminallar kichik koʻrinardi.
+- Tuzatish: user pin endi faqat qatlam nuqtalari yonida (bounds +25% atrofida) boʻlsa fit ga qoʻshiladi; uzoqda boʻlsa fit faqat nuqtalarga qilinadi (Cruise: zoom ~13, terminallar yaqin). Restroom/Tesla/Hotel nuqtalari user atrofida boʻlgani uchun ularda pin odatda kiritiladi — oʻzgarishsiz. Airport: user odatda aeroportlar oraligʻida boʻlgani uchun pin kiritiladi. SW tlc-pro-v91, assetlar ?v=164.

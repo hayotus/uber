@@ -1077,9 +1077,14 @@ function zoomHalfMile(){
 const FIT_LAYERS=["wc","ev","cruise","air","loc"];
 function fitLayerBounds(){
   if(!map)return;
-  const pts=[[userLat(),userLon()]];
+  const pts=[];
   FIT_LAYERS.forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(x=>pts.push([x.lat,x.lon]))});
   if(pts.length<2)return;
+  /* v10.64: user pinni faqat nuqtalar yonida boʻlsa fit ga qoʻshamiz — uzoqda boʻlsa (masalan Bay Ridge dan Cruise terminallariga) fit ni choʻzib, xaritani uzoqlashtirib yubormasin */
+  const b0=L.latLngBounds(pts);
+  const u=[userLat(),userLon()];
+  const laP=(b0.getNorth()-b0.getSouth())*.25,loP=(b0.getEast()-b0.getWest())*.25;
+  if(u[0]>=b0.getSouth()-laP&&u[0]<=b0.getNorth()+laP&&u[1]>=b0.getWest()-loP&&u[1]<=b0.getEast()+loP)pts.push(u);
   const sz=map.getSize();
   const isAir=panelLayer==="air";
   const ptl=isAir?[64,24]:[88,48];
