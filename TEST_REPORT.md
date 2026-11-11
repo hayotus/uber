@@ -570,3 +570,9 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - v10.57 QA topilmasi: Restroom qayta yoqilganda fit juda tigʻiz — 5 marker dan 3 tasi kadrda, bittasi chap tugmalar paneli ostida, bittasi kadr tashqarisida.
 - Sabab: fitLayerBounds padding [24,24] edi — chapdagi vertikal tugmalar paneli (~56px) va kadr chetlari hisobga olinmagan.
 - Tuzatish: paddingTopLeft [88,48], paddingBottomRight keng ekranda [308,48] (oʻng panel 276 + havo), telefonda [88,48]. Barcha fit qatlamlarga (wc/ev/cruise/air/loc) tegishli. SW tlc-pro-v85, assetlar ?v=158.
+
+## v10.59 (2026-11-11) — Radar-uslubidagi airport paneli (faqat Airport qatlami)
+- Foydalanuvchi Radar skrinshoti bilan tasdiqladi ("Ha"): Airport ON boʻlganda Map pastida Radar dagi koʻrinish — 4 ta katta kvadrat karta: JFK #F59E0B, LGA #10B981, EWR #A855F7, HOME #0EA5E9 (pastki menyu tugmalaridan ~2x katta), sarlavha "LIVE AIRPORT & HOME ETAS" + "● Auto Updating".
+- HOME nuqtasi Radar dan olindi (40.5985,-73.9965); air qatlamiga 4-element sifatida qoʻshildi — Google marshrut, fit va chiziq avtomatik ishlaydi. Xaritada aeroportlar endi katta yumaloq rangli markerlar (56px, kod yozuvi bilan); marshrut chiziqlari air uchun qat'iy ranglarda (boshqa qatlamlar palette da qoldi).
+- "+" tugmasi (faqat aeroport kartalarida): Radar dagi reyslar oynasi — keyingi 1 soatda qoʻnadigan reyslar soni (adsb next60) va roʻyxat (~N daq, reys raqami, kelish shahri; More bilan davom). Ma'lumot: mavjud AirLabs jonli oqimi (adsb, eng yaqin 8 reys roʻyxati). Marker bosilsa ham shu oyna ochiladi (HOME marker = navigatsiya).
+- Panel #etaStrip — #view-map ichida flex element (xarita ostida), generic #mapPanel air uchun yashiriladi. Air yoqilganda loadLiveFlights chaqiriladi, strip chiqishi bilan invalidateSize+refit. SW tlc-pro-v86, assetlar ?v=159.

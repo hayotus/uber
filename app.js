@@ -42,6 +42,10 @@ const AIRPORTS=[
 {code:"LGA",name:"LaGuardia",lat:40.7769,lon:-73.8740,term:"Terminal B asosiy oqim"},
 {code:"EWR",name:"Newark Liberty Intl",lat:40.6895,lon:-74.1745,term:"Terminal A va C"}
 ];
+/* v10.59: Radar uslubi — HOME nuqtasi va aeroportlarning qat'iy ranglari */
+const HOME_PT={lat:40.5985,lon:-73.9965};
+const AIR_COLORS={JFK:"#F59E0B",LGA:"#10B981",EWR:"#A855F7",HOME:"#0EA5E9"};
+function hexA(h,a){const n=parseInt(h.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")"}
 const PLACES=[
 {n:"Office 40w St",lat:40.75696,lon:-73.99338},
 {n:"Office 10e St",lat:40.72818,lon:-73.98279},
@@ -519,7 +523,7 @@ function loadLiveFlights(force){
       const origins=Object.keys(org).map(k=>({c:k,n:org[k]})).sort((a,b)=>b.n-a.n).slice(0,3);
       adsb[ap.code]={ts:now,total:enr.length,low:near,list:list.slice(0,8),wave:wave,next60:next60,next30:wave[0]+wave[1]+wave[2],hours6:hours6,origins:origins};
       apiStat.adsb="OK · "+nowNY().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-      renderApiStat();renderAirports();
+      renderApiStat();renderAirports();if(fmCode===ap.code)renderFlightsBody();
     }).catch(()=>{apiStat.adsb="XATO — AirLabs javob bermadi";renderApiStat()});
   });
 }
@@ -803,10 +807,11 @@ function layerItems(layer){
   if(layer==="ev")return (TESLA_ITEMS||[]).map(x=>({n:x.n,sub:x.addr||"Tesla Supercharger",lat:x.lat,lon:x.lon,d:(x.d!=null?x.d:hav(userLat(),userLon(),x.lat,x.lon))}));
   if(layer==="loc")return HOTEL_TOCHKA.map(p=>({n:p.n,sub:p.h+" ta hotel \u00b7 "+p.sub,lat:p.lat,lon:p.lon,kind:"tochka",h:p.h,d:hav(userLat(),userLon(),p.lat,p.lon)}));
   if(layer==="cruise")return distSort(CRUISE2.map(p=>({n:p.n,sub:"Cruise terminal",lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
-  if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon}))).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d}));
+  if(layer==="air")return distSort(AIRPORTS.map(p=>({n:p.code+" \u2014 "+p.name,sub:p.term,lat:p.lat,lon:p.lon,code:p.code})).concat([{n:"HOME",sub:"Uy",lat:HOME_PT.lat,lon:HOME_PT.lon,code:"HOME",home:true}])).map(x=>({n:x.n,sub:x.sub,lat:x.lat,lon:x.lon,d:x.d,code:x.code,home:!!x.home}));
   return [];
 }
 function sortedItems(layer){if(layer==="loc")return layerItems(layer).slice().sort((p,q)=>(q.h||0)-(p.h||0));return layerItems(layer).slice().sort((p,q)=>{const rp=routeInfo[routeKey(layer,p)],rq=routeInfo[routeKey(layer,q)];const ep=rp&&rp.dist!=null?rp.dist:(p.d!=null?p.d:1e9),eq=rq&&rq.dist!=null?rq.dist:(q.d!=null?q.d:1e9);return ep-eq})}
+function mkAirIcon(x){const c=AIR_COLORS[x.code]||"#0A84FF";return L.divIcon({className:"",html:'<div class="airport-marker" style="background:'+c+';box-shadow:0 0 16px '+hexA(c,.55)+', 0 2px 10px rgba(0,0,0,.45)">'+x.code+'</div>',iconSize:[56,56],iconAnchor:[28,28]})}
 function drawMapLayer(layer){
   if(typeof layerGroups==="undefined")return;
   const items=sortedItems(layer),vis=items.slice(0,visCount[layer]);
@@ -815,7 +820,7 @@ function drawMapLayer(layer){
   if(layer==="ev"){const g=layerGroups.tesla;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-tesla","\u26A1")))}
   if(layer==="loc"){const g=layerGroups.loc;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,x.kind==="tochka"?mkIcon("mk-tochka",String(x.h)):mkIcon("mk-loc","\uD83D\uDCCD")))}
   if(layer==="cruise"){const g=layerGroups.cruise;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-loc","\uD83D\uDEA2")))}
-  if(layer==="air"){const g=layerGroups.air;if(!g)return;g.clearLayers();vis.forEach(x=>put(g,x,mkIcon("mk-loc","\u2708\uFE0F")))}
+  if(layer==="air"){const g=layerGroups.air;if(!g)return;g.clearLayers();vis.forEach(x=>{const m=L.marker([x.lat,x.lon],{icon:mkAirIcon(x)}).addTo(g);m.bindTooltip("<b>"+esc(x.n)+"</b>",{direction:"top",offset:[0,-30]});m.on("click",()=>{if(x.home)gmaps(x.lat,x.lon);else showFlights(x.code)})})}
   syncRouteLines();
 }
 function routeKey(layer,x){return layer+"@"+x.lat.toFixed(4)+","+x.lon.toFixed(4)}
@@ -893,7 +898,7 @@ function syncRouteLines(){
     if(!mapOn[l])return;
     sortedItems(l).slice(0,visCount[l]).forEach((x,i)=>{
       const ri=routeInfo[routeKey(l,x)];
-      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:routeColor(i),weight:4,opacity:.85}).addTo(routeGroup);
+      if(ri&&ri.pts&&ri.pts.length>1)L.polyline(ri.pts,{color:(l==="air"&&x.code&&AIR_COLORS[x.code])?AIR_COLORS[x.code]:routeColor(i),weight:4,opacity:.85}).addTo(routeGroup);
     });
   });
 }
@@ -974,6 +979,9 @@ function toggleEzpass(){
 }
 function renderMapPanel(){
   const p=$("mapPanel");if(!p)return;
+  const strip=$("etaStrip");
+  if(panelLayer==="air"){p.classList.remove("open");p.innerHTML="";if(strip)strip.style.display="block";renderEtaCards();return}
+  if(strip)strip.style.display="none";
   if(!panelLayer){p.classList.remove("open");p.innerHTML="";return}
   const layer=panelLayer,items=sortedItems(layer),vis=items.slice(0,visCount[layer]);
   p.classList.add("open");
@@ -995,6 +1003,62 @@ function renderMapPanel(){
   const mb=p.querySelector(".more");
   if(mb)mb.addEventListener("click",()=>{visCount[layer]+=5;drawMapLayer(layer);renderMapPanel();if(layer==="wc")kickRoutesWc();else kickRoutes(layer);if(FIT_LAYERS.indexOf(layer)>=0)fitLayerBounds()});
 }
+/* v10.59: Radar-uslubidagi ETA kartalar (faqat Airport) */
+function etaTargets(){return AIRPORTS.map(ap=>({code:ap.code,lat:ap.lat,lon:ap.lon,ico:ap.code==="JFK"?"\uD83D\uDEEB":ap.code==="LGA"?"\u2708\uFE0F":"\uD83D\uDEEC"})).concat([{code:"HOME",lat:HOME_PT.lat,lon:HOME_PT.lon,ico:"\uD83C\uDFE0",home:true}])}
+function renderEtaCards(){
+  const wrap=$("etaCards");if(!wrap)return;
+  const tg=etaTargets();
+  let best=null;tg.forEach(t=>{const ri=routeInfo[routeKey("air",t)];if(ri&&ri.mins!=null&&(best===null||ri.mins<best))best=ri.mins});
+  wrap.innerHTML=tg.map(t=>{
+    const c=AIR_COLORS[t.code],ri=routeInfo[routeKey("air",t)];
+    const mv=ri&&ri.mins!=null?String(ri.mins):"—";
+    const dv=ri&&ri.dist!=null?ri.dist.toFixed(1)+" mi":"—";
+    const near=ri&&ri.mins!=null&&ri.mins===best;
+    return '<div class="etaCard'+(near?" nearest":"")+'" data-code="'+t.code+'" data-lat="'+t.lat+'" data-lon="'+t.lon+'" style="border-color:'+c+';--c:'+c+(near?";box-shadow:0 0 18px "+hexA(c,.55)+", 0 6px 16px rgba(0,0,0,.45)":"")+'">'+
+    (t.home?"":'<button class="flightsBtn" data-fly="'+t.code+'" aria-label="'+t.code+' reyslari">+</button>')+
+    '<div class="eta-ico" style="border-color:'+c+';color:'+c+';background:'+hexA(c,.14)+'">'+t.ico+'</div>'+
+    '<div class="eta-code" style="color:'+c+'">'+t.code+'</div>'+
+    '<div class="eta-min">'+mv+'<span class="eta-min-u">min</span></div>'+
+    '<div class="eta-mi">'+dv+'</div>'+
+    '<button class="eta-go" style="background:'+hexA(c,.22)+';color:'+c+';border-color:'+hexA(c,.55)+'">GO</button></div>';
+  }).join("");
+  wrap.querySelectorAll(".etaCard").forEach(card=>{
+    card.addEventListener("click",()=>{gmaps(+card.dataset.lat,+card.dataset.lon)});
+    const fb=card.querySelector(".flightsBtn");
+    if(fb)fb.addEventListener("click",e=>{e.stopPropagation();showFlights(fb.dataset.fly)});
+  });
+}
+/* Reyslar oynasi (Radar dagi kabi): keyingi 1 soatda qoʻnadiganlar */
+let fmCode=null,fmShown=0;
+function showFlights(code){
+  fmCode=code;fmShown=0;
+  $("fmTitle").textContent="✈️ "+code+" — Reyslar";
+  $("flightsModal").classList.add("open");
+  if(!adsb[code]){$("fmBody").innerHTML='<p class="fm-note">Yuklanmoqda...</p>';loadLiveFlights(true)}
+  else renderFlightsBody();
+}
+function closeFlights(){fmCode=null;const m=$("flightsModal");if(m)m.classList.remove("open")}
+function renderFlightsBody(){
+  if(!fmCode)return;const a=adsb[fmCode];const body=$("fmBody");if(!body)return;
+  if(!a){body.innerHTML='<p class="fm-note">Yuklanmoqda...</p>';return}
+  const now=Date.now();
+  const up=a.list.filter(x=>x.eta>now&&x.eta-now<=3600e3).sort((p2,q2)=>p2.eta-q2.eta);
+  fmShown=Math.max(fmShown,Math.min(6,up.length));
+  const rows=up.slice(0,fmShown).map(x=>{
+    const mins=Math.max(1,Math.round((x.eta-now)/60000));
+    const cn=(typeof CITY!=="undefined"&&x.dep&&CITY[x.dep])?CITY[x.dep]:"";
+    const from=x.dep?esc(x.dep)+(cn?" · "+esc(cn)+"dan":" dan"):"—";
+    return '<div class="f-row"><span class="f-time">~'+mins+' daq</span><span class="f-num">'+esc(x.f)+'</span><span class="f-from">'+from+'</span></div>';
+  }).join("");
+  let html='<div class="flights-big">'+a.next60+'</div><div class="flights-sub">keyingi 1 soatda qoʻnadigan reyslar (taxminiy)</div>';
+  html+=up.length?('<div>'+rows+'</div>'+(fmShown<up.length?'<button class="fm-more" id="fmMore">⬇ More</button>':"")):'<p class="fm-note">Keyingi 1 soatda qoʻnadigan reys topilmadi.</p>';
+  html+='<p class="fm-note">Havodagi reyslar asosida hisoblanadi (taxminiy; hali uchmagan reyslar kirmaydi). Yangilangan: '+new Date(a.ts).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})+'</p>';
+  body.innerHTML=html;
+  const mb2=$("fmMore");if(mb2)mb2.addEventListener("click",()=>{fmShown+=6;renderFlightsBody()});
+}
+const _fmc=$("fmClose");if(_fmc)_fmc.addEventListener("click",closeFlights);
+const _fmm=$("flightsModal");if(_fmm)_fmm.addEventListener("click",e=>{if(e.target===_fmm)closeFlights()});
+
 function zoomHalfMile(){
   if(!map)return;
   const la=userLat(),lo=userLon(),dLa=805/111320,dLo=805/(111320*Math.cos(la*Math.PI/180));
@@ -1025,6 +1089,7 @@ function mapToggle(layer,btn){
     else if(FIT_LAYERS.some(l=>mapOn[l]))fitLayerBounds();
     else if(savedMapView){map.setView(savedMapView.c,savedMapView.z);savedMapView=null}
   }
+  if(layer==="air"){if(on)loadLiveFlights();setTimeout(()=>{if(map){try{map.invalidateSize()}catch(e){} if(FIT_LAYERS.some(l=>mapOn[l]))fitLayerBounds()}},90)}
   syncRouteLines();
 }
 function distSort(a){return a.map(x=>Object.assign({},x,{d:hav(userLat(),userLon(),x.lat,x.lon)})).sort((x,y)=>x.d-y.d)}
