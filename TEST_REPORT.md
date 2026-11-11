@@ -565,3 +565,8 @@ refreshTesla fetchT 10000→25000; overpass() fetchT 12000→15000. SW tlc-pro-v
 - Muammo (foydalanuvchi): Airport ON qilinganda xarita 3 aeroportni sigʻdirib zoom boʻladi, lekin ~1 soniyadan keyin koʻrinish foydalanuvchiga qaytib, aeroportlar kadran chiqib ketadi.
 - Sabab: watchPosition har GPS signalida asosiy xaritaga setView([pos],12) qilardi — fit dan keyin kelgan birinchi signal (odatda ~1 soniya) koʻrinishni tortib ketardi. Yana bir nuqson: fitLayerBounds fit dan keyin zoom ni majburan 10 ga koʻtarardi (tor ekranda chet aeroportlar kesilishi mumkin edi).
 - Tuzatish: GPS endi faqat markerni yangilaydi; markazlash faqat BIR marta va faqat foydalanuvchi hali xaritaga tegmagan / fit qatlam yoqilmagan boʻlsa. Foydalanuvchi zoom/pan qilishi (zoomstart/dragstart) yoki fit qatlami darhol ustunlik oladi — qoʻl zoom har doim erkin. fitLayerBounds dagi majburiy setZoom(10) olib tashlandi. SW tlc-pro-v84, assetlar ?v=157.
+
+## v10.58 (2026-11-11) — Fit chegaralariga havo (padding) qoʻshildi
+- v10.57 QA topilmasi: Restroom qayta yoqilganda fit juda tigʻiz — 5 marker dan 3 tasi kadrda, bittasi chap tugmalar paneli ostida, bittasi kadr tashqarisida.
+- Sabab: fitLayerBounds padding [24,24] edi — chapdagi vertikal tugmalar paneli (~56px) va kadr chetlari hisobga olinmagan.
+- Tuzatish: paddingTopLeft [88,48], paddingBottomRight keng ekranda [308,48] (oʻng panel 276 + havo), telefonda [88,48]. Barcha fit qatlamlarga (wc/ev/cruise/air/loc) tegishli. SW tlc-pro-v85, assetlar ?v=158.

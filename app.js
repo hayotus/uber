@@ -1007,7 +1007,7 @@ function fitLayerBounds(){
   FIT_LAYERS.forEach(l=>{if(mapOn[l])sortedItems(l).slice(0,visCount[l]).forEach(x=>pts.push([x.lat,x.lon]))});
   if(pts.length<2)return;
   const sz=map.getSize();
-  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[24,24],paddingBottomRight:[sz.x>=700?290:24,24],maxZoom:16})}catch(e){}
+  try{map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[88,48],paddingBottomRight:[sz.x>=700?308:88,48],maxZoom:16})}catch(e){}
 }
 function mapToggle(layer,btn){
   if(!map)initMaps();
